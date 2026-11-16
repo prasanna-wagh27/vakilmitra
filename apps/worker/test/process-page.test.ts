@@ -7,7 +7,7 @@ import { accessLogs, advocates, and, cases, count, createDb, documents, eq, page
 import { type OcrEngine, type ReadPolicy, TesseractEngine } from "@vakilmitra/ocr";
 import { FsBlobStore, keys, parseMasterKeys, SecureStorage } from "@vakilmitra/storage";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { markFailed, processPage } from "../src/process-page.js";
+import { markCloudFailed, markFailed, processCloudPage, processPage } from "../src/process-page.js";
 
 const url = process.env.DATABASE_URL!;
 await runMigrations(url);
@@ -47,7 +47,7 @@ async function addPage(pageNo: number, body?: Buffer) {
   const id = randomUUID();
   const storageKey = keys.page(advocateId, caseId, documentId, id);
   if (body) await storage.put(storageKey, body);
-  await db.insert(pages).values({ id, documentId, pageNo, storageKey });
+  await db.insert(pages).values({ id, documentId, pageNo, storageKey, byteSize: body?.length ?? 0 });
   return id;
 }
 
@@ -88,15 +88,93 @@ describe("processPage", () => {
     expect(await sentLogs(pageId)).toBe(0);
   });
 
-  it("uses the cloud engine once consent is on, and logs the send", async () => {
-    await db.update(advocates).set({ cloudOcrConsent: true }).where(eq(advocates.id, advocateId));
-    const pageId = await addPage(11, fixture);
-    await processPage({ db, storage, policy: cloudAlways }, pageId);
-    const p = await db.query.pages.findFirst({ where: eq(pages.id, pageId) });
-    expect(p).toMatchObject({ ocrRoute: "cloud", ocrEngine: "fake-cloud", ocrText: "गाव : माळेगाव (cloud)" });
-    expect(cloudCalls).toHaveLength(1);
-    expect(await sentLogs(pageId)).toBe(1);
-    await db.update(advocates).set({ cloudOcrConsent: false }).where(eq(advocates.id, advocateId));
+  describe("with consent: local first, then a separate cloud job", () => {
+    const queued: [string, number][] = [];
+    const deps = { db, storage, policy: cloudAlways, enqueueCloud: async (id: string, v: number) => void queued.push([id, v]) };
+    const setConsent = (on: boolean) => db.update(advocates).set({ cloudOcrConsent: on }).where(eq(advocates.id, advocateId));
+    const get = (id: string) => db.query.pages.findFirst({ where: eq(pages.id, id) });
+
+    beforeAll(() => setConsent(true));
+    afterAll(() => setConsent(false));
+
+    it("saves the local reading at once, queues the cloud read, and the cloud job replaces it (logging the send)", async () => {
+      queued.length = 0;
+      cloudCalls.length = 0;
+      const pageId = await addPage(11, fixture);
+      expect(await processPage(deps, pageId)).toBe("cloud-queued");
+      expect(await get(pageId)).toMatchObject({ ocrStatus: "DONE", ocrRoute: "local:cloud-queued", ocrEngine: "tesseract-mar+eng" });
+      expect(cloudCalls).toHaveLength(0); // the local job never calls the cloud
+      expect(queued).toEqual([[pageId, 1]]);
+
+      expect(await processCloudPage(deps, pageId, 1)).toBe("done");
+      const p = await get(pageId);
+      expect(p).toMatchObject({ ocrRoute: "cloud", ocrEngine: "fake-cloud", ocrText: "गाव : माळेगाव (cloud)" });
+      expect(p?.ocrWords?.length).toBeGreaterThan(20); // the cloud engine gave no boxes: local ones kept
+      expect(cloudCalls).toHaveLength(1);
+      expect(await sentLogs(pageId)).toBe(1);
+
+      // A duplicate cloud job, or a retried local job, changes nothing.
+      expect(await processCloudPage(deps, pageId, 1)).toBe("stale");
+      expect(await processPage(deps, pageId)).toBe("done");
+      expect((await get(pageId))?.ocrRoute).toBe("cloud");
+      expect(cloudCalls).toHaveLength(1);
+    });
+
+    it("re-queues the cloud read if a local job is retried after saving", async () => {
+      const pageId = await addPage(12, fixture);
+      await processPage({ ...deps, enqueueCloud: async () => Promise.reject(new Error("valkey down")) }, pageId).catch(() => undefined);
+      queued.length = 0;
+      expect(await processPage(deps, pageId)).toBe("cloud-queued");
+      expect(queued).toEqual([[pageId, 1]]);
+      await db.delete(pages).where(eq(pages.id, pageId));
+    });
+
+    it("if queueing the cloud read keeps failing, the page keeps its local reading (not FAILED)", async () => {
+      const pageId = await addPage(16, fixture);
+      const err = await processPage({ ...deps, enqueueCloud: async () => Promise.reject(new Error("valkey down")) }, pageId).catch(
+        (e) => e,
+      );
+      expect(err).toMatchObject({ message: "valkey down", pageVersion: 1 });
+      await markFailed(db, pageId, err);
+      expect(await get(pageId)).toMatchObject({ ocrStatus: "DONE", ocrRoute: "local:cloud-failed", ocrError: null });
+      await db.delete(pages).where(eq(pages.id, pageId));
+    });
+
+    it("does not send if the owner turned cloud reading off after the page was queued", async () => {
+      cloudCalls.length = 0;
+      const pageId = await addPage(13, fixture);
+      await processPage(deps, pageId);
+      await setConsent(false);
+      expect(await processCloudPage(deps, pageId, 1)).toBe("no-consent");
+      await setConsent(true);
+      expect(cloudCalls).toHaveLength(0);
+      expect(await sentLogs(pageId)).toBe(0);
+      expect((await get(pageId))?.ocrRoute).toBe("local:no-consent");
+      await db.delete(pages).where(eq(pages.id, pageId));
+    });
+
+    it("does not send an image that was replaced after the page was queued", async () => {
+      cloudCalls.length = 0;
+      const pageId = await addPage(14, fixture);
+      await processPage(deps, pageId);
+      await db.update(pages).set({ version: 2, ocrStatus: "PENDING" }).where(eq(pages.id, pageId));
+      expect(await processCloudPage(deps, pageId, 1)).toBe("stale");
+      expect(cloudCalls).toHaveLength(0);
+      await db.delete(pages).where(eq(pages.id, pageId));
+    });
+
+    it("keeps the local reading when the cloud engine keeps failing", async () => {
+      const pageId = await addPage(15, fixture);
+      await processPage(deps, pageId);
+      const down: ReadPolicy = {
+        ...cloudAlways,
+        cloud: { ...fakeCloud, recognize: async () => Promise.reject(new Error("sarvam 503")) },
+      };
+      await expect(processCloudPage({ ...deps, policy: down }, pageId, 1)).rejects.toThrow("sarvam 503");
+      await markCloudFailed(db, pageId, 1);
+      expect(await get(pageId)).toMatchObject({ ocrStatus: "DONE", ocrRoute: "local:cloud-failed", ocrEngine: "tesseract-mar+eng" });
+      await db.delete(pages).where(eq(pages.id, pageId));
+    });
   });
 
   it("returns missing for a page deleted before its job ran", async () => {

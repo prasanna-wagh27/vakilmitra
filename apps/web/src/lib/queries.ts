@@ -112,10 +112,14 @@ export const documentQuery = (documentId: string) =>
   queryOptions({
     queryKey: ["document", documentId],
     queryFn: () => api<{ document: DocumentDetail }>(`/documents/${documentId}`).then((r) => r.document),
-    refetchInterval: (q) =>
-      q.state.data && (q.state.data.ocrStatus === "PROCESSING" || (q.state.data.ocrStatus === "PENDING" && q.state.data.pages.length > 0))
-        ? 2000
-        : false,
+    refetchInterval: (q) => {
+      const d = q.state.data;
+      if (!d) return false;
+      if (d.ocrStatus === "PROCESSING" || (d.ocrStatus === "PENDING" && d.pages.length > 0)) return 2000;
+      // Local text is shown already; a cloud reading may still replace it (that can take a minute or two).
+      // Give up after about 5 minutes (a stuck cloud job must not keep the screen polling).
+      return d.pages.some((p) => p.ocrRoute === "local:cloud-queued") && q.state.dataUpdateCount < 60 ? 5000 : false;
+    },
   });
 
 export const searchQuery = (q: string, caseId?: string) =>
