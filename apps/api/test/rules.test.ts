@@ -19,12 +19,64 @@ const opts = { asOf };
 /** A clean 30-year chain: owner A sells to B (deed + mutation), B dies, heirs C and D. */
 function cleanChain(): ChainEvent[] {
   return [
-    { id: "s1995", kind: "RECORD_SNAPSHOT", date: d("1995-06-01"), owners: ["रामचंद्र पाटील"], areaSqm: 8100, landClass: "Class-I", factIds: ["f1"] },
-    { id: "deed1", kind: "DEED", subtype: "SALE", date: d("2001-03-10"), deedRegNo: "1234/2001", fromParties: ["रामचंद्र पाटील"], toParties: ["सुरेश जाधव"], factIds: ["f2"] },
-    { id: "m1", kind: "MUTATION", subtype: "SALE", date: d("2001-08-20"), ferfarNo: "456", refDeedRegNo: "1234/2001", fromParties: ["रामचंद्र पाटील"], toParties: ["सुरेश जाधव"], factIds: ["f3"] },
-    { id: "s2005", kind: "RECORD_SNAPSHOT", date: d("2005-06-01"), owners: ["सुरेश जाधव"], areaSqm: 8100, landClass: "Class-I", factIds: ["f4"] },
-    { id: "m2", kind: "MUTATION", subtype: "HEIRSHIP", date: d("2015-02-01"), ferfarNo: "789", fromParties: ["सुरेश जाधव"], toParties: ["अनिल जाधव", "सुनील जाधव"], factIds: ["f5"] },
-    { id: "s2025", kind: "RECORD_SNAPSHOT", date: d("2025-06-01"), owners: ["अनिल जाधव", "सुनील जाधव"], areaSqm: 8100, landClass: "Class-I", factIds: ["f6"] },
+    {
+      id: "s1995",
+      kind: "RECORD_SNAPSHOT",
+      date: d("1995-06-01"),
+      owners: ["रामचंद्र पाटील"],
+      areaSqm: 8100,
+      landClass: "Class-I",
+      factIds: ["f1"],
+    },
+    {
+      id: "deed1",
+      kind: "DEED",
+      subtype: "SALE",
+      date: d("2001-03-10"),
+      deedRegNo: "1234/2001",
+      fromParties: ["रामचंद्र पाटील"],
+      toParties: ["सुरेश जाधव"],
+      factIds: ["f2"],
+    },
+    {
+      id: "m1",
+      kind: "MUTATION",
+      subtype: "SALE",
+      date: d("2001-08-20"),
+      ferfarNo: "456",
+      refDeedRegNo: "1234/2001",
+      fromParties: ["रामचंद्र पाटील"],
+      toParties: ["सुरेश जाधव"],
+      factIds: ["f3"],
+    },
+    {
+      id: "s2005",
+      kind: "RECORD_SNAPSHOT",
+      date: d("2005-06-01"),
+      owners: ["सुरेश जाधव"],
+      areaSqm: 8100,
+      landClass: "Class-I",
+      factIds: ["f4"],
+    },
+    {
+      id: "m2",
+      kind: "MUTATION",
+      subtype: "HEIRSHIP",
+      date: d("2015-02-01"),
+      ferfarNo: "789",
+      fromParties: ["सुरेश जाधव"],
+      toParties: ["अनिल जाधव", "सुनील जाधव"],
+      factIds: ["f5"],
+    },
+    {
+      id: "s2025",
+      kind: "RECORD_SNAPSHOT",
+      date: d("2025-06-01"),
+      owners: ["अनिल जाधव", "सुनील जाधव"],
+      areaSqm: 8100,
+      landClass: "Class-I",
+      factIds: ["f6"],
+    },
   ];
 }
 
@@ -124,9 +176,7 @@ describe("Section 155 and other rights", () => {
   });
 
   it("reports each entry once against the latest extract showing it", () => {
-    const ev = cleanChain().map((e) =>
-      e.id === "s2005" || e.id === "s2025" ? { ...e, otherRights: ["बँक ऑफ महाराष्ट्र बोजा"] } : e,
-    );
+    const ev = cleanChain().map((e) => (e.id === "s2005" || e.id === "s2025" ? { ...e, otherRights: ["बँक ऑफ महाराष्ट्र बोजा"] } : e));
     const flags = checkOtherRights(ev);
     expect(flags).toHaveLength(1);
     expect(flags[0]).toMatchObject({ severity: "HIGH", eventIds: ["s2025"] });

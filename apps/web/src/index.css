@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* shadcn/ui-style tokens. Light by default, dark follows the phone's setting. */
+:root {
+  --background: #f6f7f9;
+  --foreground: #15181e;
+  --card: #ffffff;
+  --muted: #eef0f3;
+  --muted-foreground: #5d6573;
+  --border: #e3e6eb;
+  --input: #d5d9e0;
+  --primary: #1f4fb8;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e6eeff;
+  --destructive: #c81e1e;
+  --destructive-soft: #fdecec;
+  --warning-soft: #fdf3dc;
+  --warning: #8a5a00;
+  --success-soft: #e3f5e8;
+  --success: #1e6b36;
+  --ring: #1f4fb8;
+  --radius: 0.875rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f1216;
+    --foreground: #e8eaee;
+    --card: #181c22;
+    --muted: #222731;
+    --muted-foreground: #9aa3b2;
+    --border: #2a2f38;
+    --input: #363c47;
+    --primary: #6d95f0;
+    --primary-foreground: #0b1020;
+    --primary-soft: #1a2747;
+    --destructive: #f07272;
+    --destructive-soft: #3a1717;
+    --warning-soft: #3a2b0c;
+    --warning: #f2c46b;
+    --success-soft: #11301c;
+    --success: #7fd69b;
+    --ring: #6d95f0;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-ring: var(--ring);
+  --radius-lg: var(--radius);
+  --font-sans: "Noto Sans Devanagari", "Mukta", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+}
+
+@media print {
+  .no-print {
+    /* biome-ignore lint/complexity/noImportantStyles: print must override layout utilities */
+    display: none !important;
+  }
+  body {
+    background: white;
+    color: black;
+  }
+}

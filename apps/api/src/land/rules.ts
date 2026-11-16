@@ -9,6 +9,8 @@
  * This module is pure: no database, no clock (pass `asOf`), no I/O.
  */
 
+import { addMonths, addYears, differenceInDays } from "date-fns";
+
 export type EventKind = "RECORD_SNAPSHOT" | "DEED" | "MUTATION";
 export type Severity = "HIGH" | "MEDIUM" | "LOW";
 
@@ -86,8 +88,6 @@ const OTHER_RIGHTS_KEYWORDS: { category: string; en: string; mr: string; words: 
   },
 ];
 
-const DAY = 24 * 60 * 60 * 1000;
-
 export function normaliseName(name: string): string {
   return name
     .normalize("NFC")
@@ -101,12 +101,6 @@ function namesOverlap(a: string[] = [], b: string[] = []): boolean {
   if (a.length === 0 || b.length === 0) return false;
   const set = new Set(a.map(normaliseName));
   return b.some((n) => set.has(normaliseName(n)));
-}
-
-function addMonths(d: Date, months: number): Date {
-  const r = new Date(d.getTime());
-  r.setUTCMonth(r.getUTCMonth() + months);
-  return r;
 }
 
 function ymd(d: Date): string {
@@ -151,18 +145,16 @@ export function checkDeedsHaveMutations(events: ChainEvent[], opts: RuleOptions)
     if (mutations.some((m) => mutationMatchesDeed(m, d, window))) continue;
     // Do not flag deeds too recent for a mutation to be expected yet.
     if (addMonths(d.date, window) > opts.asOf) continue;
-    {
-      out.push({
-        rule: "DEED_WITHOUT_MUTATION",
-        severity: "HIGH",
-        message: {
-          en: `Registered ${ref(d)} (${ymd(d.date)}) has no matching mutation entry within ${window} months.`,
-          mr: `नोंदणीकृत ${refMr(d)} (${ymd(d.date)}) नंतर ${window} महिन्यांत जुळणारी फेरफार नोंद नाही.`,
-        },
-        eventIds: [d.id],
-        factIds: facts(d),
-      });
-    }
+    out.push({
+      rule: "DEED_WITHOUT_MUTATION",
+      severity: "HIGH",
+      message: {
+        en: `Registered ${ref(d)} (${ymd(d.date)}) has no matching mutation entry within ${window} months.`,
+        mr: `नोंदणीकृत ${refMr(d)} (${ymd(d.date)}) नंतर ${window} महिन्यांत जुळणारी फेरफार नोंद नाही.`,
+      },
+      eventIds: [d.id],
+      factIds: facts(d),
+    });
   }
   return out;
 }
@@ -198,7 +190,8 @@ export function checkAreaChanges(events: ChainEvent[], opts: RuleOptions): RuleF
   const snaps = snapshots(events).filter((s) => s.areaSqm != null);
   const out: RuleFlag[] = [];
   for (let i = 1; i < snaps.length; i++) {
-    const a = snaps[i - 1], b = snaps[i];
+    const a = snaps[i - 1],
+      b = snaps[i];
     const diff = Math.abs(b.areaSqm! - a.areaSqm!);
     if (diff / Math.max(a.areaSqm!, 1) <= tol) continue;
     // Only a partition or acquisition between the two extracts can explain an area change; then
@@ -227,7 +220,8 @@ export function checkLandClassChanges(events: ChainEvent[]): RuleFlag[] {
   const snaps = snapshots(events).filter((s) => s.landClass);
   const out: RuleFlag[] = [];
   for (let i = 1; i < snaps.length; i++) {
-    const a = snaps[i - 1], b = snaps[i];
+    const a = snaps[i - 1],
+      b = snaps[i];
     if (normClass(a.landClass!) === normClass(b.landClass!)) continue;
     out.push({
       rule: "LAND_CLASS_CHANGE",
@@ -289,14 +283,16 @@ export function checkOtherRights(events: ChainEvent[]): RuleFlag[] {
 
 export function checkChainCoverage(events: ChainEvent[], opts: RuleOptions): RuleFlag[] {
   const years = opts.chainYears ?? 30;
-  const start = new Date(opts.asOf.getTime());
-  start.setUTCFullYear(start.getUTCFullYear() - years);
+  const start = addYears(opts.asOf, -years);
   const out: RuleFlag[] = [];
   if (events.length === 0) {
     out.push({
       rule: "CHAIN_START_GAP",
       severity: "HIGH",
-      message: { en: `No records in the file. A ${years}-year chain is required.`, mr: `फाईलमध्ये एकही नोंद नाही. ${years} वर्षांची साखळी आवश्यक आहे.` },
+      message: {
+        en: `No records in the file. A ${years}-year chain is required.`,
+        mr: `फाईलमध्ये एकही नोंद नाही. ${years} वर्षांची साखळी आवश्यक आहे.`,
+      },
       eventIds: [],
       factIds: [],
     });
@@ -305,7 +301,7 @@ export function checkChainCoverage(events: ChainEvent[], opts: RuleOptions): Rul
   const sorted = [...events].sort((a, b) => a.date.getTime() - b.date.getTime());
   const first = sorted[0];
   // Allow a year of slack: a 7/12 from early in the start year covers it.
-  if (first.date.getTime() - start.getTime() > 365 * DAY) {
+  if (differenceInDays(first.date, start) > 365) {
     out.push({
       rule: "CHAIN_START_GAP",
       severity: "HIGH",

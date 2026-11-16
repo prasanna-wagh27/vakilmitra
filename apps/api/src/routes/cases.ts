@@ -1,161 +1,208 @@
-import { Router } from "express";
+import {
+  advocates,
+  and,
+  asc,
+  caseAccess,
+  cases,
+  clients,
+  count,
+  desc,
+  eq,
+  flags,
+  gte,
+  hearings,
+  ilike,
+  inArray,
+  or,
+  ownershipEvents,
+  parties,
+  properties,
+} from "@vakilmitra/db";
+import { caseInput, caseListQuery, grantInput, istDayRange, partyInput } from "@vakilmitra/shared";
+import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { prisma } from "../db.js";
-import { HttpError, notFound, parse } from "../lib/http.js";
-import { accessibleCaseIds, logAccess, requireCaseAccess } from "../lib/access.js";
-import { startOfTodayIst } from "../lib/time.js";
+import { db } from "../db.js";
+import { logAccess, requireCaseAccess, requireCaseOwner, visibleCase } from "../lib/access.js";
+import { HttpError, likePattern, notFound } from "../lib/http.js";
 
-export const casesRouter = Router();
-
-const KINDS = ["CIVIL", "LAND_PROPERTY", "TITLE_SEARCH", "CRIMINAL", "FAMILY", "REVENUE", "OTHER"] as const;
-const STATUSES = ["ACTIVE", "DISPOSED", "ON_HOLD", "CLOSED"] as const;
-const PARTY_ROLES = ["PETITIONER", "RESPONDENT", "PLAINTIFF", "DEFENDANT", "APPLICANT", "OPPONENT", "APPELLANT", "OTHER"] as const;
-
-const caseSchema = z.object({
-  title: z.string().trim().min(1).max(300),
-  kind: z.enum(KINDS).optional(),
-  clientId: z.string().nullable().optional(),
-  caseNumber: z.string().trim().max(80).nullable().optional(),
-  court: z.string().trim().max(200).nullable().optional(),
-  cnrNumber: z.string().trim().max(32).nullable().optional(),
-  status: z.enum(STATUSES).optional(),
-  filedOn: z.coerce.date().nullable().optional(),
-  notes: z.string().max(20000).nullable().optional(),
-});
+const idParams = z.object({ id: z.string() });
 
 async function assertOwnClient(advocateId: string, clientId?: string | null) {
   if (!clientId) return;
-  const c = await prisma.client.findFirst({ where: { id: clientId, advocateId } });
+  const c = await db.query.clients.findFirst({
+    where: and(eq(clients.id, clientId), eq(clients.advocateId, advocateId)),
+    columns: { id: true },
+  });
   if (!c) throw notFound("Client");
 }
 
-casesRouter.get("/", async (req, res) => {
-  const ids = await accessibleCaseIds(req.advocateId!);
-  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
-  const status = typeof req.query.status === "string" && (STATUSES as readonly string[]).includes(req.query.status) ? (req.query.status as (typeof STATUSES)[number]) : undefined;
-  const cases = await prisma.caseFile.findMany({
-    where: {
-      id: { in: ids },
-      ...(status ? { status } : {}),
-      ...(q
-        ? {
-            OR: [
-              { title: { contains: q, mode: "insensitive" } },
-              { caseNumber: { contains: q, mode: "insensitive" } },
-              { court: { contains: q, mode: "insensitive" } },
-              { client: { name: { contains: q, mode: "insensitive" } } },
-              { parties: { some: { name: { contains: q, mode: "insensitive" } } } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: { updatedAt: "desc" },
-    include: {
-      client: { select: { id: true, name: true } },
-      hearings: { where: { date: { gte: startOfTodayIst() } }, orderBy: { date: "asc" }, take: 1 },
-      _count: { select: { flags: { where: { resolved: false } } } },
-    },
+export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
+  app.get("/", { schema: { querystring: caseListQuery } }, async (req) => {
+    const { q, status } = req.query;
+    const p = q ? likePattern(q) : null;
+    const rows = await db.query.cases.findMany({
+      where: and(
+        visibleCase(req.advocateId),
+        status ? eq(cases.status, status) : undefined,
+        p
+          ? or(
+              ilike(cases.title, p),
+              ilike(cases.caseNumber, p),
+              ilike(cases.court, p),
+              inArray(cases.clientId, db.select({ id: clients.id }).from(clients).where(ilike(clients.name, p))),
+              inArray(cases.id, db.select({ id: parties.caseId }).from(parties).where(ilike(parties.name, p))),
+            )
+          : undefined,
+      ),
+      orderBy: desc(cases.updatedAt),
+      with: { client: { columns: { id: true, name: true, phone: true } } },
+    });
+    const ids = rows.map((c) => c.id);
+    if (ids.length === 0) return { cases: [] };
+
+    const [next, flagCounts] = await Promise.all([
+      db
+        .selectDistinctOn([hearings.caseId])
+        .from(hearings)
+        .where(and(inArray(hearings.caseId, ids), gte(hearings.date, istDayRange().start)))
+        .orderBy(hearings.caseId, asc(hearings.date)),
+      db
+        .select({ caseId: flags.caseId, n: count() })
+        .from(flags)
+        .where(and(inArray(flags.caseId, ids), eq(flags.resolved, false)))
+        .groupBy(flags.caseId),
+    ]);
+    const nextMap = new Map(next.map((h) => [h.caseId, h]));
+    const flagMap = new Map(flagCounts.map((f) => [f.caseId, f.n]));
+    return {
+      cases: rows.map(({ advocateId, ...c }) => ({
+        ...c,
+        shared: advocateId !== req.advocateId,
+        nextHearing: nextMap.get(c.id) ?? null,
+        openFlags: flagMap.get(c.id) ?? 0,
+      })),
+    };
   });
-  res.json({
-    cases: cases.map(({ hearings, advocateId, ...c }) => ({ ...c, nextHearing: hearings[0] ?? null, shared: advocateId !== req.advocateId })),
+
+  app.post("/", { schema: { body: caseInput } }, async (req, reply) => {
+    await assertOwnClient(req.advocateId, req.body.clientId);
+    const [c] = await db
+      .insert(cases)
+      .values({ ...req.body, advocateId: req.advocateId })
+      .returning();
+    return reply.code(201).send({ case: c });
   });
-});
 
-casesRouter.post("/", async (req, res) => {
-  const data = parse(caseSchema, req.body);
-  await assertOwnClient(req.advocateId!, data.clientId);
-  const caseFile = await prisma.caseFile.create({ data: { ...data, advocateId: req.advocateId! } });
-  res.status(201).json({ case: caseFile });
-});
-
-casesRouter.get("/:id", async (req, res) => {
-  const access = await requireCaseAccess(req.advocateId!, req.params.id);
-  const caseFile = await prisma.caseFile.findUniqueOrThrow({
-    where: { id: req.params.id },
-    include: {
-      client: true,
-      parties: { orderBy: { createdAt: "asc" } },
-      properties: { orderBy: { createdAt: "asc" }, include: { _count: { select: { events: true } } } },
-      hearings: { orderBy: { date: "desc" } },
-      flags: { where: { resolved: false }, orderBy: { createdAt: "asc" } },
-      drafts: { orderBy: { updatedAt: "desc" }, select: { id: true, title: true, status: true, language: true, updatedAt: true } },
-      feeAgreements: { include: { payments: true, installments: true } },
-      grants: access === "OWNER" ? { include: { advocate: { select: { id: true, name: true, email: true } } } } : false,
-    },
+  app.get("/:id", { schema: { params: idParams } }, async (req) => {
+    const access = await requireCaseAccess(req.advocateId, req.params.id);
+    const c = await db.query.cases.findFirst({
+      where: eq(cases.id, req.params.id),
+      with: {
+        client: { columns: { id: true, name: true, phone: true } },
+        parties: { orderBy: asc(parties.createdAt) },
+        properties: { orderBy: asc(properties.createdAt) },
+        hearings: { orderBy: desc(hearings.date) },
+        flags: { where: eq(flags.resolved, false), orderBy: asc(flags.createdAt) },
+        drafts: { columns: { id: true, title: true, status: true, language: true, updatedAt: true } },
+        feeAgreements: { with: { payments: true, installments: true } },
+        grants: { with: { advocate: { columns: { id: true, name: true, email: true } } } },
+      },
+    });
+    if (!c) throw notFound("Case");
+    const propIds = c.properties.map((p) => p.id);
+    const eventCounts = propIds.length
+      ? await db
+          .select({ propertyId: ownershipEvents.propertyId, n: count() })
+          .from(ownershipEvents)
+          .where(inArray(ownershipEvents.propertyId, propIds))
+          .groupBy(ownershipEvents.propertyId)
+      : [];
+    const evMap = new Map(eventCounts.map((e) => [e.propertyId, e.n]));
+    await logAccess(req, "case.view", "case", c.id);
+    const { advocateId: _owner, ...rest } = c;
+    return {
+      access,
+      case: {
+        ...rest,
+        properties: c.properties.map((p) => ({ ...p, eventCount: evMap.get(p.id) ?? 0 })),
+        // Only the owner sees who else has access.
+        grants: access === "OWNER" ? c.grants : [],
+      },
+    };
   });
-  await logAccess(req, "case.view", "case", caseFile.id);
-  res.json({ case: caseFile, access });
-});
 
-casesRouter.patch("/:id", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.id, "write");
-  const data = parse(caseSchema.partial(), req.body);
-  await assertOwnClient(req.advocateId!, data.clientId);
-  const caseFile = await prisma.caseFile.update({ where: { id: req.params.id }, data });
-  res.json({ case: caseFile });
-});
-
-/** One-tap delete of a case and everything in it. Owner only. */
-casesRouter.delete("/:id", async (req, res) => {
-  const access = await requireCaseAccess(req.advocateId!, req.params.id, "write");
-  if (access !== "OWNER") throw new HttpError(403, "forbidden", "Only the owning advocate can delete a case");
-  await prisma.caseFile.delete({ where: { id: req.params.id } });
-  await logAccess(req, "case.delete", "case", req.params.id);
-  res.status(204).end();
-});
-
-// ---------- Parties ----------
-
-const partySchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  role: z.enum(PARTY_ROLES),
-  isOurClient: z.boolean().optional(),
-  opposingCounsel: z.string().trim().max(200).nullable().optional(),
-  address: z.string().trim().max(500).nullable().optional(),
-});
-
-casesRouter.post("/:id/parties", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.id, "write");
-  const party = await prisma.party.create({ data: { ...parse(partySchema, req.body), caseId: req.params.id } });
-  res.status(201).json({ party });
-});
-
-casesRouter.patch("/:id/parties/:partyId", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.id, "write");
-  const { count } = await prisma.party.updateMany({ where: { id: req.params.partyId, caseId: req.params.id }, data: parse(partySchema.partial(), req.body) });
-  if (!count) throw notFound("Party");
-  res.json({ party: await prisma.party.findUnique({ where: { id: req.params.partyId } }) });
-});
-
-casesRouter.delete("/:id/parties/:partyId", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.id, "write");
-  const { count } = await prisma.party.deleteMany({ where: { id: req.params.partyId, caseId: req.params.id } });
-  if (!count) throw notFound("Party");
-  res.status(204).end();
-});
-
-// ---------- Sharing with juniors (case by case) ----------
-
-casesRouter.post("/:id/grants", async (req, res) => {
-  const access = await requireCaseAccess(req.advocateId!, req.params.id, "write");
-  if (access !== "OWNER") throw new HttpError(403, "forbidden", "Only the owning advocate can share a case");
-  const body = parse(z.object({ email: z.email().transform((e) => e.toLowerCase()), role: z.enum(["EDITOR", "VIEWER"]).default("VIEWER") }), req.body);
-  const junior = await prisma.advocate.findUnique({ where: { email: body.email } });
-  if (!junior) throw notFound("Advocate with that email");
-  if (junior.id === req.advocateId) throw new HttpError(400, "invalid_input", "You already own this case");
-  const grant = await prisma.caseAccess.upsert({
-    where: { caseId_advocateId: { caseId: req.params.id, advocateId: junior.id } },
-    create: { caseId: req.params.id, advocateId: junior.id, role: body.role },
-    update: { role: body.role },
+  app.patch("/:id", { schema: { params: idParams, body: caseInput.partial() } }, async (req) => {
+    await requireCaseAccess(req.advocateId, req.params.id, "write");
+    await assertOwnClient(req.advocateId, req.body.clientId);
+    const [c] = await db.update(cases).set(req.body).where(eq(cases.id, req.params.id)).returning();
+    return { case: c };
   });
-  await logAccess(req, "case.share", "case", req.params.id);
-  res.status(201).json({ grant });
-});
 
-casesRouter.delete("/:id/grants/:grantId", async (req, res) => {
-  const access = await requireCaseAccess(req.advocateId!, req.params.id, "write");
-  if (access !== "OWNER") throw new HttpError(403, "forbidden", "Only the owning advocate can change sharing");
-  const { count } = await prisma.caseAccess.deleteMany({ where: { id: req.params.grantId, caseId: req.params.id } });
-  if (!count) throw notFound("Grant");
-  res.status(204).end();
-});
+  /** One-tap delete of a case and everything in it. Owner only. */
+  app.delete("/:id", { schema: { params: idParams } }, async (req, reply) => {
+    await requireCaseOwner(req.advocateId, req.params.id);
+    await db.delete(cases).where(eq(cases.id, req.params.id));
+    await logAccess(req, "case.delete", "case", req.params.id);
+    return reply.code(204).send();
+  });
+
+  // ---------- Parties ----------
+
+  const partyParams = z.object({ id: z.string(), partyId: z.string() });
+
+  app.post("/:id/parties", { schema: { params: idParams, body: partyInput } }, async (req, reply) => {
+    await requireCaseAccess(req.advocateId, req.params.id, "write");
+    const [party] = await db
+      .insert(parties)
+      .values({ ...req.body, caseId: req.params.id })
+      .returning();
+    return reply.code(201).send({ party });
+  });
+
+  app.patch("/:id/parties/:partyId", { schema: { params: partyParams, body: partyInput.partial() } }, async (req) => {
+    await requireCaseAccess(req.advocateId, req.params.id, "write");
+    const [party] = await db
+      .update(parties)
+      .set(req.body)
+      .where(and(eq(parties.id, req.params.partyId), eq(parties.caseId, req.params.id)))
+      .returning();
+    if (!party) throw notFound("Party");
+    return { party };
+  });
+
+  app.delete("/:id/parties/:partyId", { schema: { params: partyParams } }, async (req, reply) => {
+    await requireCaseAccess(req.advocateId, req.params.id, "write");
+    const gone = await db
+      .delete(parties)
+      .where(and(eq(parties.id, req.params.partyId), eq(parties.caseId, req.params.id)))
+      .returning({ id: parties.id });
+    if (!gone.length) throw notFound("Party");
+    return reply.code(204).send();
+  });
+
+  // ---------- Sharing with juniors, case by case ----------
+
+  app.post("/:id/grants", { schema: { params: idParams, body: grantInput } }, async (req, reply) => {
+    await requireCaseOwner(req.advocateId, req.params.id);
+    const junior = await db.query.advocates.findFirst({ where: eq(advocates.email, req.body.email), columns: { id: true } });
+    if (!junior) throw notFound("Advocate with that email");
+    if (junior.id === req.advocateId) throw new HttpError(400, "invalid_input", "You already own this case");
+    const [grant] = await db
+      .insert(caseAccess)
+      .values({ caseId: req.params.id, advocateId: junior.id, role: req.body.role })
+      .onConflictDoUpdate({ target: [caseAccess.caseId, caseAccess.advocateId], set: { role: req.body.role } })
+      .returning();
+    await logAccess(req, "case.share", "case", req.params.id);
+    return reply.code(201).send({ grant });
+  });
+
+  app.delete("/:id/grants/:grantId", { schema: { params: z.object({ id: z.string(), grantId: z.string() }) } }, async (req, reply) => {
+    await requireCaseOwner(req.advocateId, req.params.id);
+    const gone = await db
+      .delete(caseAccess)
+      .where(and(eq(caseAccess.id, req.params.grantId), eq(caseAccess.caseId, req.params.id)))
+      .returning({ id: caseAccess.id });
+    if (!gone.length) throw notFound("Grant");
+    return reply.code(204).send();
+  });
+};

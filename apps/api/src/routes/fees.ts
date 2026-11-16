@@ -1,41 +1,43 @@
-import { Router } from "express";
+import { and, asc, clients, eq, feeAgreements, installments, payments } from "@vakilmitra/db";
+import { type ClientTotals, feeAgreementInput, paymentInput, toPaise } from "@vakilmitra/shared";
+import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { prisma } from "../db.js";
-import { notFound, parse, toPaise } from "../lib/http.js";
+import { db } from "../db.js";
 import { requireCaseAccess } from "../lib/access.js";
+import { notFound } from "../lib/http.js";
 
-export const feesRouter = Router();
+type Totals = Omit<ClientTotals, "nextDue"> & { nextDue: { date: Date; amountPaise: number } | null };
 
-export interface ClientTotals {
-  clientId: string;
-  clientName: string;
-  totalPaise: number;
-  paidPaise: number;
-  outstandingPaise: number;
-  /** Installments already due minus everything paid (never negative). */
-  overduePaise: number;
-  nextDue: { date: Date; amountPaise: number } | null;
-}
-
-/** Fee position per client, computed from agreements, installments and payments. */
-export async function outstandingByClient(advocateId: string, asOf = new Date()): Promise<Map<string, ClientTotals>> {
-  const agreements = await prisma.feeAgreement.findMany({
-    where: { client: { advocateId } },
-    include: { client: { select: { name: true } }, payments: { select: { amountPaise: true } }, installments: true },
+/** Fee position per client, from agreements, installments and payments. */
+export async function feeTotalsByClient(advocateId: string, asOf = new Date()): Promise<Map<string, Totals>> {
+  const rows = await db.query.feeAgreements.findMany({
+    with: {
+      client: { columns: { name: true, advocateId: true } },
+      payments: { columns: { amountPaise: true } },
+      installments: { orderBy: asc(installments.dueDate) },
+    },
+    where: (f, { inArray }) => inArray(f.clientId, db.select({ id: clients.id }).from(clients).where(eq(clients.advocateId, advocateId))),
   });
-  const map = new Map<string, ClientTotals>();
-  for (const a of agreements) {
-    const t =
-      map.get(a.clientId) ??
-      { clientId: a.clientId, clientName: a.client.name, totalPaise: 0, paidPaise: 0, outstandingPaise: 0, overduePaise: 0, nextDue: null };
+  const map = new Map<string, Totals>();
+  for (const a of rows) {
+    const t = map.get(a.clientId) ?? {
+      clientId: a.clientId,
+      clientName: a.client.name,
+      totalPaise: 0,
+      paidPaise: 0,
+      outstandingPaise: 0,
+      overduePaise: 0,
+      nextDue: null,
+    };
     const paid = a.payments.reduce((s, p) => s + p.amountPaise, 0);
     const dueSoFar = a.installments.filter((i) => i.dueDate <= asOf).reduce((s, i) => s + i.amountPaise, 0);
     t.totalPaise += a.totalPaise;
     t.paidPaise += paid;
     t.overduePaise += Math.max(0, dueSoFar - paid);
-    // Next unpaid installment: walk installments in date order, consuming payments.
+    t.outstandingPaise = Math.max(0, t.totalPaise - t.paidPaise);
+    // Next unpaid future installment: walk installments in date order, consuming payments.
     let remaining = paid;
-    for (const i of [...a.installments].sort((x, y) => x.dueDate.getTime() - y.dueDate.getTime())) {
+    for (const i of a.installments) {
       const left = i.amountPaise - Math.min(remaining, i.amountPaise);
       remaining = Math.max(0, remaining - i.amountPaise);
       if (left > 0 && i.dueDate > asOf) {
@@ -43,108 +45,116 @@ export async function outstandingByClient(advocateId: string, asOf = new Date())
         break;
       }
     }
-    t.outstandingPaise = Math.max(0, t.totalPaise - t.paidPaise);
     map.set(a.clientId, t);
   }
   return map;
 }
 
-/** One screen: total outstanding per client (spec acceptance for Fees). */
-feesRouter.get("/summary", async (req, res) => {
-  const rows = [...(await outstandingByClient(req.advocateId!)).values()].sort((a, b) => b.outstandingPaise - a.outstandingPaise);
-  const totals = rows.reduce(
-    (s, r) => ({ totalPaise: s.totalPaise + r.totalPaise, paidPaise: s.paidPaise + r.paidPaise, outstandingPaise: s.outstandingPaise + r.outstandingPaise, overduePaise: s.overduePaise + r.overduePaise }),
-    { totalPaise: 0, paidPaise: 0, outstandingPaise: 0, overduePaise: 0 },
-  );
-  res.json({ clients: rows, totals });
-});
-
-const agreementSchema = z.object({
-  clientId: z.string(),
-  caseId: z.string().nullable().optional(),
-  description: z.string().trim().min(1).max(300),
-  totalRupees: z.number().positive().max(1e9),
-  installments: z
-    .array(z.object({ dueDate: z.coerce.date(), amountRupees: z.number().positive(), note: z.string().max(200).optional() }))
-    .optional(),
-});
-
-feesRouter.post("/agreements", async (req, res) => {
-  const body = parse(agreementSchema, req.body);
-  const client = await prisma.client.findFirst({ where: { id: body.clientId, advocateId: req.advocateId } });
-  if (!client) throw notFound("Client");
-  if (body.caseId) await requireCaseAccess(req.advocateId!, body.caseId, "write");
-  const agreement = await prisma.feeAgreement.create({
-    data: {
-      clientId: body.clientId,
-      caseId: body.caseId ?? null,
-      description: body.description,
-      totalPaise: toPaise(body.totalRupees),
-      installments: { create: (body.installments ?? []).map((i) => ({ dueDate: i.dueDate, amountPaise: toPaise(i.amountRupees), note: i.note })) },
-    },
-    include: { installments: true, payments: true },
-  });
-  res.status(201).json({ agreement });
-});
-
 async function ownAgreement(advocateId: string, id: string) {
-  const a = await prisma.feeAgreement.findFirst({
-    where: { id, client: { advocateId } },
-    include: { client: true, case: { select: { id: true, title: true, caseNumber: true, court: true } }, installments: { orderBy: { dueDate: "asc" } }, payments: { orderBy: { paidOn: "asc" } } },
+  const a = await db.query.feeAgreements.findFirst({
+    where: eq(feeAgreements.id, id),
+    with: {
+      client: true,
+      case: { columns: { id: true, title: true, caseNumber: true, court: true } },
+      installments: { orderBy: asc(installments.dueDate) },
+      payments: { orderBy: asc(payments.paidOn) },
+    },
   });
-  if (!a) throw notFound("Fee agreement");
+  if (!a || a.client.advocateId !== advocateId) throw notFound("Fee agreement");
   return a;
 }
 
-feesRouter.get("/agreements/:id", async (req, res) => {
-  res.json({ agreement: await ownAgreement(req.advocateId!, req.params.id) });
-});
+const idParams = z.object({ id: z.string() });
 
-feesRouter.delete("/agreements/:id", async (req, res) => {
-  await ownAgreement(req.advocateId!, req.params.id);
-  await prisma.feeAgreement.delete({ where: { id: req.params.id } });
-  res.status(204).end();
-});
-
-const paymentSchema = z.object({
-  amountRupees: z.number().positive().max(1e9),
-  paidOn: z.coerce.date(),
-  mode: z.enum(["cash", "upi", "cheque", "bank"]).optional(),
-  reference: z.string().trim().max(100).optional(),
-});
-
-feesRouter.post("/agreements/:id/payments", async (req, res) => {
-  await ownAgreement(req.advocateId!, req.params.id);
-  const b = parse(paymentSchema, req.body);
-  const payment = await prisma.payment.create({
-    data: { agreementId: req.params.id, amountPaise: toPaise(b.amountRupees), paidOn: b.paidOn, mode: b.mode, reference: b.reference },
+export const feeRoutes: FastifyPluginAsyncZod = async (app) => {
+  /** One screen: total outstanding per client (spec acceptance for Fees). */
+  app.get("/summary", async (req) => {
+    const rows = [...(await feeTotalsByClient(req.advocateId)).values()].sort((a, b) => b.outstandingPaise - a.outstandingPaise);
+    const totals = rows.reduce(
+      (s, r) => ({
+        totalPaise: s.totalPaise + r.totalPaise,
+        paidPaise: s.paidPaise + r.paidPaise,
+        outstandingPaise: s.outstandingPaise + r.outstandingPaise,
+        overduePaise: s.overduePaise + r.overduePaise,
+      }),
+      { totalPaise: 0, paidPaise: 0, outstandingPaise: 0, overduePaise: 0 },
+    );
+    return { clients: rows, totals };
   });
-  res.status(201).json({ payment });
-});
 
-feesRouter.delete("/payments/:id", async (req, res) => {
-  const p = await prisma.payment.findFirst({ where: { id: req.params.id, agreement: { client: { advocateId: req.advocateId } } } });
-  if (!p) throw notFound("Payment");
-  await prisma.payment.delete({ where: { id: p.id } });
-  res.status(204).end();
-});
+  app.post("/agreements", { schema: { body: feeAgreementInput } }, async (req, reply) => {
+    const b = req.body;
+    const client = await db.query.clients.findFirst({ where: and(eq(clients.id, b.clientId), eq(clients.advocateId, req.advocateId)) });
+    if (!client) throw notFound("Client");
+    if (b.caseId) await requireCaseAccess(req.advocateId, b.caseId, "write");
+    const id = await db.transaction(async (tx) => {
+      const [a] = await tx
+        .insert(feeAgreements)
+        .values({ clientId: b.clientId, caseId: b.caseId ?? null, description: b.description, totalPaise: toPaise(b.totalRupees) })
+        .returning({ id: feeAgreements.id });
+      if (b.installments?.length) {
+        await tx
+          .insert(installments)
+          .values(
+            b.installments.map((i) => ({ agreementId: a.id, dueDate: i.dueDate, amountPaise: toPaise(i.amountRupees), note: i.note })),
+          );
+      }
+      return a.id;
+    });
+    return reply.code(201).send({ agreement: await ownAgreement(req.advocateId, id) });
+  });
 
-/** Simple invoice for one client: all agreements, payments and the balance. */
-feesRouter.get("/invoice/:clientId", async (req, res) => {
-  const client = await prisma.client.findFirst({
-    where: { id: req.params.clientId, advocateId: req.advocateId },
-    include: {
-      feeAgreements: {
-        include: { case: { select: { title: true, caseNumber: true, court: true } }, payments: { orderBy: { paidOn: "asc" } }, installments: { orderBy: { dueDate: "asc" } } },
-        orderBy: { createdAt: "asc" },
+  app.get("/agreements/:id", { schema: { params: idParams } }, async (req) => ({
+    agreement: await ownAgreement(req.advocateId, req.params.id),
+  }));
+
+  app.delete("/agreements/:id", { schema: { params: idParams } }, async (req, reply) => {
+    await ownAgreement(req.advocateId, req.params.id);
+    await db.delete(feeAgreements).where(eq(feeAgreements.id, req.params.id));
+    return reply.code(204).send();
+  });
+
+  app.post("/agreements/:id/payments", { schema: { params: idParams, body: paymentInput } }, async (req, reply) => {
+    await ownAgreement(req.advocateId, req.params.id);
+    const b = req.body;
+    const [payment] = await db
+      .insert(payments)
+      .values({ agreementId: req.params.id, amountPaise: toPaise(b.amountRupees), paidOn: b.paidOn, mode: b.mode, reference: b.reference })
+      .returning();
+    return reply.code(201).send({ payment });
+  });
+
+  app.delete("/payments/:id", { schema: { params: idParams } }, async (req, reply) => {
+    const p = await db.query.payments.findFirst({
+      where: eq(payments.id, req.params.id),
+      with: { agreement: { with: { client: { columns: { advocateId: true } } } } },
+    });
+    if (!p || p.agreement.client.advocateId !== req.advocateId) throw notFound("Payment");
+    await db.delete(payments).where(eq(payments.id, p.id));
+    return reply.code(204).send();
+  });
+
+  /** Simple invoice for one client: all agreements, payments and the balance. */
+  app.get("/invoice/:clientId", { schema: { params: z.object({ clientId: z.string() }) } }, async (req) => {
+    const client = await db.query.clients.findFirst({
+      where: and(eq(clients.id, req.params.clientId), eq(clients.advocateId, req.advocateId)),
+      with: {
+        feeAgreements: {
+          orderBy: asc(feeAgreements.createdAt),
+          with: {
+            case: { columns: { id: true, title: true, caseNumber: true, court: true } },
+            payments: { orderBy: asc(payments.paidOn) },
+            installments: { orderBy: asc(installments.dueDate) },
+          },
+        },
       },
-    },
+    });
+    if (!client) throw notFound("Client");
+    const advocate = await db.query.advocates.findFirst({
+      where: (a, { eq }) => eq(a.id, req.advocateId),
+      columns: { name: true, email: true, phone: true, barCouncilNo: true },
+    });
+    const totals = (await feeTotalsByClient(req.advocateId)).get(client.id) ?? null;
+    return { advocate, client, totals, issuedOn: new Date() };
   });
-  if (!client) throw notFound("Client");
-  const advocate = await prisma.advocate.findUniqueOrThrow({
-    where: { id: req.advocateId },
-    select: { name: true, email: true, phone: true, barCouncilNo: true },
-  });
-  const totals = (await outstandingByClient(req.advocateId!)).get(client.id) ?? null;
-  res.json({ advocate, client, totals, issuedOn: new Date() });
-});
+};

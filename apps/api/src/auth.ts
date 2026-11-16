@@ -1,0 +1,40 @@
+import { accessLogs, accounts, advocates, sessions, verifications } from "@vakilmitra/db";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { db } from "./db.js";
+import { env, isProd } from "./env.js";
+
+/**
+ * Better Auth runs inside our own Postgres. An advocate is Better Auth's "user".
+ * Email + password for now; phone OTP (MSG91) and chamber orgs plug in here later.
+ */
+export const auth = betterAuth({
+  baseURL: env.API_URL,
+  basePath: "/api/auth",
+  secret: env.BETTER_AUTH_SECRET,
+  trustedOrigins: [env.WEB_ORIGIN],
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: { user: advocates, session: sessions, account: accounts, verification: verifications },
+  }),
+  emailAndPassword: { enabled: true, minPasswordLength: 8, maxPasswordLength: 200 },
+  session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 },
+  user: {
+    additionalFields: {
+      phone: { type: "string", required: false },
+      barCouncilNo: { type: "string", required: false },
+      locale: { type: "string", required: false, defaultValue: "mr" },
+    },
+    deleteUser: {
+      enabled: true,
+      // Keep an anonymised record that the account was deleted (DPDP audit trail).
+      beforeDelete: async (user) => {
+        await db.insert(accessLogs).values({ advocateId: null, action: "account.delete", entityType: "advocate", entityId: user.id });
+      },
+    },
+  },
+  rateLimit: { enabled: env.NODE_ENV !== "test", window: 60, max: 30 },
+  advanced: { useSecureCookies: isProd },
+});
+
+export type Session = typeof auth.$Infer.Session;

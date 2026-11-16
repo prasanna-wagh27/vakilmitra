@@ -1,144 +1,146 @@
-import { Router } from "express";
+import { and, asc, eq, flags, ownershipEvents, properties } from "@vakilmitra/db";
+import { checkQuery, eventInput, flagUpdateInput, propertyInput } from "@vakilmitra/shared";
+import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { prisma } from "../db.js";
-import { notFound, parse } from "../lib/http.js";
+import { db } from "../db.js";
+import { type ChainEvent, runRules } from "../land/rules.js";
 import { requireCaseAccess } from "../lib/access.js";
-import { runRules, type ChainEvent } from "../land/rules.js";
+import { notFound } from "../lib/http.js";
 
-/** Properties, their ownership chain, and the deterministic red-flag check. */
-export const landRouter = Router();
-
-const propertySchema = z.object({
-  surveyNo: z.string().trim().max(40).nullable().optional(),
-  gatNo: z.string().trim().max(40).nullable().optional(),
-  hissaNo: z.string().trim().max(40).nullable().optional(),
-  village: z.string().trim().max(120).nullable().optional(),
-  taluka: z.string().trim().max(120).nullable().optional(),
-  district: z.string().trim().max(120).nullable().optional(),
-});
-
-const names = z.array(z.string().trim().min(1).max(200)).max(100).default([]);
-
-const eventSchema = z.object({
-  kind: z.enum(["RECORD_SNAPSHOT", "DEED", "MUTATION"]),
-  date: z.coerce.date(),
-  subtype: z.string().trim().toUpperCase().max(40).nullable().optional(),
-  ferfarNo: z.string().trim().max(40).nullable().optional(),
-  deedRegNo: z.string().trim().max(60).nullable().optional(),
-  refDeedRegNo: z.string().trim().max(60).nullable().optional(),
-  fromParties: names,
-  toParties: names,
-  owners: names,
-  areaSqm: z.number().nonnegative().nullable().optional(),
-  landClass: z.string().trim().max(40).nullable().optional(),
-  otherRights: z.array(z.string().trim().max(500)).max(50).default([]),
-  section155: z.boolean().default(false),
-  factIds: z.array(z.string()).max(200).default([]),
-  notes: z.string().max(2000).nullable().optional(),
-});
+const caseParams = z.object({ caseId: z.string() });
+const propParams = z.object({ caseId: z.string(), propertyId: z.string() });
+const eventParams = propParams.extend({ eventId: z.string() });
 
 async function propertyInCase(caseId: string, propertyId: string) {
-  const p = await prisma.property.findFirst({ where: { id: propertyId, caseId } });
+  const p = await db.query.properties.findFirst({ where: and(eq(properties.id, propertyId), eq(properties.caseId, caseId)) });
   if (!p) throw notFound("Property");
   return p;
 }
 
-landRouter.post("/cases/:caseId/properties", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.caseId, "write");
-  const property = await prisma.property.create({ data: { ...parse(propertySchema, req.body), caseId: req.params.caseId } });
-  res.status(201).json({ property });
-});
-
-landRouter.get("/cases/:caseId/properties/:propertyId", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.caseId);
-  await propertyInCase(req.params.caseId, req.params.propertyId);
-  const property = await prisma.property.findUniqueOrThrow({
-    where: { id: req.params.propertyId },
-    include: {
-      events: { orderBy: { date: "asc" } },
-      flags: { orderBy: [{ resolved: "asc" }, { createdAt: "asc" }] },
-    },
+/** Properties, their ownership chain, and the deterministic red-flag check. */
+export const landRoutes: FastifyPluginAsyncZod = async (app) => {
+  app.post("/cases/:caseId/properties", { schema: { params: caseParams, body: propertyInput } }, async (req, reply) => {
+    await requireCaseAccess(req.advocateId, req.params.caseId, "write");
+    const [property] = await db
+      .insert(properties)
+      .values({ ...req.body, caseId: req.params.caseId })
+      .returning();
+    return reply.code(201).send({ property });
   });
-  res.json({ property });
-});
 
-landRouter.patch("/cases/:caseId/properties/:propertyId", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.caseId, "write");
-  await propertyInCase(req.params.caseId, req.params.propertyId);
-  const property = await prisma.property.update({ where: { id: req.params.propertyId }, data: parse(propertySchema.partial(), req.body) });
-  res.json({ property });
-});
-
-landRouter.delete("/cases/:caseId/properties/:propertyId", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.caseId, "write");
-  await propertyInCase(req.params.caseId, req.params.propertyId);
-  await prisma.property.delete({ where: { id: req.params.propertyId } });
-  res.status(204).end();
-});
-
-landRouter.post("/cases/:caseId/properties/:propertyId/events", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.caseId, "write");
-  await propertyInCase(req.params.caseId, req.params.propertyId);
-  const event = await prisma.ownershipEvent.create({ data: { ...parse(eventSchema, req.body), propertyId: req.params.propertyId } });
-  res.status(201).json({ event });
-});
-
-landRouter.patch("/cases/:caseId/properties/:propertyId/events/:eventId", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.caseId, "write");
-  await propertyInCase(req.params.caseId, req.params.propertyId);
-  const { count } = await prisma.ownershipEvent.updateMany({
-    where: { id: req.params.eventId, propertyId: req.params.propertyId },
-    data: parse(eventSchema.partial(), req.body),
-  });
-  if (!count) throw notFound("Event");
-  res.json({ event: await prisma.ownershipEvent.findUnique({ where: { id: req.params.eventId } }) });
-});
-
-landRouter.delete("/cases/:caseId/properties/:propertyId/events/:eventId", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.caseId, "write");
-  const { count } = await prisma.ownershipEvent.deleteMany({ where: { id: req.params.eventId, propertyId: req.params.propertyId } });
-  if (!count) throw notFound("Event");
-  res.status(204).end();
-});
-
-/**
- * Run the rules over the property's chain. Open flags are replaced with the fresh result;
- * flags the advocate already resolved stay resolved if the same rule fires on the same events.
- */
-landRouter.post("/cases/:caseId/properties/:propertyId/check", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.caseId, "write");
-  await propertyInCase(req.params.caseId, req.params.propertyId);
-  const locale = req.query.lang === "en" ? "en" : "mr";
-  const events = await prisma.ownershipEvent.findMany({ where: { propertyId: req.params.propertyId } });
-  const results = runRules(events as ChainEvent[], { asOf: new Date() });
-
-  const sig = (rule: string, eventIds: string[]) => `${rule}|${[...eventIds].sort().join(",")}`;
-  const resolved = await prisma.flag.findMany({ where: { propertyId: req.params.propertyId, resolved: true } });
-  const resolvedSigs = new Set(resolved.map((f) => sig(f.rule, f.eventIds)));
-
-  const flags = await prisma.$transaction(async (tx) => {
-    await tx.flag.deleteMany({ where: { propertyId: req.params.propertyId, resolved: false } });
-    const fresh = results.filter((r) => !resolvedSigs.has(sig(r.rule, r.eventIds)));
-    await tx.flag.createMany({
-      data: fresh.map((r) => ({
-        caseId: req.params.caseId,
-        propertyId: req.params.propertyId,
-        rule: r.rule,
-        severity: r.severity,
-        message: r.message[locale],
-        eventIds: r.eventIds,
-        factIds: r.factIds,
-      })),
+  app.get("/cases/:caseId/properties/:propertyId", { schema: { params: propParams } }, async (req) => {
+    await requireCaseAccess(req.advocateId, req.params.caseId);
+    await propertyInCase(req.params.caseId, req.params.propertyId);
+    const property = await db.query.properties.findFirst({
+      where: eq(properties.id, req.params.propertyId),
+      with: {
+        events: { orderBy: asc(ownershipEvents.date) },
+        flags: { orderBy: [asc(flags.resolved), asc(flags.createdAt)] },
+      },
     });
-    return tx.flag.findMany({ where: { propertyId: req.params.propertyId }, orderBy: [{ resolved: "asc" }, { createdAt: "asc" }] });
+    return { property };
   });
-  res.json({ flags, ranAt: new Date(), eventCount: events.length });
-});
 
-landRouter.patch("/cases/:caseId/flags/:flagId", async (req, res) => {
-  await requireCaseAccess(req.advocateId!, req.params.caseId, "write");
-  const body = parse(z.object({ resolved: z.boolean(), resolution: z.string().trim().max(2000).nullable().optional() }), req.body);
-  const { count } = await prisma.flag.updateMany({ where: { id: req.params.flagId, caseId: req.params.caseId }, data: body });
-  if (!count) throw notFound("Flag");
-  res.json({ flag: await prisma.flag.findUnique({ where: { id: req.params.flagId } }) });
-});
+  app.patch("/cases/:caseId/properties/:propertyId", { schema: { params: propParams, body: propertyInput.partial() } }, async (req) => {
+    await requireCaseAccess(req.advocateId, req.params.caseId, "write");
+    await propertyInCase(req.params.caseId, req.params.propertyId);
+    const [property] = await db.update(properties).set(req.body).where(eq(properties.id, req.params.propertyId)).returning();
+    return { property };
+  });
+
+  app.delete("/cases/:caseId/properties/:propertyId", { schema: { params: propParams } }, async (req, reply) => {
+    await requireCaseAccess(req.advocateId, req.params.caseId, "write");
+    await propertyInCase(req.params.caseId, req.params.propertyId);
+    await db.delete(properties).where(eq(properties.id, req.params.propertyId));
+    return reply.code(204).send();
+  });
+
+  app.post("/cases/:caseId/properties/:propertyId/events", { schema: { params: propParams, body: eventInput } }, async (req, reply) => {
+    await requireCaseAccess(req.advocateId, req.params.caseId, "write");
+    await propertyInCase(req.params.caseId, req.params.propertyId);
+    const [event] = await db
+      .insert(ownershipEvents)
+      .values({ ...req.body, propertyId: req.params.propertyId })
+      .returning();
+    return reply.code(201).send({ event });
+  });
+
+  app.patch(
+    "/cases/:caseId/properties/:propertyId/events/:eventId",
+    { schema: { params: eventParams, body: eventInput.partial() } },
+    async (req) => {
+      await requireCaseAccess(req.advocateId, req.params.caseId, "write");
+      await propertyInCase(req.params.caseId, req.params.propertyId);
+      const [event] = await db
+        .update(ownershipEvents)
+        .set(req.body)
+        .where(and(eq(ownershipEvents.id, req.params.eventId), eq(ownershipEvents.propertyId, req.params.propertyId)))
+        .returning();
+      if (!event) throw notFound("Event");
+      return { event };
+    },
+  );
+
+  app.delete("/cases/:caseId/properties/:propertyId/events/:eventId", { schema: { params: eventParams } }, async (req, reply) => {
+    await requireCaseAccess(req.advocateId, req.params.caseId, "write");
+    await propertyInCase(req.params.caseId, req.params.propertyId);
+    const gone = await db
+      .delete(ownershipEvents)
+      .where(and(eq(ownershipEvents.id, req.params.eventId), eq(ownershipEvents.propertyId, req.params.propertyId)))
+      .returning({ id: ownershipEvents.id });
+    if (!gone.length) throw notFound("Event");
+    return reply.code(204).send();
+  });
+
+  /**
+   * Run the rules over the property's chain. Open flags are replaced with the fresh result;
+   * flags the advocate already resolved stay resolved if the same rule fires on the same events.
+   */
+  app.post("/cases/:caseId/properties/:propertyId/check", { schema: { params: propParams, querystring: checkQuery } }, async (req) => {
+    const { caseId, propertyId } = req.params;
+    await requireCaseAccess(req.advocateId, caseId, "write");
+    await propertyInCase(caseId, propertyId);
+    const locale = req.query.lang ?? "mr";
+    const events = await db.query.ownershipEvents.findMany({ where: eq(ownershipEvents.propertyId, propertyId) });
+    const results = runRules(events as ChainEvent[], { asOf: new Date() });
+
+    const sig = (rule: string, eventIds: string[]) => `${rule}|${[...eventIds].sort().join(",")}`;
+    const resolved = await db.query.flags.findMany({ where: and(eq(flags.propertyId, propertyId), eq(flags.resolved, true)) });
+    const resolvedSigs = new Set(resolved.map((f) => sig(f.rule, f.eventIds)));
+    const fresh = results.filter((r) => !resolvedSigs.has(sig(r.rule, r.eventIds)));
+
+    const all = await db.transaction(async (tx) => {
+      await tx.delete(flags).where(and(eq(flags.propertyId, propertyId), eq(flags.resolved, false)));
+      if (fresh.length) {
+        await tx.insert(flags).values(
+          fresh.map((r) => ({
+            caseId,
+            propertyId,
+            rule: r.rule,
+            severity: r.severity,
+            message: r.message[locale],
+            eventIds: r.eventIds,
+            factIds: r.factIds,
+          })),
+        );
+      }
+      return tx.query.flags.findMany({ where: eq(flags.propertyId, propertyId), orderBy: [asc(flags.resolved), asc(flags.createdAt)] });
+    });
+    return { flags: all, ranAt: new Date(), eventCount: events.length };
+  });
+
+  app.patch(
+    "/cases/:caseId/flags/:flagId",
+    { schema: { params: z.object({ caseId: z.string(), flagId: z.string() }), body: flagUpdateInput } },
+    async (req) => {
+      await requireCaseAccess(req.advocateId, req.params.caseId, "write");
+      const [flag] = await db
+        .update(flags)
+        .set(req.body)
+        .where(and(eq(flags.id, req.params.flagId), eq(flags.caseId, req.params.caseId)))
+        .returning();
+      if (!flag) throw notFound("Flag");
+      return { flag };
+    },
+  );
+};

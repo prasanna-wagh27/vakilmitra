@@ -1,3 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { createDb } from "@vakilmitra/db";
+import { env } from "./env.js";
 
-export const prisma = new PrismaClient();
+export const { db, pool } = createDb(env.DATABASE_URL);

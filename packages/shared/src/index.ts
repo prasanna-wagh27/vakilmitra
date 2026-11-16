@@ -1,0 +1,328 @@
+/**
+ * Shared Zod schemas, enums, types and helpers for the API, web and mobile apps.
+ * The API validates every request with these schemas; clients use the same ones for forms.
+ */
+import { z } from "zod";
+
+export * from "./time.js";
+
+// ---------- Enums ----------
+
+export const LOCALES = ["mr", "en"] as const;
+export const CASE_KINDS = ["CIVIL", "LAND_PROPERTY", "TITLE_SEARCH", "CRIMINAL", "FAMILY", "REVENUE", "OTHER"] as const;
+export const CASE_STATUSES = ["ACTIVE", "DISPOSED", "ON_HOLD", "CLOSED"] as const;
+export const PARTY_ROLES = ["PETITIONER", "RESPONDENT", "PLAINTIFF", "DEFENDANT", "APPLICANT", "OPPONENT", "APPELLANT", "OTHER"] as const;
+export const CASE_ROLES = ["EDITOR", "VIEWER"] as const;
+export const EVENT_KINDS = ["RECORD_SNAPSHOT", "DEED", "MUTATION"] as const;
+export const DEED_SUBTYPES = ["SALE", "GIFT", "PARTITION", "MORTGAGE", "WILL", "RELEASE", "EXCHANGE", "OTHER"] as const;
+export const MUTATION_SUBTYPES = [
+  "SALE",
+  "HEIRSHIP",
+  "GIFT",
+  "PARTITION",
+  "MORTGAGE",
+  "RELEASE",
+  "EXCHANGE",
+  "CORRECTION",
+  "ACQUISITION",
+  "OTHER",
+] as const;
+export const SEVERITIES = ["HIGH", "MEDIUM", "LOW"] as const;
+export const PAYMENT_MODES = ["cash", "upi", "cheque", "bank"] as const;
+
+export type Locale = (typeof LOCALES)[number];
+export type CaseKind = (typeof CASE_KINDS)[number];
+export type CaseStatus = (typeof CASE_STATUSES)[number];
+export type PartyRole = (typeof PARTY_ROLES)[number];
+export type CaseRole = (typeof CASE_ROLES)[number];
+export type EventKind = (typeof EVENT_KINDS)[number];
+export type Severity = (typeof SEVERITIES)[number];
+export type PaymentMode = (typeof PAYMENT_MODES)[number];
+export type CaseAccessLevel = "OWNER" | CaseRole;
+
+// ---------- Building blocks ----------
+
+/** ISO date ("2026-11-16") or datetime with offset, parsed to a Date. */
+export const isoDate = z
+  .string()
+  .refine((s) => /^\d{4}-\d{2}-\d{2}(T.+)?$/.test(s) && !Number.isNaN(Date.parse(s)), "Expected an ISO date")
+  .transform((s) => new Date(s));
+
+const optText = (max: number) => z.string().trim().max(max).nullable().optional();
+const names = z.array(z.string().trim().min(1).max(200)).max(100).default([]);
+
+/** Rupees (may be decimal) to integer paise. */
+export const toPaise = (rupees: number) => Math.round(rupees * 100);
+
+// ---------- Inputs ----------
+
+export const updateProfileInput = z.object({
+  name: z.string().trim().min(2).max(120).optional(),
+  phone: optText(20),
+  barCouncilNo: optText(40),
+  locale: z.enum(LOCALES).optional(),
+});
+
+export const clientInput = z.object({
+  name: z.string().trim().min(1).max(160),
+  phone: optText(20),
+  email: z
+    .union([z.email(), z.literal("").transform(() => null)])
+    .nullable()
+    .optional(),
+  address: optText(500),
+  whatsappOptIn: z.boolean().optional(),
+  notes: optText(5000),
+});
+export type ClientInput = z.input<typeof clientInput>;
+
+export const caseInput = z.object({
+  title: z.string().trim().min(1).max(300),
+  kind: z.enum(CASE_KINDS).optional(),
+  clientId: z.string().nullable().optional(),
+  caseNumber: optText(80),
+  court: optText(200),
+  cnrNumber: optText(32),
+  status: z.enum(CASE_STATUSES).optional(),
+  filedOn: isoDate.nullable().optional(),
+  notes: optText(20000),
+});
+export type CaseInput = z.input<typeof caseInput>;
+
+export const caseListQuery = z.object({
+  q: z.string().trim().max(200).optional(),
+  status: z.enum(CASE_STATUSES).optional(),
+});
+
+export const partyInput = z.object({
+  name: z.string().trim().min(1).max(200),
+  role: z.enum(PARTY_ROLES),
+  isOurClient: z.boolean().optional(),
+  opposingCounsel: optText(200),
+  address: optText(500),
+});
+export type PartyInput = z.input<typeof partyInput>;
+
+export const grantInput = z.object({
+  email: z.email().transform((e) => e.toLowerCase()),
+  role: z.enum(CASE_ROLES).default("VIEWER"),
+});
+
+export const hearingInput = z.object({
+  date: isoDate,
+  court: optText(200),
+  purpose: optText(200),
+  nextStep: optText(2000),
+  outcome: optText(2000),
+});
+
+/** Recording what happened usually means setting the next date too: `next` creates it in the same call. */
+export const hearingUpdateInput = hearingInput.partial().extend({
+  next: z.object({ date: isoDate, purpose: optText(200) }).optional(),
+});
+
+export const dayQuery = z.object({ date: z.iso.date().optional() });
+export const rangeQuery = z.object({ from: z.iso.date().optional(), to: z.iso.date().optional() });
+
+export const propertyInput = z.object({
+  surveyNo: optText(40),
+  gatNo: optText(40),
+  hissaNo: optText(40),
+  village: optText(120),
+  taluka: optText(120),
+  district: optText(120),
+});
+export type PropertyInput = z.input<typeof propertyInput>;
+
+export const eventInput = z.object({
+  kind: z.enum(EVENT_KINDS),
+  date: isoDate,
+  subtype: z.string().trim().toUpperCase().max(40).nullable().optional(),
+  ferfarNo: optText(40),
+  deedRegNo: optText(60),
+  refDeedRegNo: optText(60),
+  fromParties: names,
+  toParties: names,
+  owners: names,
+  areaSqm: z.number().nonnegative().nullable().optional(),
+  landClass: optText(40),
+  otherRights: z.array(z.string().trim().max(500)).max(50).default([]),
+  section155: z.boolean().default(false),
+  factIds: z.array(z.string()).max(200).default([]),
+  notes: optText(2000),
+});
+export type EventInput = z.input<typeof eventInput>;
+
+export const checkQuery = z.object({ lang: z.enum(LOCALES).optional() });
+
+export const flagUpdateInput = z.object({ resolved: z.boolean(), resolution: optText(2000) });
+
+export const feeAgreementInput = z.object({
+  clientId: z.string(),
+  caseId: z.string().nullable().optional(),
+  description: z.string().trim().min(1).max(300),
+  totalRupees: z.number().positive().max(1e9),
+  installments: z
+    .array(z.object({ dueDate: isoDate, amountRupees: z.number().positive().max(1e9), note: z.string().max(200).optional() }))
+    .max(60)
+    .optional(),
+});
+export type FeeAgreementInput = z.input<typeof feeAgreementInput>;
+
+export const paymentInput = z.object({
+  amountRupees: z.number().positive().max(1e9),
+  paidOn: isoDate,
+  mode: z.enum(PAYMENT_MODES).optional(),
+  reference: z.string().trim().max(100).optional(),
+});
+export type PaymentInput = z.input<typeof paymentInput>;
+
+export const searchQuery = z.object({ q: z.string().trim().max(200).optional() });
+
+// ---------- Response shapes (dates are ISO strings over the wire) ----------
+
+export interface Advocate {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  barCouncilNo?: string | null;
+  locale: Locale;
+}
+export interface Client {
+  id: string;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  whatsappOptIn: boolean;
+  notes: string | null;
+}
+export interface ClientListItem extends Client {
+  caseCount: number;
+  outstandingPaise: number;
+}
+export interface Hearing {
+  id: string;
+  caseId: string;
+  date: string;
+  court: string | null;
+  purpose: string | null;
+  nextStep: string | null;
+  outcome: string | null;
+}
+export interface CaseRef {
+  id: string;
+  title: string;
+  caseNumber: string | null;
+  court: string | null;
+  status: CaseStatus;
+  client: { id: string; name: string; phone: string | null } | null;
+}
+export interface HearingWithCase extends Hearing {
+  case: CaseRef;
+}
+export interface Party {
+  id: string;
+  name: string;
+  role: PartyRole;
+  isOurClient: boolean;
+  opposingCounsel: string | null;
+  address: string | null;
+}
+export interface Property {
+  id: string;
+  surveyNo: string | null;
+  gatNo: string | null;
+  hissaNo: string | null;
+  village: string | null;
+  taluka: string | null;
+  district: string | null;
+}
+export interface Flag {
+  id: string;
+  propertyId: string | null;
+  rule: string;
+  severity: Severity;
+  message: string;
+  eventIds: string[];
+  factIds: string[];
+  resolved: boolean;
+  resolution: string | null;
+}
+export interface OwnershipEvent {
+  id: string;
+  kind: EventKind;
+  date: string;
+  subtype: string | null;
+  ferfarNo: string | null;
+  deedRegNo: string | null;
+  refDeedRegNo: string | null;
+  fromParties: string[];
+  toParties: string[];
+  owners: string[];
+  areaSqm: number | null;
+  landClass: string | null;
+  otherRights: string[];
+  section155: boolean;
+  notes: string | null;
+}
+export interface Payment {
+  id: string;
+  amountPaise: number;
+  paidOn: string;
+  mode: string | null;
+  reference: string | null;
+}
+export interface Installment {
+  id: string;
+  dueDate: string;
+  amountPaise: number;
+  note: string | null;
+}
+export interface FeeAgreement {
+  id: string;
+  clientId: string;
+  caseId: string | null;
+  description: string;
+  totalPaise: number;
+  installments: Installment[];
+  payments: Payment[];
+  case?: { id: string; title: string; caseNumber: string | null; court: string | null } | null;
+}
+export interface CaseListItem extends CaseRef {
+  kind: CaseKind;
+  shared: boolean;
+  openFlags: number;
+  nextHearing: Hearing | null;
+}
+export interface CaseDetail extends CaseRef {
+  kind: CaseKind;
+  clientId: string | null;
+  cnrNumber: string | null;
+  filedOn: string | null;
+  notes: string | null;
+  parties: Party[];
+  properties: (Property & { eventCount: number })[];
+  hearings: Hearing[];
+  flags: Flag[];
+  feeAgreements: FeeAgreement[];
+  drafts: { id: string; title: string; status: "DRAFT" | "APPROVED"; language: Locale; updatedAt: string }[];
+  grants: { id: string; role: CaseRole; advocate: { id: string; name: string; email: string } }[];
+}
+export interface ClientTotals {
+  clientId: string;
+  clientName: string;
+  totalPaise: number;
+  paidPaise: number;
+  outstandingPaise: number;
+  /** Installments already due minus everything paid (never negative). */
+  overduePaise: number;
+  nextDue: { date: string; amountPaise: number } | null;
+}
+export interface FeeTotals {
+  totalPaise: number;
+  paidPaise: number;
+  outstandingPaise: number;
+  overduePaise: number;
+}

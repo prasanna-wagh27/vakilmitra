@@ -1,8 +1,8 @@
 node_modules
-.next
 dist
+.turbo
 .env
+.env.*
+!.env.example
 *.log
-apps/api/uploads
-next-env.d.ts
 *.tsbuildinfo

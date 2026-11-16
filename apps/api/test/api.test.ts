@@ -1,17 +1,29 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { accessLogs, and, count, eq, flags, hearings } from "@vakilmitra/db";
 import request from "supertest";
-import { createApp } from "../src/app.js";
-import { prisma } from "../src/db.js";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { buildApp } from "../src/app.js";
+import { db, pool } from "../src/db.js";
 
-const app = createApp();
+const app = await buildApp();
+await app.ready();
+const server = app.server;
+const ORIGIN = "http://localhost:5173";
 const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 async function signup(email: string) {
-  const agent = request.agent(app);
-  const r = await agent.post("/api/auth/register").send({ name: "Adv. Test", email, password: "password123" });
-  expect(r.status).toBe(201);
+  const agent = request.agent(server).set("Origin", ORIGIN);
+  const r = await agent.post("/api/auth/sign-up/email").send({ name: "Adv. Test", email, password: "password123" });
+  expect(r.status).toBe(200);
   return agent;
 }
+
+const countLogs = async (entityId: string, action: string) =>
+  (
+    await db
+      .select({ n: count() })
+      .from(accessLogs)
+      .where(and(eq(accessLogs.entityId, entityId), eq(accessLogs.action, action)))
+  )[0].n;
 
 let senior: ReturnType<typeof request.agent>;
 let other: ReturnType<typeof request.agent>;
@@ -24,24 +36,47 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await prisma.$disconnect();
+  await app.close();
+  await pool.end();
 });
 
 describe("auth", () => {
   it("rejects unauthenticated requests", async () => {
-    expect((await request(app).get("/api/cases")).status).toBe(401);
+    expect((await request(server).get("/api/cases")).status).toBe(401);
   });
 
   it("returns the signed-in advocate without the password hash", async () => {
-    const r = await senior.get("/api/auth/me");
+    const r = await senior.get("/api/me");
     expect(r.status).toBe(200);
     expect(r.body.advocate.locale).toBe("mr");
-    expect(r.body.advocate.passwordHash).toBeUndefined();
+    expect(r.body.advocate.password).toBeUndefined();
   });
 
   it("rejects a wrong password and a duplicate email", async () => {
-    expect((await request(app).post("/api/auth/login").send({ email: `senior-${stamp}@example.com`, password: "nope" })).status).toBe(401);
-    expect((await request(app).post("/api/auth/register").send({ name: "Dup", email: `SENIOR-${stamp}@example.com`, password: "password123" })).status).toBe(409);
+    const bad = await request(server)
+      .post("/api/auth/sign-in/email")
+      .set("Origin", ORIGIN)
+      .send({ email: `senior-${stamp}@example.com`, password: "nope" });
+    expect(bad.status).toBe(401);
+    const dup = await request(server)
+      .post("/api/auth/sign-up/email")
+      .set("Origin", ORIGIN)
+      .send({ name: "Dup", email: `SENIOR-${stamp}@example.com`, password: "password123" });
+    expect(dup.status).toBeGreaterThanOrEqual(400);
+  });
+
+  it("signs in and out with a session cookie", async () => {
+    const agent = request.agent(server).set("Origin", ORIGIN);
+    expect(
+      (await agent.post("/api/auth/sign-in/email").send({ email: `senior-${stamp}@example.com`, password: "password123" })).status,
+    ).toBe(200);
+    expect((await agent.get("/api/me")).status).toBe(200);
+    expect((await agent.post("/api/auth/sign-out").send({})).status).toBe(200);
+    expect((await agent.get("/api/me")).status).toBe(401);
+  });
+
+  it("does not expose Better Auth's password-optional delete endpoint", async () => {
+    expect((await senior.post("/api/auth/delete-user").send({})).status).toBe(404);
   });
 });
 
@@ -51,9 +86,13 @@ describe("clients and cases", () => {
     expect(c.status).toBe(201);
     clientId = c.body.client.id;
 
-    const k = await senior
-      .post("/api/cases")
-      .send({ title: "जाधव वि. पाटील", kind: "LAND_PROPERTY", clientId, court: "Civil Judge Jr. Dn., Baramati", caseNumber: "RCS 123/2025" });
+    const k = await senior.post("/api/cases").send({
+      title: "जाधव वि. पाटील",
+      kind: "LAND_PROPERTY",
+      clientId,
+      court: "Civil Judge Jr. Dn., Baramati",
+      caseNumber: "RCS 123/2025",
+    });
     expect(k.status).toBe(201);
     caseId = k.body.case.id;
 
@@ -81,7 +120,7 @@ describe("clients and cases", () => {
     expect((await other.get("/api/cases")).body.cases).toHaveLength(0);
     expect((await other.post(`/api/cases/${caseId}/hearings`).send({ date: "2026-12-01" })).status).toBe(404);
     expect((await senior.get(`/api/cases/${caseId}`)).status).toBe(200);
-    expect(await prisma.accessLog.count({ where: { entityId: caseId, action: "case.view" } })).toBe(1);
+    expect(await countLogs(caseId, "case.view")).toBe(1);
   });
 
   it("shares a case with a junior as viewer only", async () => {
@@ -134,7 +173,9 @@ describe("fees", () => {
       ],
     });
     expect(a.status).toBe(201);
-    const pay = await senior.post(`/api/fees/agreements/${a.body.agreement.id}/payments`).send({ amountRupees: 4000.5, paidOn: "2025-02-01", mode: "upi" });
+    const pay = await senior
+      .post(`/api/fees/agreements/${a.body.agreement.id}/payments`)
+      .send({ amountRupees: 4000.5, paidOn: "2025-02-01", mode: "upi" });
     expect(pay.status).toBe(201);
 
     const s = await senior.get("/api/fees/summary");
@@ -150,13 +191,22 @@ describe("fees", () => {
 
 describe("land chain", () => {
   it("raises deterministic flags and keeps resolved ones resolved", async () => {
-    const p = await senior.post(`/api/cases/${caseId}/properties`).send({ gatNo: "112", village: "माळेगाव", taluka: "बारामती", district: "पुणे" });
+    const p = await senior
+      .post(`/api/cases/${caseId}/properties`)
+      .send({ gatNo: "112", village: "माळेगाव", taluka: "बारामती", district: "पुणे" });
     expect(p.status).toBe(201);
     const base = `/api/cases/${caseId}/properties/${p.body.property.id}`;
     const events = [
       { kind: "RECORD_SNAPSHOT", date: "1994-01-01", owners: ["रामचंद्र पाटील"], areaSqm: 8100, landClass: "Class-II" },
       { kind: "DEED", subtype: "sale", date: "2001-03-10", deedRegNo: "1234/2001", fromParties: ["रामचंद्र पाटील"], toParties: ["सुरेश जाधव"] },
-      { kind: "RECORD_SNAPSHOT", date: "2024-01-01", owners: ["सुरेश जाधव"], areaSqm: 8100, landClass: "Class-I", otherRights: ["बँक ऑफ महाराष्ट्र बोजा"] },
+      {
+        kind: "RECORD_SNAPSHOT",
+        date: "2024-01-01",
+        owners: ["सुरेश जाधव"],
+        areaSqm: 8100,
+        landClass: "Class-I",
+        otherRights: ["बँक ऑफ महाराष्ट्र बोजा"],
+      },
     ];
     for (const e of events) expect((await senior.post(`${base}/events`).send(e)).status).toBe(201);
 
@@ -167,7 +217,9 @@ describe("land chain", () => {
     expect(r.body.flags[0].message).toMatch(/[ऀ-ॿ]/); // Marathi by default
 
     const cls = r.body.flags.find((f: { rule: string }) => f.rule === "LAND_CLASS_CHANGE");
-    const res = await senior.patch(`/api/cases/${caseId}/flags/${cls.id}`).send({ resolved: true, resolution: "Conversion order dated 2010 on file" });
+    const res = await senior
+      .patch(`/api/cases/${caseId}/flags/${cls.id}`)
+      .send({ resolved: true, resolution: "Conversion order dated 2010 on file" });
     expect(res.status).toBe(200);
 
     const again = await senior.post(`${base}/check`).query({ lang: "en" });
@@ -180,14 +232,16 @@ describe("deletion", () => {
   it("deletes a case with everything in it", async () => {
     expect((await other.delete(`/api/cases/${caseId}`)).status).toBe(404);
     expect((await senior.delete(`/api/cases/${caseId}`)).status).toBe(204);
-    expect(await prisma.hearing.count({ where: { caseId } })).toBe(0);
-    expect(await prisma.flag.count({ where: { caseId } })).toBe(0);
-    expect(await prisma.accessLog.count({ where: { entityId: caseId, action: "case.delete" } })).toBe(1);
+    expect((await db.select({ n: count() }).from(hearings).where(eq(hearings.caseId, caseId)))[0].n).toBe(0);
+    expect((await db.select({ n: count() }).from(flags).where(eq(flags.caseId, caseId)))[0].n).toBe(0);
+    expect(await countLogs(caseId, "case.delete")).toBe(1);
   });
 
   it("deletes the whole account after password confirmation", async () => {
-    expect((await other.delete("/api/auth/me").send({ password: "wrong" })).status).toBe(401);
-    expect((await other.delete("/api/auth/me").send({ password: "password123" })).status).toBe(204);
-    expect((await other.get("/api/auth/me")).status).toBe(401);
+    const me = await other.get("/api/me");
+    expect((await other.delete("/api/me").send({ password: "wrong" })).status).toBe(401);
+    expect((await other.delete("/api/me").send({ password: "password123" })).status).toBe(204);
+    expect((await other.get("/api/me")).status).toBe(401);
+    expect(await countLogs(me.body.advocate.id, "account.delete")).toBe(1);
   });
 });
