@@ -103,7 +103,9 @@ export const documentsQuery = (caseId: string) =>
     queryKey: ["documents", caseId],
     queryFn: () => api<{ documents: DocumentSummary[] }>(`/cases/${caseId}/documents`).then((r) => r.documents),
     // Keep statuses fresh while pages are still being read.
-    refetchInterval: (q) => (q.state.data?.some((d) => d.ocrStatus === "PENDING" || d.ocrStatus === "PROCESSING") ? 3000 : false),
+    // Poll only while pages are being read; an empty document stays PENDING and must not poll forever.
+    refetchInterval: (q) =>
+      q.state.data?.some((d) => d.ocrStatus === "PROCESSING" || (d.ocrStatus === "PENDING" && d.pageCount > 0)) ? 3000 : false,
   });
 
 export const documentQuery = (documentId: string) =>
@@ -111,7 +113,9 @@ export const documentQuery = (documentId: string) =>
     queryKey: ["document", documentId],
     queryFn: () => api<{ document: DocumentDetail }>(`/documents/${documentId}`).then((r) => r.document),
     refetchInterval: (q) =>
-      q.state.data && (q.state.data.ocrStatus === "PENDING" || q.state.data.ocrStatus === "PROCESSING") ? 2000 : false,
+      q.state.data && (q.state.data.ocrStatus === "PROCESSING" || (q.state.data.ocrStatus === "PENDING" && q.state.data.pages.length > 0))
+        ? 2000
+        : false,
   });
 
 export const searchQuery = (q: string, caseId?: string) =>

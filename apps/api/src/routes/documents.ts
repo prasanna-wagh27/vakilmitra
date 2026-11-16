@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, asc, cases, count, desc, documents, eq, ilike, inArray, pages } from "@vakilmitra/db";
+import { and, asc, cases, count, desc, documents, eq, ilike, inArray, pages, sql } from "@vakilmitra/db";
 import { enqueueOcr, rollUpDocumentStatus } from "@vakilmitra/jobs";
 import { documentInput, documentUpdateInput, PAGE_UPLOAD, type SearchHit, textSearchQuery } from "@vakilmitra/shared";
 import { keys } from "@vakilmitra/storage";
@@ -55,9 +55,18 @@ async function pageCounts(documentIds: string[]) {
 }
 
 /** Text around the first match, with the match position inside the snippet. */
-export function makeSnippet(text: string, q: string, radius = 70) {
+export function makeSnippet(rawText: string, rawQ: string, radius = 70) {
+  // Work on one normalised form throughout, so positions and lengths agree.
+  const text = rawText.normalize("NFC");
+  const q = rawQ.normalize("NFC");
   const lower = text.toLocaleLowerCase();
-  const at = Math.max(0, lower.indexOf(q.toLocaleLowerCase()));
+  const at = lower.length === text.length ? lower.indexOf(q.toLocaleLowerCase()) : -1;
+  // If JS can't locate what Postgres matched (case-folding differences), show the start of the
+  // page with no highlight rather than highlighting the wrong words.
+  if (at < 0) {
+    const end = Math.min(text.length, radius * 2);
+    return { snippet: text.slice(0, end).replace(/\s/g, " ") + (end < text.length ? "…" : ""), matchStart: 0, matchEnd: 0 };
+  }
   const start = Math.max(0, at - radius);
   const end = Math.min(text.length, at + q.length + radius);
   const prefix = start > 0 ? "…" : "";
@@ -182,7 +191,8 @@ export const documentRoutes: FastifyPluginAsyncZod = async (app) => {
       const [page] = await db
         .insert(pages)
         .values({ id: pageId, documentId: doc.id, pageNo, ...reset })
-        .onConflictDoUpdate({ target: [pages.documentId, pages.pageNo], set: reset })
+        // A re-upload bumps the version, so an OCR job still reading the old image won't save.
+        .onConflictDoUpdate({ target: [pages.documentId, pages.pageNo], set: { ...reset, version: sql`${pages.version} + 1` } })
         .returning(pageReturning);
       await rollUpDocumentStatus(db, doc.id);
       await enqueueOcr(ocrQueue, page.id);
@@ -221,7 +231,7 @@ export const documentRoutes: FastifyPluginAsyncZod = async (app) => {
     const doc = await documentWithAccess(req.advocateId, req.params.id, "write");
     const [page] = await db
       .update(pages)
-      .set({ ocrStatus: "PENDING", ocrError: null })
+      .set({ ocrStatus: "PENDING", ocrError: null, version: sql`${pages.version} + 1` })
       .where(and(eq(pages.id, req.params.pageId), eq(pages.documentId, doc.id)))
       .returning(pageReturning);
     if (!page) throw notFound("Page");

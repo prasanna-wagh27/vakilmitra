@@ -3,20 +3,25 @@ import { type ClientTotals, feeAgreementInput, paymentInput, toPaise } from "@va
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { db } from "../db.js";
-import { requireCaseAccess } from "../lib/access.js";
+import { requireCaseOwner, requireOwnClient } from "../lib/access.js";
 import { notFound } from "../lib/http.js";
 
 type Totals = Omit<ClientTotals, "nextDue"> & { nextDue: { date: Date; amountPaise: number } | null };
 
 /** Fee position per client, from agreements, installments and payments. */
-export async function feeTotalsByClient(advocateId: string, asOf = new Date()): Promise<Map<string, Totals>> {
+export async function feeTotalsByClient(advocateId: string, opts: { asOf?: Date; clientId?: string } = {}): Promise<Map<string, Totals>> {
+  const asOf = opts.asOf ?? new Date();
   const rows = await db.query.feeAgreements.findMany({
     with: {
       client: { columns: { name: true, advocateId: true } },
       payments: { columns: { amountPaise: true } },
       installments: { orderBy: asc(installments.dueDate) },
     },
-    where: (f, { inArray }) => inArray(f.clientId, db.select({ id: clients.id }).from(clients).where(eq(clients.advocateId, advocateId))),
+    where: (f, { and, eq: eqf, inArray }) =>
+      and(
+        inArray(f.clientId, db.select({ id: clients.id }).from(clients).where(eq(clients.advocateId, advocateId))),
+        opts.clientId ? eqf(f.clientId, opts.clientId) : undefined,
+      ),
   });
   const map = new Map<string, Totals>();
   for (const a of rows) {
@@ -84,9 +89,9 @@ export const feeRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.post("/agreements", { schema: { body: feeAgreementInput } }, async (req, reply) => {
     const b = req.body;
-    const client = await db.query.clients.findFirst({ where: and(eq(clients.id, b.clientId), eq(clients.advocateId, req.advocateId)) });
-    if (!client) throw notFound("Client");
-    if (b.caseId) await requireCaseAccess(req.advocateId, b.caseId, "write");
+    await requireOwnClient(req.advocateId, b.clientId);
+    // Only the case owner bills on a case: juniors' clients never attach to someone else's case.
+    if (b.caseId) await requireCaseOwner(req.advocateId, b.caseId);
     const id = await db.transaction(async (tx) => {
       const [a] = await tx
         .insert(feeAgreements)
@@ -154,7 +159,7 @@ export const feeRoutes: FastifyPluginAsyncZod = async (app) => {
       where: (a, { eq }) => eq(a.id, req.advocateId),
       columns: { name: true, email: true, phone: true, barCouncilNo: true },
     });
-    const totals = (await feeTotalsByClient(req.advocateId)).get(client.id) ?? null;
+    const totals = (await feeTotalsByClient(req.advocateId, { clientId: client.id })).get(client.id) ?? null;
     return { advocate, client, totals, issuedOn: new Date() };
   });
 };

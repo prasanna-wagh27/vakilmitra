@@ -1,5 +1,5 @@
 import { and, asc, eq, flags, ownershipEvents, properties } from "@vakilmitra/db";
-import { checkQuery, eventInput, flagUpdateInput, propertyInput } from "@vakilmitra/shared";
+import { checkQuery, eventInput, eventUpdateInput, flagUpdateInput, propertyInput } from "@vakilmitra/shared";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { db } from "../db.js";
@@ -67,7 +67,7 @@ export const landRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.patch(
     "/cases/:caseId/properties/:propertyId/events/:eventId",
-    { schema: { params: eventParams, body: eventInput.partial() } },
+    { schema: { params: eventParams, body: eventUpdateInput } },
     async (req) => {
       await requireCaseAccess(req.advocateId, req.params.caseId, "write");
       await propertyInCase(req.params.caseId, req.params.propertyId);
@@ -101,13 +101,16 @@ export const landRoutes: FastifyPluginAsyncZod = async (app) => {
     await requireCaseAccess(req.advocateId, caseId, "write");
     await propertyInCase(caseId, propertyId);
     const locale = req.query.lang ?? "mr";
-    const events = await db.query.ownershipEvents.findMany({ where: eq(ownershipEvents.propertyId, propertyId) });
+    const events = await db.query.ownershipEvents.findMany({
+      where: eq(ownershipEvents.propertyId, propertyId),
+      orderBy: [asc(ownershipEvents.date), asc(ownershipEvents.id)],
+    });
     const results = runRules(events as ChainEvent[], { asOf: new Date() });
 
-    const sig = (rule: string, eventIds: string[]) => `${rule}|${[...eventIds].sort().join(",")}`;
+    const sig = (rule: string, key: string, eventIds: string[]) => `${rule}|${key}|${[...eventIds].sort().join(",")}`;
     const resolved = await db.query.flags.findMany({ where: and(eq(flags.propertyId, propertyId), eq(flags.resolved, true)) });
-    const resolvedSigs = new Set(resolved.map((f) => sig(f.rule, f.eventIds)));
-    const fresh = results.filter((r) => !resolvedSigs.has(sig(r.rule, r.eventIds)));
+    const resolvedSigs = new Set(resolved.map((f) => sig(f.rule, f.ruleKey, f.eventIds)));
+    const fresh = results.filter((r) => !resolvedSigs.has(sig(r.rule, r.key ?? "", r.eventIds)));
 
     const all = await db.transaction(async (tx) => {
       await tx.delete(flags).where(and(eq(flags.propertyId, propertyId), eq(flags.resolved, false)));
@@ -117,6 +120,7 @@ export const landRoutes: FastifyPluginAsyncZod = async (app) => {
             caseId,
             propertyId,
             rule: r.rule,
+            ruleKey: r.key ?? "",
             severity: r.severity,
             message: r.message[locale],
             eventIds: r.eventIds,

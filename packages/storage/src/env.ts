@@ -26,6 +26,11 @@ const schema = z.discriminatedUnion("STORAGE_DRIVER", [
 ]);
 
 export function storageConfigFromEnv(env: Record<string, string | undefined>): StorageConfig {
+  // In production the driver must be chosen on purpose: silently writing client files to a
+  // container's local disk would lose them on redeploy and keep them out of the India bucket.
+  if (env.NODE_ENV === "production" && !env.STORAGE_DRIVER) {
+    throw new Error("STORAGE_DRIVER must be set in production (s3, or fs with a persistent volume)");
+  }
   const e = schema.parse({ STORAGE_DRIVER: "fs", ...env });
   if (e.STORAGE_DRIVER === "fs") return { driver: "fs", dir: e.STORAGE_DIR, masterKeys: e.STORAGE_MASTER_KEYS };
   return {

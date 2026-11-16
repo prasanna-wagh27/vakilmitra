@@ -247,6 +247,8 @@ export const pages = pgTable(
       .notNull()
       .references(() => documents.id, { onDelete: "cascade" }),
     pageNo: integer("page_no").notNull(),
+    // Bumped on every re-upload or re-read request; an OCR job only saves if it read the current version.
+    version: integer("version").notNull().default(1),
     storageKey: text("storage_key").notNull(), // encrypted image (see packages/storage)
     byteSize: integer("byte_size"),
     width: integer("width"),
@@ -339,6 +341,8 @@ export const flags = pgTable(
       .references(() => cases.id, { onDelete: "cascade" }),
     propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }),
     rule: text("rule").notNull(),
+    // Distinguishes flags of one rule on the same events (e.g. each other-rights entry).
+    ruleKey: text("rule_key").notNull().default(""),
     severity: severityEnum("severity").notNull(),
     message: text("message").notNull(),
     eventIds: textArray("event_ids"),
@@ -401,7 +405,8 @@ export const feeAgreements = pgTable(
   "fee_agreement",
   {
     id: id(),
-    caseId: text("case_id").references(() => cases.id, { onDelete: "cascade" }),
+    // SET NULL: deleting a case must not erase the client's billing and payment history.
+    caseId: text("case_id").references(() => cases.id, { onDelete: "set null" }),
     clientId: text("client_id")
       .notNull()
       .references(() => clients.id, { onDelete: "cascade" }),

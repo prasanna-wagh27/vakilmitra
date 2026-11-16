@@ -12,16 +12,15 @@ import {
   payments,
   properties,
 } from "@vakilmitra/db";
+import { istDate } from "@vakilmitra/shared";
 import { auth } from "./auth.js";
 import { db, pool } from "./db.js";
 
 const DAY = 86_400_000;
 /** n days from today at the given IST hour. */
-const inDays = (n: number, hour = 11) => {
-  const d = new Date(Date.now() + n * DAY);
-  d.setUTCHours(hour - 5, 30, 0, 0);
-  return d;
-};
+/** n IST calendar days from today, at the given IST hour. */
+const inDays = (n: number, hour = 11) =>
+  new Date(`${istDate(new Date(Date.now() + n * DAY))}T${String(hour).padStart(2, "0")}:00:00+05:30`);
 const y = (s: string) => new Date(`${s}T00:00:00Z`);
 
 const email = "demo@vakilmitra.in";

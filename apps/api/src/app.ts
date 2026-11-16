@@ -84,9 +84,12 @@ export async function buildApp() {
     url: "/api/auth/*",
     schema: { hide: true },
     async handler(req, reply) {
-      // Account deletion must go through /api/me/delete, which always requires the password.
-      if (req.url.startsWith("/api/auth/delete-user")) return reply.code(404).send({ error: "not_found", message: "Use DELETE /api/me" });
       const url = new URL(req.url, env.API_URL);
+      // Account deletion must go through DELETE /api/me, which always requires the password.
+      // Checked on the normalised path, so "/api/auth/x/../delete-user" cannot slip past.
+      if (url.pathname.toLowerCase().split("/").includes("delete-user")) {
+        return reply.code(404).send({ error: "not_found", message: "Use DELETE /api/me" });
+      }
       const request = new Request(url, {
         method: req.method,
         headers: fromNodeHeaders(req.headers),

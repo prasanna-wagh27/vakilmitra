@@ -3,7 +3,7 @@ import { mkdtemp, readdir, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { decrypt, encrypt, FsBlobStore, keys, parseMasterKeys, SecureStorage } from "../src/index.js";
+import { decrypt, encrypt, FsBlobStore, keys, parseMasterKeys, S3BlobStore, SecureStorage, storageConfigFromEnv } from "../src/index.js";
 
 const k = (id: string) => `${id}:${randomBytes(32).toString("base64")}`;
 
@@ -72,5 +72,26 @@ describe("SecureStorage on disk", () => {
     await expect(s.put("../etc/passwd", Buffer.from("x"))).rejects.toThrow(/Unsafe/);
     await expect(s.deletePrefix("adv/")).resolves.toBeDefined();
     await expect(s.deletePrefix("adv")).rejects.toThrow(/end with/);
+  });
+});
+
+describe("review fixes", () => {
+  it("S3 prefix delete fails loudly when the bucket reports per-object errors", async () => {
+    const store = new S3BlobStore({ region: "ap-south-1", bucket: "b", accessKeyId: "k", secretAccessKey: "s" });
+    (store as unknown as { client: { send: (c: { constructor: { name: string } }) => Promise<unknown> } }).client = {
+      async send(cmd) {
+        if (cmd.constructor.name === "ListObjectsV2Command")
+          return { Contents: [{ Key: "adv/a/1" }, { Key: "adv/a/2" }], IsTruncated: false };
+        return { Errors: [{ Key: "adv/a/2", Code: "AccessDenied" }] };
+      },
+    };
+    await expect(store.deletePrefix("adv/a/")).rejects.toThrow(/Could not delete 1 of 2.*AccessDenied/);
+  });
+
+  it("requires an explicit storage driver in production", () => {
+    const keysEnv = { STORAGE_MASTER_KEYS: k("k1") };
+    expect(() => storageConfigFromEnv({ ...keysEnv, NODE_ENV: "production" })).toThrow(/STORAGE_DRIVER must be set/);
+    expect(storageConfigFromEnv({ ...keysEnv, NODE_ENV: "development" }).driver).toBe("fs");
+    expect(storageConfigFromEnv({ ...keysEnv, NODE_ENV: "production", STORAGE_DRIVER: "fs" }).driver).toBe("fs");
   });
 });

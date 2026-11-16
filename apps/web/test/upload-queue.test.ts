@@ -41,7 +41,9 @@ describe("UploadQueue", () => {
     q.add(1, blob, "");
     calls[0].reject(new RetryableError("offline"));
     await tick();
-    expect(q.getSnapshot()[0]).toMatchObject({ status: "failed", attempts: 1, error: "offline" });
+    // Backoff is "waiting", not "failed": the page will upload on its own, and the queue is not settled.
+    expect(q.getSnapshot()[0]).toMatchObject({ status: "waiting", attempts: 1, error: "offline" });
+    expect(q.settled).toBe(false);
     timers.shift()!();
     expect(calls).toHaveLength(2);
     calls[1].resolve();

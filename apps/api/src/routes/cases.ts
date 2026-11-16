@@ -23,20 +23,11 @@ import { keys } from "@vakilmitra/storage";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { db } from "../db.js";
-import { logAccess, requireCaseAccess, requireCaseOwner, visibleCase } from "../lib/access.js";
-import { HttpError, likePattern, notFound } from "../lib/http.js";
+import { logAccess, requireCaseAccess, requireCaseOwner, requireOwnClient, visibleCase } from "../lib/access.js";
+import { forbidden, HttpError, likePattern, notFound } from "../lib/http.js";
 import { getServices } from "../services.js";
 
 const idParams = z.object({ id: z.string() });
-
-async function assertOwnClient(advocateId: string, clientId?: string | null) {
-  if (!clientId) return;
-  const c = await db.query.clients.findFirst({
-    where: and(eq(clients.id, clientId), eq(clients.advocateId, advocateId)),
-    columns: { id: true },
-  });
-  if (!c) throw notFound("Client");
-}
 
 export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", { schema: { querystring: caseListQuery } }, async (req) => {
@@ -87,7 +78,7 @@ export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.post("/", { schema: { body: caseInput } }, async (req, reply) => {
-    await assertOwnClient(req.advocateId, req.body.clientId);
+    if (req.body.clientId) await requireOwnClient(req.advocateId, req.body.clientId);
     const [c] = await db
       .insert(cases)
       .values({ ...req.body, advocateId: req.advocateId })
@@ -129,13 +120,22 @@ export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
         properties: c.properties.map((p) => ({ ...p, eventCount: evMap.get(p.id) ?? 0 })),
         // Only the owner sees who else has access.
         grants: access === "OWNER" ? c.grants : [],
+        // Billing is the owner's business: juniors never see fees or payments.
+        feeAgreements: access === "OWNER" ? c.feeAgreements : [],
       },
     };
   });
 
   app.patch("/:id", { schema: { params: idParams, body: caseInput.partial() } }, async (req) => {
-    await requireCaseAccess(req.advocateId, req.params.id, "write");
-    await assertOwnClient(req.advocateId, req.body.clientId);
+    const access = await requireCaseAccess(req.advocateId, req.params.id, "write");
+    if (req.body.clientId !== undefined) {
+      const current = await db.query.cases.findFirst({ where: eq(cases.id, req.params.id), columns: { clientId: true, advocateId: true } });
+      if (current && req.body.clientId !== current.clientId) {
+        // Only the owner links a case to a client, and only to one of the owner's own clients.
+        if (access !== "OWNER") throw forbidden("Only the owning advocate can change the client");
+        if (req.body.clientId) await requireOwnClient(current.advocateId, req.body.clientId);
+      }
+    }
     const [c] = await db.update(cases).set(req.body).where(eq(cases.id, req.params.id)).returning();
     return { case: c };
   });
@@ -207,6 +207,7 @@ export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
       .where(and(eq(caseAccess.id, req.params.grantId), eq(caseAccess.caseId, req.params.id)))
       .returning({ id: caseAccess.id });
     if (!gone.length) throw notFound("Grant");
+    await logAccess(req, "case.unshare", "case", req.params.id);
     return reply.code(204).send();
   });
 };
