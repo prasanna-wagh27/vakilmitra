@@ -15,12 +15,29 @@ export function createDb(url: string, opts: { max?: number } = {}) {
   return { db, pool };
 }
 
-/** Apply migrations from packages/db/migrations (used by tests and deploys). */
+/** Any fixed number: all migrators take the same Postgres advisory lock. */
+const MIGRATION_LOCK_ID = 727_100_001;
+
+/**
+ * Apply migrations from packages/db/migrations (used by tests and deploys).
+ * Concurrent callers (parallel test suites, several app instances starting at once) are
+ * serialised with a session advisory lock; without it they race on CREATE TYPE/SCHEMA and fail.
+ */
 export async function runMigrations(url: string) {
-  const { db, pool } = createDb(url, { max: 1 });
+  const pool = new pg.Pool({ connectionString: url, max: 1 });
+  const client = await pool.connect();
   try {
-    await migrate(db, { migrationsFolder: new URL("../migrations", import.meta.url).pathname });
+    await client.query("SELECT pg_advisory_lock($1)", [MIGRATION_LOCK_ID]);
+    try {
+      // Same connection as the lock: the pool has exactly one client.
+      await migrate(drizzle(client, { schema, casing: "snake_case" }), {
+        migrationsFolder: new URL("../migrations", import.meta.url).pathname,
+      });
+    } finally {
+      await client.query("SELECT pg_advisory_unlock($1)", [MIGRATION_LOCK_ID]);
+    }
   } finally {
+    client.release();
     await pool.end();
   }
 }

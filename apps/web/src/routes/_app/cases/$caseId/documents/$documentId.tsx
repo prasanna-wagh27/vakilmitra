@@ -78,6 +78,11 @@ function PageCard({ documentId, page, outline, canEdit }: { documentId: string; 
             {Math.round(page.ocrConfidence * 100)}%
           </span>
         )}
+        {page.ocrStatus === "DONE" && page.ocrRoute && (
+          <Badge tone={page.ocrRoute === "cloud" ? "amber" : "neutral"} title={page.ocrEngine ?? undefined}>
+            {page.ocrRoute === "cloud" ? t("doc.readCloud") : t("doc.readLocal")}
+          </Badge>
+        )}
         {canEdit && (
           <span className="ml-auto flex gap-1">
             {(page.ocrStatus === "FAILED" || page.ocrStatus === "DONE") && (

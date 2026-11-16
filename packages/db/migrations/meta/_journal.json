@@ -22,6 +22,13 @@
       "when": 1794835779084,
       "tag": "0002_scanner_ocr",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794854352748,
+      "tag": "0003_cloud_ocr_consent",
+      "breakpoints": true
     }
   ]
 }

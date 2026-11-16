@@ -77,6 +77,8 @@ export const updateProfileInput = z.object({
   phone: optText(20),
   barCouncilNo: optText(40),
   locale: z.enum(LOCALES).optional(),
+  /** Allow hard-to-read pages to be sent to a cloud OCR provider. */
+  cloudOcrConsent: z.boolean().optional(),
 });
 
 export const clientInput = z.object({
@@ -222,6 +224,8 @@ export interface Advocate {
   phone?: string | null;
   barCouncilNo?: string | null;
   locale: Locale;
+  cloudOcrConsent: boolean;
+  cloudOcrConsentAt?: string | null;
 }
 export interface Client {
   id: string;
@@ -365,6 +369,9 @@ export interface PageSummary {
 }
 export interface PageDetail extends PageSummary {
   ocrText: string | null;
+  ocrEngine: string | null;
+  /** local | local:no-consent | local:confident | cloud | local:cloud-failed | local:cloud-empty */
+  ocrRoute: string | null;
   ocrWords: { t: string; c: number; b: [number, number, number, number] }[] | null;
 }
 export interface DocumentSummary {

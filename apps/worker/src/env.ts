@@ -4,7 +4,6 @@ const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   DATABASE_URL: z.url(),
   VALKEY_URL: z.url().default("redis://localhost:6379"),
-  OCR_ENGINE: z.enum(["tesseract"]).default("tesseract"),
   // Tesseract is CPU-bound; one job per core is a sensible ceiling.
   OCR_CONCURRENCY: z.coerce.number().int().min(1).max(16).default(1),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),

@@ -63,6 +63,9 @@ export const advocates = pgTable("advocate", {
   phone: text("phone"),
   barCouncilNo: text("bar_council_no"),
   locale: localeEnum("locale").notNull().default("mr"),
+  // Consent to send hard-to-read pages to a cloud OCR provider (off by default). See packages/ocr.
+  cloudOcrConsent: boolean("cloud_ocr_consent").notNull().default(false),
+  cloudOcrConsentAt: ts("cloud_ocr_consent_at"),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -249,7 +252,9 @@ export const pages = pgTable(
     width: integer("width"),
     height: integer("height"),
     ocrStatus: ocrStatusEnum("ocr_status").notNull().default("PENDING"),
-    ocrEngine: text("ocr_engine"), // e.g. tesseract-5/mar+eng
+    ocrEngine: text("ocr_engine"), // e.g. tesseract-mar+eng, sarvam-vision, gemini-vertex:gemini-3.5-flash
+    // How the engine was chosen: local | local:no-consent | local:confident | cloud | local:cloud-failed | local:cloud-empty
+    ocrRoute: text("ocr_route"),
     ocrText: text("ocr_text"),
     ocrConfidence: real("ocr_confidence"), // 0..1, mean word confidence
     // Words with boxes as fractions of the page, for source-crop links: [{ t, c, b: [x0, y0, x1, y1] }]

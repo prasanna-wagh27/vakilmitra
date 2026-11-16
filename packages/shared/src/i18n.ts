@@ -272,6 +272,12 @@ export const en = {
   "search.hint": "Search the text of every scanned page",
   "search.none": "No pages contain this text.",
   "search.min": "Type at least 2 letters",
+  "settings.cloudOcr": "Read hard pages with cloud OCR",
+  "settings.cloudOcrText":
+    "Pages are always read first on VakilMitra's own servers. If you turn this on, pages that are hard to read, such as handwritten or faded records, are also sent to a cloud OCR provider for a more accurate reading. Turn it on only if your clients have agreed. It is off by default, and every page sent is logged.",
+  "settings.cloudOcrOn": "On since {date}",
+  "doc.readLocal": "Read on VakilMitra's servers",
+  "doc.readCloud": "Read by cloud OCR",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -544,6 +550,12 @@ export const mr: Partial<Record<MessageKey, string>> = {
   "search.hint": "स्कॅन केलेल्या प्रत्येक पानाच्या मजकुरात शोधा",
   "search.none": "हा मजकूर कोणत्याही पानात नाही.",
   "search.min": "किमान २ अक्षरे टाइप करा",
+  "settings.cloudOcr": "कठीण पाने क्लाउड OCR ने वाचा",
+  "settings.cloudOcrText":
+    "पाने नेहमी आधी वकीलमित्रच्या स्वतःच्या सर्व्हरवर वाचली जातात. हे चालू केल्यास, वाचायला कठीण पाने, जसे हस्तलिखित किंवा अस्पष्ट नोंदी, अधिक अचूक वाचनासाठी क्लाउड OCR सेवेकडेही पाठवली जातात. तुमच्या पक्षकारांची संमती असेल तरच हे चालू करा. सुरुवातीला हे बंद असते, आणि पाठवलेल्या प्रत्येक पानाची नोंद ठेवली जाते.",
+  "settings.cloudOcrOn": "{date} पासून चालू",
+  "doc.readLocal": "वकीलमित्रच्या सर्व्हरवर वाचले",
+  "doc.readCloud": "क्लाउड OCR ने वाचले",
 };
 
 export const dictionaries: Record<Locale, Partial<Record<MessageKey, string>>> = { en, mr };

@@ -80,6 +80,40 @@ describe("auth", () => {
   });
 });
 
+describe("cloud OCR consent", () => {
+  it("is off by default, can be turned on and off, and every change is logged", async () => {
+    const me = await senior.get("/api/me");
+    expect(me.body.advocate).toMatchObject({ cloudOcrConsent: false, cloudOcrConsentAt: null });
+
+    const on = await senior.patch("/api/me").send({ cloudOcrConsent: true });
+    expect(on.body.advocate.cloudOcrConsent).toBe(true);
+    expect(Date.parse(on.body.advocate.cloudOcrConsentAt)).toBeGreaterThan(Date.now() - 60_000);
+
+    const off = await senior.patch("/api/me").send({ cloudOcrConsent: false });
+    expect(off.body.advocate).toMatchObject({ cloudOcrConsent: false, cloudOcrConsentAt: null });
+
+    expect(await countLogs(me.body.advocate.id, "consent.cloud_ocr.on")).toBe(1);
+    expect(await countLogs(me.body.advocate.id, "consent.cloud_ocr.off")).toBe(1);
+  });
+
+  it("keeps the original consent date when 'on' is sent again, and does not log it twice", async () => {
+    const me = await senior.get("/api/me");
+    const first = (await senior.patch("/api/me").send({ cloudOcrConsent: true })).body.advocate.cloudOcrConsentAt;
+    await new Promise((r) => setTimeout(r, 20));
+    const again = (await senior.patch("/api/me").send({ cloudOcrConsent: true })).body.advocate.cloudOcrConsentAt;
+    expect(again).toBe(first);
+    expect(await countLogs(me.body.advocate.id, "consent.cloud_ocr.on")).toBe(2); // one from the earlier test, one here
+    await senior.patch("/api/me").send({ cloudOcrConsent: false });
+  });
+
+  it("leaves consent alone when other profile fields change", async () => {
+    await senior.patch("/api/me").send({ cloudOcrConsent: true });
+    const r = await senior.patch("/api/me").send({ phone: "9800000009" });
+    expect(r.body.advocate.cloudOcrConsent).toBe(true);
+    await senior.patch("/api/me").send({ cloudOcrConsent: false });
+  });
+});
+
 describe("clients and cases", () => {
   it("creates a client, a case and a party", async () => {
     const c = await senior.post("/api/clients").send({ name: "सुनील जाधव", phone: "9800000000" });
