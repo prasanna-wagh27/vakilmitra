@@ -5,10 +5,16 @@
 import { and, count, type Db, documents, eq, pages } from "@vakilmitra/db";
 import { type ConnectionOptions, Queue, type QueueOptions } from "bullmq";
 
-export const QUEUES = { ocr: "ocr" } as const;
+export const QUEUES = { ocr: "ocr", ocrCloud: "ocr-cloud" } as const;
 
 export interface OcrJob {
   pageId: string;
+}
+
+/** A cloud read for one page version, queued by the local OCR job after it saved its reading. */
+export interface OcrCloudJob {
+  pageId: string;
+  version: number;
 }
 
 export function connectionFromUrl(url: string): ConnectionOptions {
@@ -27,6 +33,27 @@ export function createOcrQueue(url: string, opts: Partial<QueueOptions> = {}) {
     },
     ...opts,
   });
+}
+
+export function createOcrCloudQueue(url: string, opts: Partial<QueueOptions> = {}) {
+  return new Queue<OcrCloudJob, void, "ocr-cloud">(QUEUES.ocrCloud, {
+    connection: connectionFromUrl(url),
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: { type: "exponential", delay: 15_000 },
+      removeOnComplete: { age: 24 * 3600, count: 1000 },
+      removeOnFail: { age: 7 * 24 * 3600 },
+    },
+    ...opts,
+  });
+}
+
+export type OcrCloudQueue = ReturnType<typeof createOcrCloudQueue>;
+export type OcrCloudQueueLike = Pick<OcrCloudQueue, "add">;
+
+/** Queue a cloud read of one page version. One job per version: duplicates are ignored. */
+export async function enqueueCloudOcr(queue: OcrCloudQueueLike, pageId: string, version: number) {
+  await queue.add("ocr-cloud", { pageId, version }, { jobId: `ocr-cloud-${pageId}-${version}` });
 }
 
 export type OcrQueue = ReturnType<typeof createOcrQueue>;

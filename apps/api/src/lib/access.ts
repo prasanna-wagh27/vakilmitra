@@ -1,4 +1,4 @@
-import { accessLogs, and, caseAccess, cases, clients, eq, inArray, or } from "@vakilmitra/db";
+import { accessLogs, and, caseAccess, cases, clients, eq, gte, inArray, or } from "@vakilmitra/db";
 import type { CaseAccessLevel } from "@vakilmitra/shared";
 import type { FastifyRequest } from "fastify";
 import { db } from "../db.js";
@@ -35,7 +35,26 @@ export function visibleCase(advocateId: string) {
 }
 
 /** Access log on every sensitive view, share, export and delete. */
+/** How long repeat views of the same item by the same advocate count as one (screens refresh while OCR runs). */
+const VIEW_DEDUPE_MS = 10 * 60_000;
+
 export async function logAccess(req: FastifyRequest, action: string, entityType: string, entityId: string) {
+  if (action.endsWith(".view")) {
+    const [recent] = await db
+      .select({ id: accessLogs.id })
+      .from(accessLogs)
+      .where(
+        and(
+          eq(accessLogs.advocateId, req.advocateId),
+          eq(accessLogs.entityType, entityType),
+          eq(accessLogs.entityId, entityId),
+          eq(accessLogs.action, action),
+          gte(accessLogs.at, new Date(Date.now() - VIEW_DEDUPE_MS)),
+        ),
+      )
+      .limit(1);
+    if (recent) return;
+  }
   await db.insert(accessLogs).values({ advocateId: req.advocateId, action, entityType, entityId, ip: req.ip });
 }
 

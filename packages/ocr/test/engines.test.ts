@@ -4,11 +4,13 @@ import { describe, expect, it } from "vitest";
 import {
   createEngine,
   GeminiEngine,
+  localRoute,
   markdownToText,
   type OcrEngine,
   type OcrResult,
   ocrEnv,
   policyFromEnv,
+  readCloud,
   readPage,
   SarvamEngine,
 } from "../src/index.js";
@@ -207,6 +209,18 @@ describe("readPage policy", () => {
       { cloudAllowed: true },
     );
     expect(r).toMatchObject({ route: "local:cloud-failed", cloudError: "cloud down", result: { engine: "local" } });
+  });
+
+  it("splits into a local decision and a cloud read that throws, for the worker's two queues", async () => {
+    const local = await fake("local", false, 0.5).recognize(img);
+    const policy = { local: fake("local", false, 0.5), cloud: fake("cloud", true, null), mode: "fallback" as const, below: 0.85 };
+    expect(localRoute(policy, local, false)).toBe("local:no-consent");
+    expect(localRoute(policy, { confidence: 0.9 }, true)).toBe("local:confident");
+    expect(localRoute(policy, local, true)).toBeNull();
+    expect(localRoute({ ...policy, cloud: null }, local, true)).toBe("local");
+    expect(await readCloud(policy, img, () => local.words, {})).toMatchObject({ result: { engine: "cloud", words: [box] } });
+    expect(await readCloud({ ...policy, cloud: fake("cloud", true, null, false, " ") }, img, () => [], {})).toMatchObject({ result: null });
+    await expect(readCloud({ ...policy, cloud: fake("cloud", true, null, true) }, img, () => [], {})).rejects.toThrow("cloud down");
   });
 
   it("works with no cloud engine configured", async () => {

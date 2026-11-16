@@ -448,7 +448,7 @@ export interface PageSummary {
 export interface PageDetail extends PageSummary {
   ocrText: string | null;
   ocrEngine: string | null;
-  /** local | local:no-consent | local:confident | cloud | local:cloud-failed | local:cloud-empty */
+  /** local | local:no-consent | local:confident | local:cloud-queued | cloud | local:cloud-failed | local:cloud-empty */
   ocrRoute: string | null;
   ocrWords: { t: string; c: number; b: [number, number, number, number] }[] | null;
 }

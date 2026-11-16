@@ -81,7 +81,11 @@ function PageCard({ documentId, page, outline, canEdit }: { documentId: string; 
         )}
         {page.ocrStatus === "DONE" && page.ocrRoute && (
           <Badge tone={page.ocrRoute === "cloud" ? "amber" : "neutral"} title={page.ocrEngine ?? undefined}>
-            {page.ocrRoute === "cloud" ? t("doc.readCloud") : t("doc.readLocal")}
+            {page.ocrRoute === "cloud"
+              ? t("doc.readCloud")
+              : page.ocrRoute === "local:cloud-queued"
+                ? t("doc.readCloudQueued")
+                : t("doc.readLocal")}
           </Badge>
         )}
         {canEdit && (

@@ -141,6 +141,23 @@ describe("daily board", () => {
   });
 });
 
+describe("access log", () => {
+  it("counts repeat views within a few minutes once (screens refresh while OCR runs), but logs every change", async () => {
+    const c = (await owner.post("/api/cases").send({ title: "Viewed often" })).body.case.id;
+    for (let i = 0; i < 3; i++) expect((await owner.get(`/api/cases/${c}`)).status).toBe(200);
+    const n = async (action: string) =>
+      (
+        await db
+          .select({ n: count() })
+          .from(accessLogs)
+          .where(and(eq(accessLogs.entityId, c), eq(accessLogs.action, action)))
+      )[0].n;
+    expect(await n("case.view")).toBe(1);
+    await owner.delete(`/api/cases/${c}`);
+    expect(await n("case.delete")).toBe(1);
+  });
+});
+
 describe("search snippets", () => {
   it("highlights the match, and highlights nothing rather than the wrong text", () => {
     const hit = makeSnippet("गाव माळेगाव भोगवटादार सुरेश जाधव", "सुरेश");
