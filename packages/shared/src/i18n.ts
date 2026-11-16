@@ -278,6 +278,7 @@ export const en = {
   "settings.cloudOcrOn": "On since {date}",
   "doc.readLocal": "Read on VakilMitra's servers",
   "doc.readCloud": "Read by cloud OCR",
+  "doc.readCloudQueued": "Read on our servers; cloud OCR reading next",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -556,6 +557,7 @@ export const mr: Partial<Record<MessageKey, string>> = {
   "settings.cloudOcrOn": "{date} पासून चालू",
   "doc.readLocal": "वकीलमित्रच्या सर्व्हरवर वाचले",
   "doc.readCloud": "क्लाउड OCR ने वाचले",
+  "doc.readCloudQueued": "आमच्या सर्व्हरवर वाचले; क्लाउड OCR पुढे वाचत आहे",
 };
 
 export const dictionaries: Record<Locale, Partial<Record<MessageKey, string>>> = { en, mr };

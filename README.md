@@ -82,7 +82,7 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - Prototype tier: Neon/Supabase Postgres, API + worker on Railway/Render/Coolify, Valkey container, SPA on Cloudflare Pages.
 - Files must stay in India: set `STORAGE_DRIVER=s3` with an India-region S3-compatible bucket (for example AWS S3 `ap-south-1`). Keep `STORAGE_MASTER_KEYS` in the host's secret store, never in the bucket's account.
 - The worker is CPU-bound (about 1 s per page per core); set `OCR_CONCURRENCY` to the number of cores.
-- Known limit, to fix before switching cloud OCR on: a cloud read (Sarvam polls its job for up to 2 minutes) holds one worker slot for its whole duration, so with low `OCR_CONCURRENCY` it delays pages behind it. Planned fix: a separate queue for cloud reads with its own concurrency.
+- Cloud reads run on their own queue (`ocr-cloud`, limit `OCR_CLOUD_CONCURRENCY`, default 4), so a slow cloud call (Sarvam polls for up to 2 minutes) never holds a Tesseract slot. The local job saves Tesseract's reading first (route `local:cloud-queued`), so the advocate sees text at once; the cloud job then replaces it. At send time the cloud job re-checks that the page has not been replaced and that the owner still consents, and it writes the audit row before sending. After its last retry, the local reading stays (route `local:cloud-failed`).
 
 ## Kickoff checklist
 

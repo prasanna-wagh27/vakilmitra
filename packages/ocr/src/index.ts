@@ -26,6 +26,8 @@ const envSchema = z.object({
   OCR_CLOUD_MODE: z.enum(["fallback", "always"]).default("fallback"),
   OCR_CLOUD_BELOW: z.coerce.number().min(0).max(1).default(0.85),
   OCR_CONCURRENCY: z.coerce.number().int().min(1).max(16).default(1),
+  // Cloud reads mostly wait on the network, so they run on their own queue with their own limit.
+  OCR_CLOUD_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(4),
   SARVAM_API_KEY: z.string().optional(),
   SARVAM_BASE_URL: z.url().optional(),
   SARVAM_MODEL: z.string().optional(),
@@ -97,7 +99,14 @@ export function policyFromEnv(env: OcrEnv): ReadPolicy {
   };
 }
 
-export type ReadRoute = "local" | "local:no-consent" | "local:confident" | "cloud" | "local:cloud-failed" | "local:cloud-empty";
+export type ReadRoute =
+  | "local"
+  | "local:no-consent"
+  | "local:confident"
+  | "local:cloud-queued"
+  | "cloud"
+  | "local:cloud-failed"
+  | "local:cloud-empty";
 
 export interface ReadOutcome {
   result: OcrResult;
@@ -119,34 +128,59 @@ export interface ReadOptions {
 }
 
 /**
- * Read one page under the policy.
+ * After the local read: should this page also go to the cloud engine?
+ * Returns the route to record if the local reading is final, or null if the cloud engine should read it.
+ */
+export function localRoute(policy: ReadPolicy, local: Pick<OcrResult, "confidence">, cloudAllowed: boolean): ReadRoute | null {
+  if (!policy.cloud) return "local";
+  if (!cloudAllowed) return "local:no-consent";
+  if (policy.mode === "fallback" && (local.confidence ?? 0) >= policy.below) return "local:confident";
+  return null;
+}
+
+/**
+ * Read a page with the cloud engine, given the local reading of the same image.
+ * The caller must already have checked consent (see `localRoute`). Engine errors are thrown,
+ * so a job queue can retry them; an empty answer keeps the local reading.
+ * If the cloud engine gives no boxes (Sarvam's text output), the local word boxes are kept so
+ * unclear regions stay marked on the scan. Their text is Tesseract's, not the stored text.
+ */
+export async function readCloud(
+  policy: ReadPolicy,
+  image: Buffer,
+  local: OcrResult,
+  opts: Pick<ReadOptions, "hints" | "beforeCloudSend">,
+): Promise<ReadOutcome> {
+  const { cloud } = policy;
+  if (!cloud) throw new Error("No cloud OCR engine is configured");
+  await opts.beforeCloudSend?.(cloud.name);
+  const remote = await cloud.recognize(image, opts.hints);
+  if (!remote.text.trim())
+    return { result: local, route: "local:cloud-empty", localConfidence: local.confidence, cloudError: `${cloud.name} returned no text` };
+  const result = remote.words.length ? remote : { ...remote, words: local.words };
+  return { result, route: "cloud", localConfidence: local.confidence };
+}
+
+/**
+ * Read one page under the policy, in one go (used by evals and tests; the worker runs the two
+ * halves on separate queues so slow cloud reads never hold up local ones).
  * - Tesseract always reads first, on our servers (it is also the fallback and gives word boxes).
  * - The cloud engine is used only with consent, and in fallback mode only below the threshold.
  * - If the cloud call fails or returns no text, the local reading is kept.
- * - If the cloud engine gives no boxes (Sarvam's text output), the local word boxes are kept so
- *   unclear regions stay marked on the scan. Their text is Tesseract's, not the stored text.
  */
 export async function readPage(policy: ReadPolicy, image: Buffer, opts: ReadOptions): Promise<ReadOutcome> {
-  const { cloud } = policy;
   const local = await policy.local.recognize(image, opts.hints);
-  const keep = (route: ReadRoute, cloudError?: string): ReadOutcome => ({
-    result: local,
-    route,
-    localConfidence: local.confidence,
-    cloudError,
-  });
-  if (!cloud) return keep("local");
-  if (!opts.cloudAllowed) return keep("local:no-consent");
-  if (policy.mode === "fallback" && (local.confidence ?? 0) >= policy.below) return keep("local:confident");
-
-  await opts.beforeCloudSend?.(cloud.name);
-  let remote: OcrResult;
+  const final = localRoute(policy, local, opts.cloudAllowed);
+  if (final) return { result: local, route: final, localConfidence: local.confidence };
+  await opts.beforeCloudSend?.(policy.cloud?.name ?? "");
   try {
-    remote = await cloud.recognize(image, opts.hints);
+    return await readCloud(policy, image, local, { hints: opts.hints });
   } catch (e) {
-    return keep("local:cloud-failed", e instanceof Error ? e.message : String(e));
+    return {
+      result: local,
+      route: "local:cloud-failed",
+      localConfidence: local.confidence,
+      cloudError: e instanceof Error ? e.message : String(e),
+    };
   }
-  if (!remote.text.trim()) return keep("local:cloud-empty", `${cloud.name} returned no text`);
-  const result = remote.words.length ? remote : { ...remote, words: local.words };
-  return { result, route: "cloud", localConfidence: local.confidence };
 }
