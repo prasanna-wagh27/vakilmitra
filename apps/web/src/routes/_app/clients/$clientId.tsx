@@ -42,12 +42,12 @@ function ClientPage() {
       <Card>
         <div className="flex flex-wrap gap-3 text-sm">
           {c.phone && (
-            <a className="text-primary underline" href={`tel:${c.phone}`}>
+            <a className="text-accent underline underline-offset-4" href={`tel:${c.phone}`}>
               {c.phone}
             </a>
           )}
           {c.email && (
-            <a className="text-primary underline" href={`mailto:${c.email}`}>
+            <a className="text-accent underline underline-offset-4" href={`mailto:${c.email}`}>
               {c.email}
             </a>
           )}
@@ -60,7 +60,7 @@ function ClientPage() {
       <Section
         title={t("client.cases")}
         action={
-          <Link to="/cases/new" className="text-sm text-primary underline">
+          <Link to="/cases/new" className="text-sm text-accent underline underline-offset-4">
             + {t("case.new")}
           </Link>
         }
@@ -71,7 +71,7 @@ function ClientPage() {
           <ul className="space-y-2">
             {c.cases.map((k) => (
               <li key={k.id}>
-                <Link to="/cases/$caseId" params={{ caseId: k.id }} className="block rounded-2xl border bg-card p-3 hover:bg-muted">
+                <Link to="/cases/$caseId" params={{ caseId: k.id }} className="row-card block p-4">
                   <p className="font-medium">{k.title}</p>
                   <p className="text-sm text-muted-foreground">
                     {[k.caseNumber, k.court, t(`status.${k.status}`)].filter(Boolean).join(" · ")}
@@ -108,7 +108,7 @@ function ClientPage() {
         {c.feeAgreements.map((a) => {
           const paid = a.payments.reduce((s, p) => s + p.amountPaise, 0);
           return (
-            <div key={a.id} className="mb-2 rounded-2xl border bg-card p-3">
+            <div key={a.id} className="row-card mb-2 p-4">
               <div className="flex justify-between gap-2">
                 <p className="font-medium">{a.description}</p>
                 <p className="text-sm">
@@ -122,7 +122,11 @@ function ClientPage() {
           );
         })}
         {c.feeAgreements.length > 0 && (
-          <Link to="/fees/invoice/$clientId" params={{ clientId }} className="mt-1 inline-block text-sm text-primary underline">
+          <Link
+            to="/fees/invoice/$clientId"
+            params={{ clientId }}
+            className="mt-1 inline-block text-sm text-accent underline underline-offset-4"
+          >
             {t("fees.invoice")} →
           </Link>
         )}

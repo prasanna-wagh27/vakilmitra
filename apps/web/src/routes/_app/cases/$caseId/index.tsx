@@ -107,7 +107,7 @@ function CasePage() {
             <>
               <dt className="text-muted-foreground">{t("case.client")}</dt>
               <dd>
-                <Link className="text-primary underline" to="/clients/$clientId" params={{ clientId: c.client.id }}>
+                <Link className="text-accent underline underline-offset-4" to="/clients/$clientId" params={{ clientId: c.client.id }}>
                   {c.client.name}
                 </Link>
                 {c.client.phone && (
@@ -165,7 +165,7 @@ function CasePage() {
                 <Link
                   to="/cases/$caseId/documents/$documentId"
                   params={{ caseId, documentId: d.id }}
-                  className="flex items-center justify-between gap-2 rounded-2xl border bg-card p-3 hover:bg-muted"
+                  className="row-card flex items-center justify-between gap-2 p-4"
                 >
                   <div className="min-w-0">
                     <p className="truncate font-medium">
@@ -198,7 +198,7 @@ function CasePage() {
               return (
                 <li
                   key={h.id}
-                  className={cn("rounded-2xl border bg-card p-3", isToday && "border-primary", isPast && h.outcome && "opacity-75")}
+                  className={cn("row-card p-4", isToday && "border-accent ring-2 ring-accent/20", isPast && h.outcome && "opacity-75")}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -236,7 +236,7 @@ function CasePage() {
         {c.parties.length === 0 ? (
           <Empty />
         ) : (
-          <ul className="divide-y rounded-2xl border bg-card">
+          <ul className="panel divide-y overflow-hidden">
             {c.parties.map((p) => (
               <li key={p.id} className="flex items-center justify-between gap-2 p-3">
                 <div>
@@ -260,11 +260,7 @@ function CasePage() {
           <ul className="space-y-2">
             {c.properties.map((p) => (
               <li key={p.id}>
-                <Link
-                  to="/cases/$caseId/properties/$propertyId"
-                  params={{ caseId, propertyId: p.id }}
-                  className="block rounded-2xl border bg-card p-3 hover:bg-muted"
-                >
+                <Link to="/cases/$caseId/properties/$propertyId" params={{ caseId, propertyId: p.id }} className="row-card block p-4">
                   <p className="font-semibold">{propTitle(p)}</p>
                   <p className="text-sm text-muted-foreground">
                     {[p.village, p.taluka, p.district].filter(Boolean).join(", ")} · {t("land.chain")}: {p.eventCount}
@@ -282,7 +278,7 @@ function CasePage() {
         ) : (
           <ul className="space-y-2">
             {c.feeAgreements.map((a) => (
-              <li key={a.id} className="rounded-2xl border bg-card p-3">
+              <li key={a.id} className="row-card p-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium">{a.description}</p>
                   <p className="text-right text-sm">
@@ -316,7 +312,7 @@ function CasePage() {
           {c.grants.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("case.shareHint")}</p>
           ) : (
-            <ul className="divide-y rounded-2xl border bg-card">
+            <ul className="panel divide-y overflow-hidden">
               {c.grants.map((g) => (
                 <li key={g.id} className="flex items-center justify-between gap-2 p-3">
                   <div>

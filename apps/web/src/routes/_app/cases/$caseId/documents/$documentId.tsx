@@ -46,7 +46,7 @@ function PageCard({ documentId, page, outline, canEdit }: { documentId: string; 
   const remove = useApiMutation(() => api(`/documents/${documentId}/pages/${page.id}`, { method: "DELETE" }));
   const unclear = outline ? (page.ocrWords ?? []).filter((w) => w.c < UNCLEAR) : [];
   return (
-    <li id={`page-${page.pageNo}`} className="scroll-mt-20 overflow-hidden rounded-2xl border bg-card">
+    <li id={`page-${page.pageNo}`} className="panel scroll-mt-20 overflow-hidden">
       <div className="relative bg-muted" style={page.width && page.height ? { aspectRatio: `${page.width} / ${page.height}` } : undefined}>
         <img
           src={pageImageUrl(documentId, page.id)}

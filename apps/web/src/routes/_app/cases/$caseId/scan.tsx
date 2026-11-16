@@ -286,7 +286,7 @@ function ScanPage() {
         {phase === "setup" && (
           <div className="absolute inset-0 overflow-y-auto bg-background p-4 text-foreground">
             <form onSubmit={f.handleSubmit(createDocument)} className="mx-auto max-w-md space-y-3" noValidate>
-              <h1 className="text-xl font-bold">{mode === "camera" ? t("doc.scan") : t("doc.upload")}</h1>
+              <h1 className="font-display text-2xl">{mode === "camera" ? t("doc.scan") : t("doc.upload")}</h1>
               <Field id="type" label={t("doc.type")}>
                 <NativeSelect id="type" {...f.register("type")}>
                   {DOC_TYPES.map((d) => (
@@ -316,7 +316,7 @@ function ScanPage() {
               <Field id="title" label={`${t("doc.name")} (${t("common.optional")})`}>
                 <Input id="title" {...f.register("title")} />
               </Field>
-              <p className="rounded-xl bg-primary-soft p-3 text-sm text-primary">{t("doc.privacyNote")}</p>
+              <p className="rounded-xl bg-accent-soft p-3 text-sm text-accent">{t("doc.privacyNote")}</p>
               <ErrorBox error={error} />
               <Button type="submit" className="w-full" disabled={f.formState.isSubmitting}>
                 {mode === "camera" ? <Scan /> : <FileUp />} {mode === "camera" ? t("doc.start") : t("doc.upload")}

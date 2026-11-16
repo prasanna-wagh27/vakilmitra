@@ -45,7 +45,7 @@ function ClientsPage() {
       ) : data?.length === 0 ? (
         <Empty />
       ) : (
-        <ul className="divide-y rounded-2xl border bg-card">
+        <ul className="panel divide-y overflow-hidden">
           {data?.map((c) => (
             <li key={c.id}>
               <Link

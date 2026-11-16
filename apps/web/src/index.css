@@ -1,47 +1,34 @@
 @import "tailwindcss";
 
-/* shadcn/ui-style tokens. Light by default, dark follows the phone's setting. */
+/*
+ * VakilMitra visual system: a quiet, trustworthy workspace.
+ * Soft grey canvas, large rounded white panels, near-black pill actions, a Marathi-first serif
+ * for headings (Tiro Devanagari Marathi) and IBM Plex for reading. Light only, by design.
+ */
 :root {
-  --background: #f6f7f9;
-  --foreground: #15181e;
+  color-scheme: light;
+  --background: #f3f3f5;
+  --foreground: #111114;
   --card: #ffffff;
-  --muted: #eef0f3;
-  --muted-foreground: #5d6573;
-  --border: #e3e6eb;
-  --input: #d5d9e0;
-  --primary: #1f4fb8;
+  --muted: #ececf0;
+  --muted-foreground: #5f5f6b;
+  --border: #e3e3e8;
+  --input: #d9d9e0;
+  /* Primary actions are ink: black pills, white text. */
+  --primary: #111114;
   --primary-foreground: #ffffff;
-  --primary-soft: #e6eeff;
-  --destructive: #c81e1e;
-  --destructive-soft: #fdecec;
-  --warning-soft: #fdf3dc;
-  --warning: #8a5a00;
-  --success-soft: #e3f5e8;
-  --success: #1e6b36;
-  --ring: #1f4fb8;
-  --radius: 0.875rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f1216;
-    --foreground: #e8eaee;
-    --card: #181c22;
-    --muted: #222731;
-    --muted-foreground: #9aa3b2;
-    --border: #2a2f38;
-    --input: #363c47;
-    --primary: #6d95f0;
-    --primary-foreground: #0b1020;
-    --primary-soft: #1a2747;
-    --destructive: #f07272;
-    --destructive-soft: #3a1717;
-    --warning-soft: #3a2b0c;
-    --warning: #f2c46b;
-    --success-soft: #11301c;
-    --success: #7fd69b;
-    --ring: #6d95f0;
-  }
+  /* Accent for links, focus and information. */
+  --accent: #3045b5;
+  --accent-soft: #e8ebfb;
+  --destructive: #c0262d;
+  --destructive-soft: #fcebec;
+  --warning-soft: #fcf1d9;
+  --warning: #8a5500;
+  --success-soft: #e2f3e8;
+  --success: #1c6b3a;
+  --ring: #3045b5;
+  --hero: #111114;
+  --hero-foreground: #f4f4f6;
 }
 
 @theme inline {
@@ -54,7 +41,8 @@
   --color-input: var(--input);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --color-destructive: var(--destructive);
   --color-destructive-soft: var(--destructive-soft);
   --color-warning: var(--warning);
@@ -62,8 +50,17 @@
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-ring: var(--ring);
-  --radius-lg: var(--radius);
-  --font-sans: "Noto Sans Devanagari", "Mukta", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-hero: var(--hero);
+  --color-hero-foreground: var(--hero-foreground);
+  /* Larger, softer corners everywhere (existing rounded-* classes pick these up). */
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Devanagari", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Tiro Devanagari Marathi", "Noto Serif Devanagari", Georgia, "Times New Roman", serif;
+  --shadow-card: 0 1px 2px rgb(17 17 20 / 0.04), 0 10px 28px -14px rgb(17 17 20 / 0.12);
+  --shadow-float: 0 2px 6px rgb(17 17 20 / 0.06), 0 18px 40px -18px rgb(17 17 20 / 0.28);
 }
 
 @layer base {
@@ -76,8 +73,81 @@
   body {
     background: var(--background);
     color: var(--foreground);
+    font-family: var(--font-sans);
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Display headings: the serif that carries the brand. */
+  /* Tailwind's font-display utility sets the family (from --font-display); this adds weight and tracking. */
+  .font-display {
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  /* Large rounded panel on the grey canvas (ailawyer-style section). */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-card);
+  }
+  /* A row inside a panel: a soft pill with a hairline, like a file chip. */
+  .row-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 1px 0 rgb(17 17 20 / 0.02);
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+  }
+  a.row-card:hover,
+  button.row-card:hover {
+    border-color: #cfcfd8;
+    box-shadow: var(--shadow-card);
+  }
+  /* Ink hero card with a faint lit texture (Harvey-style), for the day's summary. */
+  .hero-ink {
+    background:
+      radial-gradient(120% 90% at 100% 0%, rgb(255 255 255 / 0.1), transparent 55%),
+      radial-gradient(80% 70% at 0% 100%, rgb(70 90 200 / 0.18), transparent 60%), var(--hero);
+    color: var(--hero-foreground);
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-float);
+  }
+  /* Circular icon button with a soft ring (ailawyer-style). */
+  .icon-ring {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow:
+      0 0 0 4px rgb(17 17 20 / 0.03),
+      0 1px 2px rgb(17 17 20 / 0.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    /* biome-ignore lint/complexity/noImportantStyles: reduced motion must win over every utility */
+    transition: none !important;
+    /* biome-ignore lint/complexity/noImportantStyles: reduced motion must win over every utility */
+    animation: none !important;
   }
 }
 

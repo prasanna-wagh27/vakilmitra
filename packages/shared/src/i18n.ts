@@ -279,6 +279,16 @@ export const en = {
   "doc.readLocal": "Read on VakilMitra's servers",
   "doc.readCloud": "Read by cloud OCR",
   "doc.readCloudQueued": "Read on our servers; cloud OCR reading next",
+  "today.greeting": "Good day, {name}",
+  "today.count": "{n} hearings listed",
+  "today.countOne": "1 hearing listed",
+  "today.countNone": "No hearings listed",
+  "today.byCourt": "Hearings by court",
+  "auth.trust1": "Encrypted and private by default",
+  "auth.trust2": "Every fact links to its source",
+  "auth.trust3": "You approve everything",
+  "auth.hero": "Your practice, in Marathi, in your pocket.",
+  "auth.heroSub": "7/12, Ferfar and court files in Marathi, scanned on your phone and checked by fixed rules.",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -558,6 +568,16 @@ export const mr: Partial<Record<MessageKey, string>> = {
   "doc.readLocal": "वकीलमित्रच्या सर्व्हरवर वाचले",
   "doc.readCloud": "क्लाउड OCR ने वाचले",
   "doc.readCloudQueued": "आमच्या सर्व्हरवर वाचले; क्लाउड OCR पुढे वाचत आहे",
+  "today.greeting": "नमस्कार, {name}",
+  "today.count": "{n} सुनावण्या नोंदलेल्या",
+  "today.countOne": "१ सुनावणी नोंदलेली",
+  "today.countNone": "एकही सुनावणी नाही",
+  "today.byCourt": "न्यायालयानुसार सुनावण्या",
+  "auth.trust1": "एनक्रिप्टेड, आणि मूलतः खाजगी",
+  "auth.trust2": "प्रत्येक माहितीचा मूळ स्रोत दिसतो",
+  "auth.trust3": "सर्व काही तुमच्या मंजुरीनेच",
+  "auth.hero": "तुमची वकिली, मराठीत, तुमच्या खिशात.",
+  "auth.heroSub": "७/१२, फेरफार आणि न्यायालयीन फाईल्स मराठीत, फोनवर स्कॅन करून ठरलेल्या नियमांनी तपासलेल्या.",
 };
 
 export const dictionaries: Record<Locale, Partial<Record<MessageKey, string>>> = { en, mr };

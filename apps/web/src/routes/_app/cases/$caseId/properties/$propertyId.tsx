@@ -131,8 +131,8 @@ function PropertyPage() {
                 key={e.id}
                 id={`ev-${e.id}`}
                 className={cn(
-                  "relative rounded-2xl border bg-card p-3 transition",
-                  highlight.includes(e.id) && "ring-2 ring-primary",
+                  "row-card relative p-4",
+                  highlight.includes(e.id) && "border-accent ring-2 ring-accent/25",
                   flaggedEvents.has(e.id) && "border-destructive/40",
                 )}
               >

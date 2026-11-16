@@ -30,7 +30,7 @@ function InvoicePage() {
           }
         />
       </div>
-      <article className="rounded-2xl border bg-card p-5 print:border-0 print:p-0">
+      <article className="panel p-6 print:border-0 print:shadow-none print:p-0">
         <header className="mb-4 border-b pb-3">
           <p className="text-lg font-bold">{advocate.name}</p>
           <p className="text-sm text-muted-foreground">

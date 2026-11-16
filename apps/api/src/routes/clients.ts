@@ -4,7 +4,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { db } from "../db.js";
 import { requireOwnClient } from "../lib/access.js";
-import { likePattern, notFound } from "../lib/http.js";
+import { likePattern } from "../lib/http.js";
 import { feeTotalsByClient } from "./fees.js";
 
 const idParams = z.object({ id: z.string() });
