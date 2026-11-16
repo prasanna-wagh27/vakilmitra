@@ -148,7 +148,7 @@ function CloudOcrConsent() {
             <span className="block font-medium">{t("settings.cloudOcr")}</span>
             <span className="block text-muted-foreground">{t("settings.cloudOcrText")}</span>
             {on && me.data?.cloudOcrConsentAt && (
-              <span className="mt-1 block text-primary">
+              <span className="mt-1 block text-accent">
                 {tf("settings.cloudOcrOn", { date: fmtDate(me.data.cloudOcrConsentAt, locale) })}
               </span>
             )}

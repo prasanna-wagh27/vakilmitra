@@ -56,7 +56,7 @@ function CasesPage() {
         <ul className="space-y-2">
           {data?.map((c) => (
             <li key={c.id}>
-              <Link to="/cases/$caseId" params={{ caseId: c.id }} className="block rounded-2xl border bg-card p-3 hover:bg-muted">
+              <Link to="/cases/$caseId" params={{ caseId: c.id }} className="row-card block p-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-semibold">{c.title}</p>
                   {c.openFlags > 0 && (

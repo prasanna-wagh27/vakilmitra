@@ -105,6 +105,13 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 3. **Approved by:** Prasanna Wagh, 2026-11-16. The license gate (`scripts/check-licenses.mjs`) allowlists only `@img/sharp-libvips-*`.
 4. **New default for future projects?** No: decide per project.
 
+### Web fonts (OFL-1.1), pending owner confirmation
+
+1. **What and why:** the web app's typefaces, IBM Plex Sans, IBM Plex Sans Devanagari and Tiro Devanagari Marathi, are bundled from `@fontsource/*` and served from our own origin. Loading them from Google Fonts would send every visitor's IP address to Google before any consent, which goes against "private by default" (DPDP).
+2. **License, pricing, exit path:** SIL Open Font License 1.1, free. It allows bundling in commercial software; the only limits are not selling the fonts on their own and not shipping modified copies under the reserved names. We ship them unmodified. To exit, remove the imports at the top of `apps/web/src/main.tsx`: the CSS font stacks fall back to system fonts (Noto Sans Devanagari on Android).
+3. **Approved by:** _pending._ Added during an unattended run on 2026-11-16; Prasanna Wagh to confirm or reject. The license gate lists the three packages by name.
+4. **New default for future projects?** Suggested yes for fonts only: OFL is the standard license for open fonts.
+
 ### Dev-only note
 
 `@fastify/swagger-ui` pulls in BlueOak-1.0.0 packages, so it is a dev-only dependency. It is not loaded in production and is not part of the shipped dependency tree, so no exception is needed.
