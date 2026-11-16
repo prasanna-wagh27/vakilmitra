@@ -8,14 +8,17 @@ import type {
   Client,
   ClientListItem,
   ClientTotals,
+  DocumentDetail,
+  DocumentSummary,
   FeeAgreement,
   FeeTotals,
   Flag,
   HearingWithCase,
   OwnershipEvent,
   Property,
+  SearchHit,
 } from "@vakilmitra/shared";
-import { api } from "./api";
+import { API_BASE, api } from "./api";
 
 export const meQuery = queryOptions({
   queryKey: ["me"],
@@ -94,3 +97,28 @@ export function useApiMutation<TVars, TResult = unknown>(
     },
   });
 }
+
+export const documentsQuery = (caseId: string) =>
+  queryOptions({
+    queryKey: ["documents", caseId],
+    queryFn: () => api<{ documents: DocumentSummary[] }>(`/cases/${caseId}/documents`).then((r) => r.documents),
+    // Keep statuses fresh while pages are still being read.
+    refetchInterval: (q) => (q.state.data?.some((d) => d.ocrStatus === "PENDING" || d.ocrStatus === "PROCESSING") ? 3000 : false),
+  });
+
+export const documentQuery = (documentId: string) =>
+  queryOptions({
+    queryKey: ["document", documentId],
+    queryFn: () => api<{ document: DocumentDetail }>(`/documents/${documentId}`).then((r) => r.document),
+    refetchInterval: (q) =>
+      q.state.data && (q.state.data.ocrStatus === "PENDING" || q.state.data.ocrStatus === "PROCESSING") ? 2000 : false,
+  });
+
+export const searchQuery = (q: string, caseId?: string) =>
+  queryOptions({
+    queryKey: ["search", q, caseId],
+    queryFn: () => api<{ hits: SearchHit[] }>("/search", { query: { q, caseId } }).then((r) => r.hits),
+    enabled: q.trim().length >= 2,
+  });
+
+export const pageImageUrl = (documentId: string, pageId: string) => `${API_BASE}/api/documents/${documentId}/pages/${pageId}/image`;

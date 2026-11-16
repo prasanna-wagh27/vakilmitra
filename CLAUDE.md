@@ -9,3 +9,12 @@
 ## Stack
 
 Follow the Tech Stack Standard. See the README for the layout, commands and the exception process.
+
+## Branches
+
+- Use conventional branch names: `feat/<topic>`, `fix/<topic>`, `chore/<topic>`, `docs/<topic>`, `refactor/<topic>`, `test/<topic>`.
+- One branch per piece of work, branched from the latest main; never commit straight to main.
+
+## Scope: web first
+
+- Build the web app first. Do not start Expo or any mobile-app work until the web app is done and the owner says to start mobile.

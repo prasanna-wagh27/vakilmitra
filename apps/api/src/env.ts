@@ -8,6 +8,7 @@ const schema = z.object({
   API_URL: z.url().default("http://localhost:4000"),
   WEB_ORIGIN: z.url().default("http://localhost:5173"),
   PORT: z.coerce.number().int().positive().default(4000),
+  VALKEY_URL: z.url().default("redis://localhost:6379"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 

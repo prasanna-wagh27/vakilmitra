@@ -1,8 +1,10 @@
 import { accessLogs, accounts, advocates, sessions, verifications } from "@vakilmitra/db";
+import { keys } from "@vakilmitra/storage";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db.js";
 import { env, isProd } from "./env.js";
+import { getServices } from "./services.js";
 
 /**
  * Better Auth runs inside our own Postgres. An advocate is Better Auth's "user".
@@ -30,6 +32,8 @@ export const auth = betterAuth({
       // Keep an anonymised record that the account was deleted (DPDP audit trail).
       beforeDelete: async (user) => {
         await db.insert(accessLogs).values({ advocateId: null, action: "account.delete", entityType: "advocate", entityId: user.id });
+        // Every scanned page of every case this advocate owns. Rows go with the cascade.
+        await getServices().storage.deletePrefix(keys.advocate(user.id));
       },
     },
   },

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { type Hearing, istDate } from "@vakilmitra/shared";
-import { Plus, X } from "lucide-react";
+import { FileUp, Plus, Scan, X } from "lucide-react";
 import { useState } from "react";
 import { Empty, ErrorBox, Loading, PageHeader, Section } from "@/components/common";
 import { FlagCard } from "@/components/FlagCard";
@@ -13,8 +13,9 @@ import { Sheet } from "@/components/ui/sheet";
 import { api } from "@/lib/api";
 import { fmtDate, rupees } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import { caseQuery, useApiMutation } from "@/lib/queries";
+import { caseQuery, documentsQuery, useApiMutation } from "@/lib/queries";
 import { cn } from "@/lib/utils";
+import { OcrBadge } from "./documents/$documentId";
 
 export const Route = createFileRoute("/_app/cases/$caseId/")({ component: CasePage });
 
@@ -38,6 +39,7 @@ function CasePage() {
   const navigate = useNavigate();
   const { t, locale } = useI18n();
   const { data, error, isPending, refetch } = useQuery(caseQuery(caseId));
+  const docs = useQuery(documentsQuery(caseId));
   const [sheet, setSheet] = useState<SheetState>(null);
   const close = () => setSheet(null);
   const remove = useApiMutation(() => api(`/cases/${caseId}`, { method: "DELETE" }), { onSuccess: () => navigate({ to: "/cases" }) });
@@ -136,6 +138,53 @@ function CasePage() {
           </div>
         </Section>
       )}
+
+      <Section
+        title={t("doc.title")}
+        action={
+          canEdit && (
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/cases/$caseId/scan" params={{ caseId }} search={{ mode: "upload" }}>
+                  <FileUp /> {t("doc.upload")}
+                </Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link to="/cases/$caseId/scan" params={{ caseId }}>
+                  <Scan /> {t("doc.scan")}
+                </Link>
+              </Button>
+            </div>
+          )
+        }
+      >
+        {docs.data?.length ? (
+          <ul className="space-y-2">
+            {docs.data.map((d) => (
+              <li key={d.id}>
+                <Link
+                  to="/cases/$caseId/documents/$documentId"
+                  params={{ caseId, documentId: d.id }}
+                  className="flex items-center justify-between gap-2 rounded-2xl border bg-card p-3 hover:bg-muted"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">
+                      {d.title || t(`doctype.${d.type}`)}
+                      {d.year ? ` · ${d.year}` : ""}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {d.pageCount} {t("doc.pages")}
+                    </p>
+                  </div>
+                  <OcrBadge status={d.ocrStatus} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty>{t("doc.none")}</Empty>
+        )}
+      </Section>
 
       <Section title={t("case.hearings")} action={canEdit && <AddButton onClick={() => setSheet({ kind: "hearing" })} />}>
         {c.hearings.length === 0 ? (

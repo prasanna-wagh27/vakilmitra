@@ -1,6 +1,8 @@
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import multipart from "@fastify/multipart";
 import swagger from "@fastify/swagger";
+import { PAGE_UPLOAD } from "@vakilmitra/shared";
 import { fromNodeHeaders } from "better-auth/node";
 import Fastify, { type FastifyError, type FastifyInstance } from "fastify";
 import {
@@ -17,6 +19,7 @@ import { accountRoutes } from "./routes/account.js";
 import { caseRoutes } from "./routes/cases.js";
 import { clientRoutes } from "./routes/clients.js";
 import { diaryRoutes } from "./routes/diary.js";
+import { documentRoutes } from "./routes/documents.js";
 import { feeRoutes } from "./routes/fees.js";
 import { landRoutes } from "./routes/land.js";
 
@@ -47,6 +50,7 @@ export async function buildApp() {
 
   await app.register(helmet, { global: true });
   await app.register(cors, { origin: env.WEB_ORIGIN, credentials: true, methods: ["GET", "POST", "PATCH", "PUT", "DELETE"] });
+  await app.register(multipart, { limits: { fileSize: PAGE_UPLOAD.maxBytes, files: 1 } });
   await app.register(swagger, {
     openapi: { info: { title: "VakilMitra API", version: "0.1.0" }, components: {} },
     transform: jsonSchemaTransform,
@@ -112,6 +116,7 @@ export async function buildApp() {
     await authed.register(diaryRoutes, { prefix: "/api" });
     await authed.register(feeRoutes, { prefix: "/api/fees" });
     await authed.register(landRoutes, { prefix: "/api" });
+    await authed.register(documentRoutes, { prefix: "/api" });
   });
 
   app.setNotFoundHandler((_req, reply) => reply.code(404).send({ error: "not_found", message: "No such endpoint" }));

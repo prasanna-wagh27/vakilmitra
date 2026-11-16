@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarDays, FolderOpen, IndianRupee, Settings, Sun, Users } from "lucide-react";
+import { CalendarDays, FolderOpen, IndianRupee, Search, Settings, Sun, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { type MessageKey, useI18n } from "@/lib/i18n";
 import { LanguageToggle } from "./LanguageToggle";
@@ -37,6 +37,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="ml-auto flex items-center gap-1">
             <LanguageToggle persist />
+            <Link
+              to="/search"
+              aria-label={t("nav.search")}
+              className="flex size-11 items-center justify-center rounded-full hover:bg-muted"
+            >
+              <Search className="size-5" />
+            </Link>
             <Link
               to="/settings"
               aria-label={t("nav.settings")}

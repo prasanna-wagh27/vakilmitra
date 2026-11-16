@@ -227,8 +227,11 @@ export const documents = pgTable(
     title: text("title"),
     storageKey: text("storage_key"), // object key in India-region S3-compatible storage
     mimeType: text("mime_type"),
+    // Rolled up from its pages: PENDING until uploaded pages exist, DONE when all are read.
     ocrStatus: ocrStatusEnum("ocr_status").notNull().default("PENDING"),
+    source: text("source").notNull().default("scan"), // scan (in-app camera) | upload (file/PDF)
     createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (t) => [index("document_case_idx").on(t.caseId)],
 );
@@ -241,13 +244,32 @@ export const pages = pgTable(
       .notNull()
       .references(() => documents.id, { onDelete: "cascade" }),
     pageNo: integer("page_no").notNull(),
-    storageKey: text("storage_key"),
-    ocrText: text("ocr_text"),
+    storageKey: text("storage_key").notNull(), // encrypted image (see packages/storage)
+    byteSize: integer("byte_size"),
     width: integer("width"),
     height: integer("height"),
+    ocrStatus: ocrStatusEnum("ocr_status").notNull().default("PENDING"),
+    ocrEngine: text("ocr_engine"), // e.g. tesseract-5/mar+eng
+    ocrText: text("ocr_text"),
+    ocrConfidence: real("ocr_confidence"), // 0..1, mean word confidence
+    // Words with boxes as fractions of the page, for source-crop links: [{ t, c, b: [x0, y0, x1, y1] }]
+    ocrWords: jsonb("ocr_words").$type<OcrWord[]>(),
+    ocrError: text("ocr_error"),
+    ocrAt: ts("ocr_at"),
+    createdAt: createdAt(),
   },
-  (t) => [uniqueIndex("page_document_no_uq").on(t.documentId, t.pageNo)],
+  (t) => [
+    uniqueIndex("page_document_no_uq").on(t.documentId, t.pageNo),
+    // Trigram index: substring search that works for Devanagari, where word tokenisers struggle.
+    index("page_ocr_text_trgm_idx").using("gin", sql`${t.ocrText} gin_trgm_ops`),
+  ],
 );
+
+export interface OcrWord {
+  t: string;
+  c: number;
+  b: [number, number, number, number];
+}
 
 export const facts = pgTable(
   "fact",

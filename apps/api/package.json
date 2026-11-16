@@ -14,13 +14,19 @@
   "dependencies": {
     "@fastify/cors": "^11.4.3",
     "@fastify/helmet": "^13.2.0",
+    "@fastify/multipart": "^10.1.9",
     "@fastify/swagger": "^9.9.5",
     "@vakilmitra/db": "workspace:*",
+    "@vakilmitra/jobs": "workspace:*",
     "@vakilmitra/shared": "workspace:*",
+    "@vakilmitra/storage": "workspace:*",
     "better-auth": "1.7.25",
+    "bullmq": "^6.7.6",
     "date-fns": "^4.4.0",
     "fastify": "^5.12.8",
     "fastify-type-provider-zod": "^7.0.0",
+    "ioredis": "^5.11.1",
+    "sharp": "~0.35.5",
     "zod": "4"
   },
   "devDependencies": {
