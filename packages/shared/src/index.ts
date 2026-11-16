@@ -65,7 +65,6 @@ export const isoDate = z
   .transform((s) => new Date(s));
 
 const optText = (max: number) => z.string().trim().max(max).nullable().optional();
-const names = z.array(z.string().trim().min(1).max(200)).max(100).default([]);
 
 /** Rupees (may be decimal) to integer paise. */
 export const toPaise = (rupees: number) => Math.round(rupees * 100);
@@ -152,23 +151,38 @@ export const propertyInput = z.object({
 });
 export type PropertyInput = z.input<typeof propertyInput>;
 
-export const eventInput = z.object({
+/**
+ * Field rules shared by create and update. Defaults live only on the create schema:
+ * Zod keeps inner .default()s under .partial(), so an update built from a schema with
+ * defaults would silently reset fields the client never sent.
+ */
+const eventFields = z.object({
   kind: z.enum(EVENT_KINDS),
   date: isoDate,
   subtype: z.string().trim().toUpperCase().max(40).nullable().optional(),
   ferfarNo: optText(40),
   deedRegNo: optText(60),
   refDeedRegNo: optText(60),
-  fromParties: names,
-  toParties: names,
-  owners: names,
+  fromParties: z.array(z.string().trim().min(1).max(200)).max(100),
+  toParties: z.array(z.string().trim().min(1).max(200)).max(100),
+  owners: z.array(z.string().trim().min(1).max(200)).max(100),
   areaSqm: z.number().nonnegative().nullable().optional(),
   landClass: optText(40),
-  otherRights: z.array(z.string().trim().max(500)).max(50).default([]),
-  section155: z.boolean().default(false),
-  factIds: z.array(z.string()).max(200).default([]),
+  otherRights: z.array(z.string().trim().max(500)).max(50),
+  section155: z.boolean(),
+  factIds: z.array(z.string()).max(200),
   notes: optText(2000),
 });
+export const eventInput = eventFields.extend({
+  fromParties: eventFields.shape.fromParties.default([]),
+  toParties: eventFields.shape.toParties.default([]),
+  owners: eventFields.shape.owners.default([]),
+  otherRights: eventFields.shape.otherRights.default([]),
+  section155: eventFields.shape.section155.default(false),
+  factIds: eventFields.shape.factIds.default([]),
+});
+/** Update: only the fields sent are changed. */
+export const eventUpdateInput = eventFields.partial();
 export type EventInput = z.input<typeof eventInput>;
 
 export const checkQuery = z.object({ lang: z.enum(LOCALES).optional() });
@@ -197,15 +211,19 @@ export type PaymentInput = z.input<typeof paymentInput>;
 
 export const searchQuery = z.object({ q: z.string().trim().max(200).optional() });
 
-export const documentInput = z.object({
-  type: z.enum(DOC_TYPES).default("OTHER"),
+const documentFields = z.object({
+  type: z.enum(DOC_TYPES),
   year: z.number().int().min(1800).max(2100).nullable().optional(),
   title: optText(200),
   propertyId: z.string().nullable().optional(),
+});
+export const documentInput = documentFields.extend({
+  type: documentFields.shape.type.default("OTHER"),
   source: z.enum(["scan", "upload"]).default("scan"),
 });
 export type DocumentInput = z.input<typeof documentInput>;
-export const documentUpdateInput = documentInput.omit({ source: true }).partial();
+/** Update: only the fields sent are changed (no defaults, see eventFields). */
+export const documentUpdateInput = documentFields.partial();
 
 /** Upload limits shared by clients (to resize before sending) and the API (to enforce). */
 export const PAGE_UPLOAD = { maxBytes: 15 * 1024 * 1024, maxPages: 300, types: ["image/jpeg", "image/png", "image/webp"] } as const;

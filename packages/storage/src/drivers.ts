@@ -99,7 +99,13 @@ export class S3BlobStore implements BlobStore {
       const page = await this.client.send(new ListObjectsV2Command({ Bucket: this.cfg.bucket, Prefix: prefix, ContinuationToken: token }));
       const keys = (page.Contents ?? []).flatMap((o) => (o.Key ? [{ Key: o.Key }] : []));
       if (keys.length) {
-        await this.client.send(new DeleteObjectsCommand({ Bucket: this.cfg.bucket, Delete: { Objects: keys, Quiet: true } }));
+        const res = await this.client.send(new DeleteObjectsCommand({ Bucket: this.cfg.bucket, Delete: { Objects: keys, Quiet: true } }));
+        // DeleteObjects returns 200 even when some keys failed: a delete must never report success
+        // while client files are still in the bucket.
+        if (res.Errors?.length) {
+          const first = res.Errors[0];
+          throw new Error(`Could not delete ${res.Errors.length} of ${keys.length} objects under ${prefix} (${first.Code}: ${first.Key})`);
+        }
         deleted += keys.length;
       }
       token = page.IsTruncated ? page.NextContinuationToken : undefined;

@@ -212,3 +212,22 @@ describe("runRules", () => {
     expect(a.map((f) => f.severity)).toEqual(["HIGH", "MEDIUM"]);
   });
 });
+
+describe("review fixes", () => {
+  it("chain continuity does not depend on row order for same-date records", () => {
+    // The 7/12 dated the same day as the sale already shows the buyer.
+    const ev: ChainEvent[] = [
+      { id: "s0", kind: "RECORD_SNAPSHOT", date: d("1995-01-01"), owners: ["रामचंद्र पाटील"] },
+      { id: "m1", kind: "MUTATION", subtype: "SALE", date: d("2001-08-20"), fromParties: ["रामचंद्र पाटील"], toParties: ["सुरेश जाधव"] },
+      { id: "s1", kind: "RECORD_SNAPSHOT", date: d("2001-08-20"), owners: ["सुरेश जाधव"] },
+    ];
+    const breaks = (e: ChainEvent[]) => checkChainCoverage(e, opts).filter((f) => f.rule === "CHAIN_BREAK");
+    expect(breaks(ev)).toEqual([]);
+    expect(breaks([ev[0], ev[2], ev[1]])).toEqual([]);
+  });
+
+  it("gives each other-rights flag its own key", () => {
+    const ev = cleanChain().map((e) => (e.id === "s2025" ? { ...e, otherRights: ["वारस: सौ. सुमन", "बँक बोजा"] } : e));
+    expect(checkOtherRights(ev).map((f) => f.key)).toEqual(["वारस: सौ. सुमन", "बँक बोजा"]);
+  });
+});

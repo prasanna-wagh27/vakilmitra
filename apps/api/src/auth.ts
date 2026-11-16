@@ -32,7 +32,10 @@ export const auth = betterAuth({
       // Keep an anonymised record that the account was deleted (DPDP audit trail).
       beforeDelete: async (user) => {
         await db.insert(accessLogs).values({ advocateId: null, action: "account.delete", entityType: "advocate", entityId: user.id });
-        // Every scanned page of every case this advocate owns. Rows go with the cascade.
+      },
+      // Files go only after the rows are gone: if the delete fails, the account keeps its pages.
+      // If this step fails, what remains is unreadable ciphertext, never a record pointing at nothing.
+      afterDelete: async (user) => {
         await getServices().storage.deletePrefix(keys.advocate(user.id));
       },
     },

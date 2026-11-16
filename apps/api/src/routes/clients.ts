@@ -3,16 +3,11 @@ import { clientInput, searchQuery } from "@vakilmitra/shared";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { db } from "../db.js";
+import { requireOwnClient } from "../lib/access.js";
 import { likePattern, notFound } from "../lib/http.js";
 import { feeTotalsByClient } from "./fees.js";
 
 const idParams = z.object({ id: z.string() });
-
-async function ownClient(advocateId: string, id: string) {
-  const c = await db.query.clients.findFirst({ where: and(eq(clients.id, id), eq(clients.advocateId, advocateId)) });
-  if (!c) throw notFound("Client");
-  return c;
-}
 
 export const clientRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", { schema: { querystring: searchQuery } }, async (req) => {
@@ -44,7 +39,7 @@ export const clientRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.get("/:id", { schema: { params: idParams } }, async (req) => {
-    await ownClient(req.advocateId, req.params.id);
+    await requireOwnClient(req.advocateId, req.params.id);
     const client = await db.query.clients.findFirst({
       where: eq(clients.id, req.params.id),
       with: {
@@ -52,18 +47,18 @@ export const clientRoutes: FastifyPluginAsyncZod = async (app) => {
         feeAgreements: { with: { payments: true, installments: true }, orderBy: (f, { desc }) => desc(f.createdAt) },
       },
     });
-    const totals = (await feeTotalsByClient(req.advocateId)).get(req.params.id);
+    const totals = (await feeTotalsByClient(req.advocateId, { clientId: req.params.id })).get(req.params.id);
     return { client, totals: totals ?? { totalPaise: 0, paidPaise: 0, outstandingPaise: 0, overduePaise: 0 } };
   });
 
   app.patch("/:id", { schema: { params: idParams, body: clientInput.partial() } }, async (req) => {
-    await ownClient(req.advocateId, req.params.id);
+    await requireOwnClient(req.advocateId, req.params.id);
     const [client] = await db.update(clients).set(req.body).where(eq(clients.id, req.params.id)).returning();
     return { client };
   });
 
   app.delete("/:id", { schema: { params: idParams } }, async (req, reply) => {
-    await ownClient(req.advocateId, req.params.id);
+    await requireOwnClient(req.advocateId, req.params.id);
     await db.delete(clients).where(eq(clients.id, req.params.id));
     return reply.code(204).send();
   });

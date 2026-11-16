@@ -25,6 +25,7 @@ const envSchema = z.object({
   // fallback: only pages Tesseract reads below OCR_CLOUD_BELOW; always: every page.
   OCR_CLOUD_MODE: z.enum(["fallback", "always"]).default("fallback"),
   OCR_CLOUD_BELOW: z.coerce.number().min(0).max(1).default(0.85),
+  OCR_CONCURRENCY: z.coerce.number().int().min(1).max(16).default(1),
   SARVAM_API_KEY: z.string().optional(),
   SARVAM_BASE_URL: z.url().optional(),
   SARVAM_MODEL: z.string().optional(),
@@ -51,7 +52,7 @@ export type EngineName = (typeof ENGINE_NAMES)[number];
 export function createEngine(name: string, env: OcrEnv): OcrEngine {
   switch (name) {
     case "tesseract":
-      return new TesseractEngine();
+      return new TesseractEngine(["mar", "eng"], env.OCR_CONCURRENCY);
     case "sarvam":
       if (!env.SARVAM_API_KEY) throw new Error("SARVAM_API_KEY is required for the sarvam engine");
       return new SarvamEngine({ apiKey: env.SARVAM_API_KEY, baseUrl: env.SARVAM_BASE_URL, model: env.SARVAM_MODEL });
@@ -81,6 +82,13 @@ export interface ReadPolicy {
 }
 
 export function policyFromEnv(env: OcrEnv): ReadPolicy {
+  // Client pages never go to the consumer Gemini API (its free tier may train on inputs and is
+  // not India-hosted). It stays available to the eval harness for non-client pages only.
+  if (env.OCR_CLOUD_ENGINE === "gemini" && env.GEMINI_PROVIDER !== "vertex") {
+    throw new Error(
+      "The worker only uses Gemini through Vertex AI (GEMINI_PROVIDER=vertex). The consumer Gemini API is for evaluation only.",
+    );
+  }
   return {
     local: createEngine("tesseract", env),
     cloud: env.OCR_CLOUD_ENGINE === "none" ? null : createEngine(env.OCR_CLOUD_ENGINE, env),

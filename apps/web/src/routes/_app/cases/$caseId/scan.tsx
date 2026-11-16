@@ -54,7 +54,9 @@ function ScanPage() {
   const existing = useQuery({ ...documentQuery(existingId ?? ""), enabled: !!existingId });
   const nextPageNo = useRef(1);
   useEffect(() => {
-    if (existing.data) nextPageNo.current = Math.max(0, ...existing.data.pages.map((p) => p.pageNo)) + 1;
+    // Never go backwards: the document refetches while pages are queued, and a smaller number
+    // would make the next capture replace a page that is already there.
+    if (existing.data) nextPageNo.current = Math.max(nextPageNo.current, Math.max(0, ...existing.data.pages.map((p) => p.pageNo)) + 1);
   }, [existing.data]);
 
   // ---- background uploads ----
@@ -63,8 +65,10 @@ function ScanPage() {
   const [queue] = useState(() => new UploadQueue((item) => uploadPage(docIdRef.current!, item.pageNo, item.blob)));
   const items = useSyncExternalStore(queue.subscribe, queue.getSnapshot);
   const done = items.filter((i) => i.status === "done").length;
-  const failed = items.filter((i) => i.status === "failed" && i.attempts >= 1);
-  const allSettled = items.every((i) => i.status === "done" || i.status === "failed");
+  const failed = items.filter((i) => i.status === "failed");
+  const allSettled = items.length > 0 && queue.settled;
+  // Adding to an existing document: wait for its pages so numbering continues after them.
+  const numberingReady = !existingId || existing.isSuccess;
 
   // ---- edge detection (loaded in the background) ----
   // The OpenCV module is a thenable: keep it in a ref, never in React state or a resolved promise.
@@ -145,12 +149,13 @@ function ScanPage() {
   }
 
   async function addPage(canvas: HTMLCanvasElement) {
+    if (!numberingReady) throw new Error(t("common.loading"));
     const [blob, thumb] = await Promise.all([canvasToJpeg(canvas), thumbnail(canvas)]);
     queue.add(nextPageNo.current++, blob, thumb);
   }
 
   async function onCapture() {
-    if (!streamRef.current || !videoRef.current || busy) return;
+    if (!streamRef.current || !videoRef.current || busy || !numberingReady) return;
     setBusy(true);
     try {
       startReview(await capture(streamRef.current, videoRef.current));
@@ -414,7 +419,7 @@ function ScanPage() {
           <button
             type="button"
             onClick={onCapture}
-            disabled={busy}
+            disabled={busy || !numberingReady}
             aria-label={t("doc.capture")}
             className="flex size-20 items-center justify-center rounded-full border-4 border-white bg-white/20 active:scale-95 disabled:opacity-50"
           >

@@ -61,7 +61,14 @@ export const accountRoutes: FastifyPluginAsyncZod = async (app) => {
       if (status === 400) throw new HttpError(401, "invalid_credentials", "Password is incorrect");
       throw e;
     }
-    reply.header("set-cookie", "better-auth.session_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax");
+    // Clear the session cookies under both names (production uses the __Secure- prefix).
+    reply.header(
+      "set-cookie",
+      ["better-auth.session_token", "better-auth.session_data"].flatMap((name) => [
+        `${name}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`,
+        `__Secure-${name}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`,
+      ]),
+    );
     return reply.code(204).send();
   });
 };

@@ -3,7 +3,8 @@
  * Framework-free (React reads it through useSyncExternalStore), so it can be unit-tested.
  * Retries network errors, timeouts, 429 and 5xx with backoff; other errors fail fast.
  */
-export type UploadStatus = "queued" | "uploading" | "done" | "failed";
+/** waiting = a retry is scheduled after a recoverable error; failed = gave up (the advocate can retry). */
+export type UploadStatus = "queued" | "uploading" | "waiting" | "done" | "failed";
 
 export interface UploadItem {
   key: string;
@@ -57,6 +58,7 @@ export class UploadQueue {
     return this.items.filter((i) => i.status !== "done").length;
   }
 
+  /** Nothing in flight or scheduled: every page is either uploaded or has given up. */
   get settled() {
     return this.items.every((i) => i.status === "done" || i.status === "failed");
   }
@@ -100,10 +102,10 @@ export class UploadQueue {
       const attempts = item.attempts + 1;
       const message = e instanceof Error ? e.message : String(e);
       if (e instanceof RetryableError && attempts < this.maxAttempts) {
-        // Hold the slot free while waiting, then re-queue.
-        this.patch(key, { status: "failed", attempts, error: message });
+        // Free the slot while waiting, then re-queue.
+        this.patch(key, { status: "waiting", attempts, error: message });
         this.schedule(() => {
-          if (this.items.find((i) => i.key === key)?.status === "failed") this.retryAfterBackoff(key, attempts);
+          if (this.items.find((i) => i.key === key)?.status === "waiting") this.retryAfterBackoff(key, attempts);
         }, this.backoffMs(attempts));
       } else {
         this.patch(key, { status: "failed", attempts, error: message });

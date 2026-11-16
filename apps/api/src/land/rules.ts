@@ -38,6 +38,11 @@ export interface RuleFlag {
   message: { en: string; mr: string };
   eventIds: string[];
   factIds: string[];
+  /**
+   * Distinguishes flags of the same rule on the same events (e.g. two other-rights entries on
+   * one 7/12), so resolving one never hides another. Empty when the events identify the flag.
+   */
+  key?: string;
 }
 
 export type RuleName =
@@ -276,6 +281,7 @@ export function checkOtherRights(events: ChainEvent[]): RuleFlag[] {
       },
       eventIds: [s.id],
       factIds: facts(s),
+      key: entry.normalize("NFC"),
     });
   }
   return out;
@@ -298,7 +304,10 @@ export function checkChainCoverage(events: ChainEvent[], opts: RuleOptions): Rul
     });
     return out;
   }
-  const sorted = [...events].sort((a, b) => a.date.getTime() - b.date.getTime());
+  // Same date: transfers first, then the 7/12 that reflects them; ties by id. Keeps the result
+  // independent of the order rows come back from the database.
+  const rank: Record<EventKind, number> = { DEED: 0, MUTATION: 1, RECORD_SNAPSHOT: 2 };
+  const sorted = [...events].sort((a, b) => a.date.getTime() - b.date.getTime() || rank[a.kind] - rank[b.kind] || a.id.localeCompare(b.id));
   const first = sorted[0];
   // Allow a year of slack: a 7/12 from early in the start year covers it.
   if (differenceInDays(first.date, start) > 365) {

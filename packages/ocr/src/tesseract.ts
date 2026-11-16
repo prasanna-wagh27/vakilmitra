@@ -7,7 +7,7 @@ import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
-import { createWorker, OEM, type Worker } from "tesseract.js";
+import { createScheduler, createWorker, OEM, type Scheduler } from "tesseract.js";
 import { type OcrEngine, type OcrResult, type OcrWord, round4 } from "./types.js";
 
 /** Longest side after preprocessing. Enough for small Devanagari matras, small enough to be fast. */
@@ -46,27 +46,42 @@ async function stageLanguageData(langs: string[]): Promise<string> {
 export class TesseractEngine implements OcrEngine {
   readonly name: string;
   readonly external = false;
-  private worker: Promise<Worker> | null = null;
+  private pool: Promise<Scheduler> | null = null;
 
-  constructor(private langs: string[] = ["mar", "eng"]) {
+  /** `workers` recognisers run in parallel (one per CPU core is a sensible ceiling). */
+  constructor(
+    private langs: string[] = ["mar", "eng"],
+    private workers = 1,
+  ) {
     this.name = `tesseract-${langs.join("+")}`;
   }
 
-  private getWorker() {
-    this.worker ??= (async () => {
-      const langPath = await stageLanguageData(this.langs);
-      const w = await createWorker(this.langs, OEM.LSTM_ONLY, { langPath, gzip: true, cacheMethod: "none" });
-      await w.setParameters({ preserve_interword_spaces: "1" });
-      return w;
-    })();
-    return this.worker;
+  private getPool() {
+    if (!this.pool) {
+      const starting = (async () => {
+        const langPath = await stageLanguageData(this.langs);
+        const scheduler = createScheduler();
+        for (let i = 0; i < Math.max(1, this.workers); i++) {
+          const w = await createWorker(this.langs, OEM.LSTM_ONLY, { langPath, gzip: true, cacheMethod: "none" });
+          await w.setParameters({ preserve_interword_spaces: "1" });
+          scheduler.addWorker(w);
+        }
+        return scheduler;
+      })();
+      // A failed start must not stick: the next page tries again instead of failing forever.
+      starting.catch(() => {
+        if (this.pool === starting) this.pool = null;
+      });
+      this.pool = starting;
+    }
+    return this.pool;
   }
 
   async recognize(image: Buffer): Promise<OcrResult> {
     const { png, width, height } = await preprocess(image);
-    const worker = await this.getWorker();
+    const pool = await this.getPool();
     // rotateAuto straightens slightly skewed phone photos before reading.
-    const { data } = await worker.recognize(png, { rotateAuto: true }, { text: true, blocks: true });
+    const { data } = await pool.addJob("recognize", png, { rotateAuto: true }, { text: true, blocks: true });
     const words: OcrWord[] = [];
     for (const block of data.blocks ?? []) {
       for (const para of block.paragraphs) {
@@ -97,7 +112,8 @@ export class TesseractEngine implements OcrEngine {
   }
 
   async close() {
-    if (this.worker) await (await this.worker).terminate();
-    this.worker = null;
+    const pool = this.pool;
+    this.pool = null;
+    if (pool) await (await pool).terminate();
   }
 }

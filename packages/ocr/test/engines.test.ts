@@ -8,6 +8,7 @@ import {
   type OcrEngine,
   type OcrResult,
   ocrEnv,
+  policyFromEnv,
   readPage,
   SarvamEngine,
 } from "../src/index.js";
@@ -220,5 +221,12 @@ describe("createEngine", () => {
     expect(() => createEngine("sarvan", env)).toThrow(/Unknown OCR engine "sarvan"/);
     expect(createEngine("gemini", env).name).toBe("gemini-api:gemini-3.5-flash");
     expect(createEngine("tesseract", env).external).toBe(false);
+  });
+});
+
+describe("policyFromEnv", () => {
+  it("refuses the consumer Gemini API for client pages", () => {
+    const env = ocrEnv({ OCR_CLOUD_ENGINE: "gemini", GEMINI_PROVIDER: "google", GOOGLE_GENERATIVE_AI_API_KEY: "x" });
+    expect(() => policyFromEnv(env)).toThrow(/only uses Gemini through Vertex AI/);
   });
 });

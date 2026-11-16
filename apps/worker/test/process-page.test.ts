@@ -3,7 +3,7 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { accessLogs, advocates, and, cases, count, createDb, documents, eq, pages, runMigrations } from "@vakilmitra/db";
+import { accessLogs, advocates, and, cases, count, createDb, documents, eq, pages, runMigrations, sql } from "@vakilmitra/db";
 import { type OcrEngine, type ReadPolicy, TesseractEngine } from "@vakilmitra/ocr";
 import { FsBlobStore, keys, parseMasterKeys, SecureStorage } from "@vakilmitra/storage";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -101,6 +101,31 @@ describe("processPage", () => {
 
   it("returns missing for a page deleted before its job ran", async () => {
     expect(await processPage({ db, storage, policy: localOnly }, randomUUID())).toBe("missing");
+  });
+
+  it("does not save a reading of an image that was replaced while it was being read", async () => {
+    const pageId = await addPage(20, fixture);
+    // A slow engine; the page is re-uploaded (version bumped) while it reads.
+    const slow: ReadPolicy = {
+      ...localOnly,
+      local: {
+        name: "slow",
+        external: false,
+        async recognize() {
+          await db
+            .update(pages)
+            .set({ version: sql`${pages.version} + 1`, ocrStatus: "PENDING" })
+            .where(eq(pages.id, pageId));
+          return { engine: "slow", text: "old image text", confidence: 0.9, words: [], width: 1, height: 1 };
+        },
+        async close() {},
+      },
+    };
+    expect(await processPage({ db, storage, policy: slow }, pageId)).toBe("stale");
+    const p = await db.query.pages.findFirst({ where: eq(pages.id, pageId) });
+    expect(p?.ocrText).toBeNull();
+    expect(p?.ocrStatus).toBe("PENDING"); // the newer job will read it
+    await db.delete(pages).where(eq(pages.id, pageId)); // keep the shared document's roll-up clean for later tests
   });
 
   it("marks a page FAILED after the last retry and the document follows", async () => {

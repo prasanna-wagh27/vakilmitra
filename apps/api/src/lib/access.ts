@@ -1,4 +1,4 @@
-import { accessLogs, caseAccess, cases, eq, inArray, or } from "@vakilmitra/db";
+import { accessLogs, and, caseAccess, cases, clients, eq, inArray, or } from "@vakilmitra/db";
 import type { CaseAccessLevel } from "@vakilmitra/shared";
 import type { FastifyRequest } from "fastify";
 import { db } from "../db.js";
@@ -37,4 +37,11 @@ export function visibleCase(advocateId: string) {
 /** Access log on every sensitive view, share, export and delete. */
 export async function logAccess(req: FastifyRequest, action: string, entityType: string, entityId: string) {
   await db.insert(accessLogs).values({ advocateId: req.advocateId, action, entityType, entityId, ip: req.ip });
+}
+
+/** The client must belong to this advocate. Returns it, or 404 (never reveals another advocate's client). */
+export async function requireOwnClient(advocateId: string, clientId: string) {
+  const c = await db.query.clients.findFirst({ where: and(eq(clients.id, clientId), eq(clients.advocateId, advocateId)) });
+  if (!c) throw notFound("Client");
+  return c;
 }

@@ -43,7 +43,8 @@ export const diaryRoutes: FastifyPluginAsyncZod = async (app) => {
     const stale = await db
       .select({ id: cases.id, title: cases.title, caseNumber: cases.caseNumber, court: cases.court })
       .from(cases)
-      .where(and(visibleCase(req.advocateId), eq(cases.status, "ACTIVE"), hearingOn(lt), not(hearingOn(gte))));
+      // Every active case with no upcoming hearing, including new cases that never had one.
+      .where(and(visibleCase(req.advocateId), eq(cases.status, "ACTIVE"), not(hearingOn(gte))));
     const last = stale.length
       ? await db
           .selectDistinctOn([hearings.caseId], { caseId: hearings.caseId, date: hearings.date, purpose: hearings.purpose })
