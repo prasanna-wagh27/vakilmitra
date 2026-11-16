@@ -20,6 +20,7 @@ import { caseRoutes } from "./routes/cases.js";
 import { clientRoutes } from "./routes/clients.js";
 import { diaryRoutes } from "./routes/diary.js";
 import { documentRoutes } from "./routes/documents.js";
+import { factRoutes } from "./routes/facts.js";
 import { feeRoutes } from "./routes/fees.js";
 import { landRoutes } from "./routes/land.js";
 
@@ -120,6 +121,7 @@ export async function buildApp() {
     await authed.register(feeRoutes, { prefix: "/api/fees" });
     await authed.register(landRoutes, { prefix: "/api" });
     await authed.register(documentRoutes, { prefix: "/api" });
+    await authed.register(factRoutes, { prefix: "/api" });
   });
 
   app.setNotFoundHandler((_req, reply) => reply.code(404).send({ error: "not_found", message: "No such endpoint" }));

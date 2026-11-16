@@ -11,10 +11,47 @@ const caseParams = z.object({ caseId: z.string() });
 const propParams = z.object({ caseId: z.string(), propertyId: z.string() });
 const eventParams = propParams.extend({ eventId: z.string() });
 
-async function propertyInCase(caseId: string, propertyId: string) {
+export async function propertyInCase(caseId: string, propertyId: string) {
   const p = await db.query.properties.findFirst({ where: and(eq(properties.id, propertyId), eq(properties.caseId, caseId)) });
   if (!p) throw notFound("Property");
   return p;
+}
+
+/**
+ * Run the rules over the property's chain. Open flags are replaced with the fresh result;
+ * flags the advocate already resolved stay resolved if the same rule fires on the same events.
+ */
+export async function runPropertyCheck(caseId: string, propertyId: string, locale: "mr" | "en") {
+  const events = await db.query.ownershipEvents.findMany({
+    where: eq(ownershipEvents.propertyId, propertyId),
+    orderBy: [asc(ownershipEvents.date), asc(ownershipEvents.id)],
+  });
+  const results = runRules(events as ChainEvent[], { asOf: new Date() });
+
+  const sig = (rule: string, key: string, eventIds: string[]) => `${rule}|${key}|${[...eventIds].sort().join(",")}`;
+  const resolved = await db.query.flags.findMany({ where: and(eq(flags.propertyId, propertyId), eq(flags.resolved, true)) });
+  const resolvedSigs = new Set(resolved.map((f) => sig(f.rule, f.ruleKey, f.eventIds)));
+  const fresh = results.filter((r) => !resolvedSigs.has(sig(r.rule, r.key ?? "", r.eventIds)));
+
+  const all = await db.transaction(async (tx) => {
+    await tx.delete(flags).where(and(eq(flags.propertyId, propertyId), eq(flags.resolved, false)));
+    if (fresh.length) {
+      await tx.insert(flags).values(
+        fresh.map((r) => ({
+          caseId,
+          propertyId,
+          rule: r.rule,
+          ruleKey: r.key ?? "",
+          severity: r.severity,
+          message: r.message[locale],
+          eventIds: r.eventIds,
+          factIds: r.factIds,
+        })),
+      );
+    }
+    return tx.query.flags.findMany({ where: eq(flags.propertyId, propertyId), orderBy: [asc(flags.resolved), asc(flags.createdAt)] });
+  });
+  return { flags: all, ranAt: new Date(), eventCount: events.length };
 }
 
 /** Properties, their ownership chain, and the deterministic red-flag check. */
@@ -92,45 +129,11 @@ export const landRoutes: FastifyPluginAsyncZod = async (app) => {
     return reply.code(204).send();
   });
 
-  /**
-   * Run the rules over the property's chain. Open flags are replaced with the fresh result;
-   * flags the advocate already resolved stay resolved if the same rule fires on the same events.
-   */
   app.post("/cases/:caseId/properties/:propertyId/check", { schema: { params: propParams, querystring: checkQuery } }, async (req) => {
     const { caseId, propertyId } = req.params;
     await requireCaseAccess(req.advocateId, caseId, "write");
     await propertyInCase(caseId, propertyId);
-    const locale = req.query.lang ?? "mr";
-    const events = await db.query.ownershipEvents.findMany({
-      where: eq(ownershipEvents.propertyId, propertyId),
-      orderBy: [asc(ownershipEvents.date), asc(ownershipEvents.id)],
-    });
-    const results = runRules(events as ChainEvent[], { asOf: new Date() });
-
-    const sig = (rule: string, key: string, eventIds: string[]) => `${rule}|${key}|${[...eventIds].sort().join(",")}`;
-    const resolved = await db.query.flags.findMany({ where: and(eq(flags.propertyId, propertyId), eq(flags.resolved, true)) });
-    const resolvedSigs = new Set(resolved.map((f) => sig(f.rule, f.ruleKey, f.eventIds)));
-    const fresh = results.filter((r) => !resolvedSigs.has(sig(r.rule, r.key ?? "", r.eventIds)));
-
-    const all = await db.transaction(async (tx) => {
-      await tx.delete(flags).where(and(eq(flags.propertyId, propertyId), eq(flags.resolved, false)));
-      if (fresh.length) {
-        await tx.insert(flags).values(
-          fresh.map((r) => ({
-            caseId,
-            propertyId,
-            rule: r.rule,
-            ruleKey: r.key ?? "",
-            severity: r.severity,
-            message: r.message[locale],
-            eventIds: r.eventIds,
-            factIds: r.factIds,
-          })),
-        );
-      }
-      return tx.query.flags.findMany({ where: eq(flags.propertyId, propertyId), orderBy: [asc(flags.resolved), asc(flags.createdAt)] });
-    });
-    return { flags: all, ranAt: new Date(), eventCount: events.length };
+    return runPropertyCheck(caseId, propertyId, req.query.lang ?? "mr");
   });
 
   app.patch(

@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
+  Extraction,
   Advocate,
   CaseAccessLevel,
   CaseDetail,
@@ -123,6 +124,12 @@ export const searchQuery = (q: string, caseId?: string) =>
     queryKey: ["search", q, caseId],
     queryFn: () => api<{ hits: SearchHit[] }>("/search", { query: { q, caseId } }).then((r) => r.hits),
     enabled: q.trim().length >= 2,
+  });
+
+export const factsQuery = (documentId: string) =>
+  queryOptions({
+    queryKey: ["facts", documentId],
+    queryFn: () => api<{ extraction: Extraction }>(`/documents/${documentId}/facts`).then((r) => r.extraction),
   });
 
 export const pageImageUrl = (documentId: string, pageId: string) => `${API_BASE}/api/documents/${documentId}/pages/${pageId}/image`;

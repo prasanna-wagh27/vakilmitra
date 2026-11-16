@@ -287,8 +287,11 @@ export const facts = pgTable(
       .references(() => cases.id, { onDelete: "cascade" }),
     documentId: text("document_id").references(() => documents.id, { onDelete: "cascade" }),
     pageId: text("page_id").references(() => pages.id, { onDelete: "set null" }),
-    field: text("field").notNull(), // e.g. owner_name, area, land_class, ferfar_no
+    field: text("field").notNull(), // e.g. owner, area, land_class, ferfar_no (see FACT_FIELDS)
     value: text("value").notNull(),
+    // What the extractor read, kept when the advocate corrects the value (null for facts added by hand).
+    originalValue: text("original_value"),
+    position: integer("position").notNull().default(0), // order among facts of the same field (owners)
     confidence: real("confidence").notNull().default(1),
     // Source crop on the page, as fractions (0..1) of page width/height.
     cropX: real("crop_x"),
@@ -301,7 +304,7 @@ export const facts = pgTable(
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [index("fact_case_field_idx").on(t.caseId, t.field)],
+  (t) => [index("fact_case_field_idx").on(t.caseId, t.field), index("fact_document_idx").on(t.documentId)],
 );
 
 export const ownershipEvents = pgTable(
@@ -326,6 +329,7 @@ export const ownershipEvents = pgTable(
     otherRights: textArray("other_rights"), // इतर हक्क column
     section155: boolean("section_155").notNull().default(false),
     factIds: textArray("fact_ids"), // facts this event was built from
+    documentId: text("document_id").references(() => documents.id, { onDelete: "set null" }), // record it was built from
     notes: text("notes"),
     createdAt: createdAt(),
   },
@@ -510,6 +514,7 @@ export const factsRelations = relations(facts, ({ one }) => ({
 }));
 export const ownershipEventsRelations = relations(ownershipEvents, ({ one }) => ({
   property: one(properties, { fields: [ownershipEvents.propertyId], references: [properties.id] }),
+  document: one(documents, { fields: [ownershipEvents.documentId], references: [documents.id] }),
 }));
 export const flagsRelations = relations(flags, ({ one }) => ({
   case: one(cases, { fields: [flags.caseId], references: [cases.id] }),
