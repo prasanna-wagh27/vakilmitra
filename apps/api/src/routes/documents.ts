@@ -101,7 +101,7 @@ export const documentRoutes: FastifyPluginAsyncZod = async (app) => {
     const pageRows = await db.query.pages.findMany({
       where: eq(pages.documentId, doc.id),
       orderBy: asc(pages.pageNo),
-      columns: { ...pageSummary, ocrText: true, ocrWords: true },
+      columns: { ...pageSummary, ocrText: true, ocrWords: true, ocrEngine: true, ocrRoute: true },
     });
     await logAccess(req, "document.view", "document", doc.id);
     const { case: _c, ...document } = doc;

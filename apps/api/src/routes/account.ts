@@ -5,9 +5,20 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { auth } from "../auth.js";
 import { db } from "../db.js";
+import { logAccess } from "../lib/access.js";
 import { HttpError } from "../lib/http.js";
 
-const profile = { id: true, name: true, email: true, phone: true, barCouncilNo: true, locale: true, createdAt: true } as const;
+const profile = {
+  id: true,
+  name: true,
+  email: true,
+  phone: true,
+  barCouncilNo: true,
+  locale: true,
+  cloudOcrConsent: true,
+  cloudOcrConsentAt: true,
+  createdAt: true,
+} as const;
 
 export const accountRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", async (req) => {
@@ -17,14 +28,16 @@ export const accountRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.patch("/", { schema: { body: updateProfileInput } }, async (req) => {
-    const [advocate] = await db.update(advocates).set(req.body).where(eq(advocates.id, req.advocateId)).returning({
-      id: advocates.id,
-      name: advocates.name,
-      email: advocates.email,
-      phone: advocates.phone,
-      barCouncilNo: advocates.barCouncilNo,
-      locale: advocates.locale,
-    });
+    const { cloudOcrConsent, ...rest } = req.body;
+    const consent = cloudOcrConsent === undefined ? {} : { cloudOcrConsent, cloudOcrConsentAt: cloudOcrConsent ? new Date() : null };
+    await db
+      .update(advocates)
+      .set({ ...rest, ...consent })
+      .where(eq(advocates.id, req.advocateId));
+    // Consent changes are part of the DPDP audit trail.
+    if (cloudOcrConsent !== undefined)
+      await logAccess(req, `consent.cloud_ocr.${cloudOcrConsent ? "on" : "off"}`, "advocate", req.advocateId);
+    const advocate = await db.query.advocates.findFirst({ where: eq(advocates.id, req.advocateId), columns: profile });
     return { advocate };
   });
 

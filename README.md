@@ -70,7 +70,9 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - **Capture:** the scanner screen uses the camera inside the page (`getUserMedia`), so no photo lands in the phone's gallery. OpenCV.js finds the page edges, the advocate can drag the corners, and the page is flattened before upload. OpenCV (~3.5 MB gzipped) loads only on the scanner screen, as a static script.
 - **Upload:** one page per request, idempotent per page number, retried with backoff on poor connections. The API re-encodes every image, which strips EXIF (including GPS), then encrypts it before storing.
 - **Encryption:** every file gets its own random key (AES-256-GCM, bound to its storage path). Those keys are wrapped with a master key from `STORAGE_MASTER_KEYS`, which never goes in the bucket. List several keys to rotate: the first encrypts, all decrypt.
-- **OCR:** Tesseract (Marathi + English) runs in `apps/worker`, so page images never leave our servers. It stores text, mean confidence and word boxes (for source-crop links in the next milestone). Swap or add engines in `packages/ocr`; a cloud vision model needs evals on real 7/12s first (see the eval checklist item).
+- **OCR:** Tesseract (Marathi + English) always reads first in `apps/worker`, on our servers. Two cloud engines can take over hard pages: **Sarvam Vision** (built for Indian languages, called over its REST API) and **Gemini** (Vercel AI SDK; Vertex AI in Mumbai by default). The worker stores text, confidence, word or line boxes, and which engine and route read each page.
+- **Cloud OCR needs consent:** a page goes to a cloud engine only if the case's advocate turned on "Read hard pages with cloud OCR" in Settings (off by default; the change is logged). Then `OCR_CLOUD_MODE=fallback` sends only pages Tesseract reads below `OCR_CLOUD_BELOW` (default 0.85), and `always` sends every page. Every page sent is recorded in the access log. If the cloud call fails, the local reading is kept.
+- **Choosing the engine:** decided by the eval harness on real labelled pages, scored against the spec's field targets. See [`packages/ocr/eval/README.md`](packages/ocr/eval/README.md).
 - **Search:** trigram (`pg_trgm`) substring search over OCR text, which works for Devanagari where word tokenisers struggle.
 - **Deletes:** deleting a page, document, case or account removes its encrypted files as well as its rows.
 
@@ -90,7 +92,7 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - [x] Env vars validated with Zod at boot; no secrets in git
 - [ ] Sentry, PostHog; Langfuse when AI work starts
 - [x] CI license check passes (no banned licenses)
-- [ ] AI eval set (at least 20 real cases) before the extraction feature launches
+- [ ] AI eval set (at least 20 real cases) before the extraction feature launches. The harness is ready (`packages/ocr/eval`); it needs real labelled pages.
 - [ ] Daily backups running and a restore tested
 
 ## Exceptions to the standard

@@ -1,134 +1,114 @@
 /**
- * OCR behind one small interface, so engines can be swapped or compared by evals.
- * Default engine: Tesseract (Marathi + English) running on our own servers. No page image
- * leaves our infrastructure, which keeps client files private by default.
+ * OCR behind one small interface, so engines can be compared by evals and swapped by config.
+ *
+ * Policy (see `readPage`): Tesseract on our own servers always reads first. A cloud engine
+ * (Sarvam Vision or Gemini) is used only when the case's advocate has consented to cloud reading,
+ * and then either for every page or only for pages Tesseract was unsure about.
  */
-import { copyFile, mkdir, stat } from "node:fs/promises";
-import { createRequire } from "node:module";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import sharp from "sharp";
-import { createWorker, OEM, type Worker } from "tesseract.js";
+import { z } from "zod";
+import { DEFAULT_GEMINI_MODEL, GeminiEngine } from "./gemini.js";
+import { SarvamEngine } from "./sarvam.js";
+import { TesseractEngine } from "./tesseract.js";
+import type { OcrEngine, OcrHints, OcrResult } from "./types.js";
 
-export interface OcrWord {
-  /** text */
-  t: string;
-  /** confidence 0..1 */
-  c: number;
-  /** box as fractions of page width/height: [x0, y0, x1, y1] */
-  b: [number, number, number, number];
+export { DEFAULT_GEMINI_MODEL, type GeminiConfig, GeminiEngine, TRANSCRIBE_PROMPT, transcriptionSchema } from "./gemini.js";
+export * from "./metrics.js";
+export { markdownToText, type SarvamConfig, SarvamEngine } from "./sarvam.js";
+export { preprocess, TesseractEngine } from "./tesseract.js";
+export type { OcrEngine, OcrHints, OcrResult, OcrWord } from "./types.js";
+
+export const CLOUD_ENGINES = ["sarvam", "gemini"] as const;
+export type CloudEngineName = (typeof CLOUD_ENGINES)[number];
+
+const envSchema = z.object({
+  OCR_CLOUD_ENGINE: z.enum(["none", ...CLOUD_ENGINES]).default("none"),
+  // fallback: only pages Tesseract reads below OCR_CLOUD_BELOW; always: every page.
+  OCR_CLOUD_MODE: z.enum(["fallback", "always"]).default("fallback"),
+  OCR_CLOUD_BELOW: z.coerce.number().min(0).max(1).default(0.85),
+  SARVAM_API_KEY: z.string().optional(),
+  SARVAM_BASE_URL: z.url().optional(),
+  SARVAM_MODEL: z.string().optional(),
+  GEMINI_PROVIDER: z.enum(["vertex", "google"]).default("vertex"),
+  GEMINI_MODEL: z.string().default(DEFAULT_GEMINI_MODEL),
+  GOOGLE_VERTEX_PROJECT: z.string().optional(),
+  GOOGLE_VERTEX_LOCATION: z.string().default("asia-south1"),
+  GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
+});
+
+export type OcrEnv = z.infer<typeof envSchema>;
+
+export function ocrEnv(env: Record<string, string | undefined>): OcrEnv {
+  return envSchema.parse(env);
 }
 
-export interface OcrResult {
-  engine: string;
-  text: string;
-  /** mean confidence 0..1 */
-  confidence: number;
-  words: OcrWord[];
-  width: number;
-  height: number;
-}
-
-export interface OcrEngine {
-  readonly name: string;
-  recognize(image: Buffer): Promise<OcrResult>;
-  close(): Promise<void>;
-}
-
-/** Longest side after preprocessing. Enough for small Devanagari matras, small enough to be fast. */
-const MAX_SIDE = 2400;
-
-/** EXIF-rotate, cap size, grayscale and stretch contrast. Returns PNG for the engine. */
-export async function preprocess(image: Buffer) {
-  const { data, info } = await sharp(image, { failOn: "error" })
-    .rotate()
-    .resize({ width: MAX_SIDE, height: MAX_SIDE, fit: "inside", withoutEnlargement: true })
-    .grayscale()
-    .normalize()
-    .png()
-    .toBuffer({ resolveWithObject: true });
-  return { png: data, width: info.width, height: info.height };
-}
-
-const round = (n: number) => Math.round(n * 10_000) / 10_000;
-
-/** Put both language files in one folder, since Tesseract takes a single language path. */
-async function stageLanguageData(langs: string[]): Promise<string> {
-  const require = createRequire(import.meta.url);
-  const dir = join(tmpdir(), "vakilmitra-tessdata");
-  await mkdir(dir, { recursive: true });
-  for (const lang of langs) {
-    const pkgDir = join(require.resolve(`@tesseract.js-data/${lang}/package.json`), "..");
-    const src = join(pkgDir, "4.0.0_best_int", `${lang}.traineddata.gz`);
-    const dest = join(dir, `${lang}.traineddata.gz`);
-    const exists = await stat(dest).then(
-      (s) => s.size > 0,
-      () => false,
-    );
-    if (!exists) await copyFile(src, dest);
-  }
-  return dir;
-}
-
-export class TesseractEngine implements OcrEngine {
-  readonly name: string;
-  private worker: Promise<Worker> | null = null;
-
-  constructor(private langs: string[] = ["mar", "eng"]) {
-    this.name = `tesseract-${langs.join("+")}`;
-  }
-
-  private getWorker() {
-    this.worker ??= (async () => {
-      const langPath = await stageLanguageData(this.langs);
-      const w = await createWorker(this.langs, OEM.LSTM_ONLY, { langPath, gzip: true, cacheMethod: "none" });
-      await w.setParameters({ preserve_interword_spaces: "1" });
-      return w;
-    })();
-    return this.worker;
-  }
-
-  async recognize(image: Buffer): Promise<OcrResult> {
-    const { png, width, height } = await preprocess(image);
-    const worker = await this.getWorker();
-    // rotateAuto straightens slightly skewed phone photos before reading.
-    const { data } = await worker.recognize(png, { rotateAuto: true }, { text: true, blocks: true });
-    const words: OcrWord[] = [];
-    for (const block of data.blocks ?? []) {
-      for (const para of block.paragraphs) {
-        for (const line of para.lines) {
-          for (const w of line.words) {
-            const t = w.text.normalize("NFC").trim();
-            if (!t) continue;
-            words.push({
-              t,
-              c: round(w.confidence / 100),
-              b: [round(w.bbox.x0 / width), round(w.bbox.y0 / height), round(w.bbox.x1 / width), round(w.bbox.y1 / height)],
-            });
-          }
-        }
-      }
-    }
-    return {
-      engine: this.name,
-      text: data.text
-        .normalize("NFC")
-        .replace(/[ \t]+\n/g, "\n")
-        .trim(),
-      confidence: round((data.confidence ?? 0) / 100),
-      words,
-      width,
-      height,
-    };
-  }
-
-  async close() {
-    if (this.worker) await (await this.worker).terminate();
-    this.worker = null;
-  }
-}
-
-export function createOcrEngine(name: string): OcrEngine {
+/** Build one engine by name from env. Throws with a clear message when its keys are missing. */
+export function createEngine(name: "tesseract" | CloudEngineName, env: OcrEnv): OcrEngine {
   if (name === "tesseract") return new TesseractEngine();
-  throw new Error(`Unknown OCR engine "${name}"`);
+  if (name === "sarvam") {
+    if (!env.SARVAM_API_KEY) throw new Error("SARVAM_API_KEY is required for the sarvam engine");
+    return new SarvamEngine({ apiKey: env.SARVAM_API_KEY, baseUrl: env.SARVAM_BASE_URL, model: env.SARVAM_MODEL });
+  }
+  if (env.GEMINI_PROVIDER === "vertex") {
+    if (!env.GOOGLE_VERTEX_PROJECT) throw new Error("GOOGLE_VERTEX_PROJECT is required for gemini on Vertex AI");
+    return new GeminiEngine({
+      provider: "vertex",
+      model: env.GEMINI_MODEL,
+      project: env.GOOGLE_VERTEX_PROJECT,
+      location: env.GOOGLE_VERTEX_LOCATION,
+    });
+  }
+  if (!env.GOOGLE_GENERATIVE_AI_API_KEY) throw new Error("GOOGLE_GENERATIVE_AI_API_KEY is required for gemini on the Gemini API");
+  return new GeminiEngine({ provider: "google", model: env.GEMINI_MODEL, apiKey: env.GOOGLE_GENERATIVE_AI_API_KEY });
 }
+
+export interface ReadPolicy {
+  local: OcrEngine;
+  cloud: OcrEngine | null;
+  mode: "fallback" | "always";
+  /** In fallback mode, pages with local confidence below this go to the cloud engine. */
+  below: number;
+}
+
+export function policyFromEnv(env: OcrEnv): ReadPolicy {
+  return {
+    local: createEngine("tesseract", env),
+    cloud: env.OCR_CLOUD_ENGINE === "none" ? null : createEngine(env.OCR_CLOUD_ENGINE, env),
+    mode: env.OCR_CLOUD_MODE,
+    below: env.OCR_CLOUD_BELOW,
+  };
+}
+
+export interface ReadOutcome {
+  result: OcrResult;
+  /** Why this engine's result was kept. */
+  route: "local" | "local:no-consent" | "local:confident" | "cloud" | "local:cloud-failed";
+  localConfidence: number | null;
+  cloudError?: string;
+}
+
+/**
+ * Read one page under the policy. A page image goes to a cloud engine only when `cloudAllowed`
+ * (the case owner's consent) is true. If the cloud call fails, the local result is kept.
+ */
+export async function readPage(policy: ReadPolicy, image: Buffer, opts: { cloudAllowed: boolean; hints?: OcrHints }): Promise<ReadOutcome> {
+  const { cloud } = policy;
+  if (cloud && opts.cloudAllowed && policy.mode === "always") {
+    try {
+      return { result: await cloud.recognize(image, opts.hints), route: "cloud", localConfidence: null };
+    } catch (e) {
+      const local = await policy.local.recognize(image, opts.hints);
+      return { result: local, route: "local:cloud-failed", localConfidence: local.confidence, cloudError: errorMessage(e) };
+    }
+  }
+  const local = await policy.local.recognize(image, opts.hints);
+  if (!cloud) return { result: local, route: "local", localConfidence: local.confidence };
+  if (!opts.cloudAllowed) return { result: local, route: "local:no-consent", localConfidence: local.confidence };
+  if ((local.confidence ?? 0) >= policy.below) return { result: local, route: "local:confident", localConfidence: local.confidence };
+  try {
+    return { result: await cloud.recognize(image, opts.hints), route: "cloud", localConfidence: local.confidence };
+  } catch (e) {
+    return { result: local, route: "local:cloud-failed", localConfidence: local.confidence, cloudError: errorMessage(e) };
+  }
+}
+
+const errorMessage = (e: unknown) => (e instanceof Error ? e.message : String(e));

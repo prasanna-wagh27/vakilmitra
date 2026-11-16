@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import type { Advocate } from "@vakilmitra/shared";
 import { useState } from "react";
@@ -9,10 +9,10 @@ import { ErrorBox, Field, PageHeader, Section } from "@/components/common";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Checkbox, Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
-import { orNull } from "@/lib/format";
+import { fmtDate, orNull } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { meQuery, useApiMutation } from "@/lib/queries";
 
@@ -80,6 +80,8 @@ function SettingsPage() {
         </form>
       </Section>
 
+      <CloudOcrConsent />
+
       <Section title={t("settings.privacy")}>
         <Card>
           <p className="text-sm">{t("settings.privacyText")}</p>
@@ -118,5 +120,42 @@ function SettingsPage() {
         </form>
       </Section>
     </>
+  );
+}
+
+/** Consent to send hard-to-read pages to a cloud OCR provider. Off by default; every change is logged. */
+function CloudOcrConsent() {
+  const { t, tf, locale } = useI18n();
+  const qc = useQueryClient();
+  const me = useQuery(meQuery);
+  // Optimistic: the box changes in the same click (no flicker on slow connections) and
+  // falls back to the saved value if the save fails.
+  const [pending, setPending] = useState<boolean | null>(null);
+  const toggle = useApiMutation((on: boolean) => api<{ advocate: Advocate }>("/me", { method: "PATCH", body: { cloudOcrConsent: on } }), {
+    onSuccess: (r) => qc.setQueryData(meQuery.queryKey, r.advocate),
+  });
+  const on = pending ?? me.data?.cloudOcrConsent ?? false;
+  const change = (next: boolean) => {
+    setPending(next);
+    toggle.mutate(next, { onSettled: () => setPending(null) });
+  };
+  return (
+    <Section title={t("settings.cloudOcr")}>
+      <Card>
+        <label className="flex min-h-11 items-start gap-3">
+          <Checkbox className="mt-1" checked={on} disabled={toggle.isPending || !me.data} onChange={(e) => change(e.target.checked)} />
+          <span className="text-sm">
+            <span className="block font-medium">{t("settings.cloudOcr")}</span>
+            <span className="block text-muted-foreground">{t("settings.cloudOcrText")}</span>
+            {on && me.data?.cloudOcrConsentAt && (
+              <span className="mt-1 block text-primary">
+                {tf("settings.cloudOcrOn", { date: fmtDate(me.data.cloudOcrConsentAt, locale) })}
+              </span>
+            )}
+          </span>
+        </label>
+        <ErrorBox error={toggle.error} />
+      </Card>
+    </Section>
   );
 }
