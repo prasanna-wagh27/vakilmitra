@@ -95,4 +95,13 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 
 ## Exceptions to the standard
 
-None. (`@fastify/swagger-ui` pulls in BlueOak-1.0.0 packages, so it is a dev-only dependency. It is not loaded in production and is not part of the shipped dependency tree.)
+### sharp / libvips (LGPL-3.0), Review tier
+
+1. **What and why:** `sharp` (Apache-2.0) is the image library that re-encodes uploads (stripping EXIF/GPS) and prepares pages for OCR. It ships prebuilt **libvips** binaries (`@img/sharp-libvips-*`), which are LGPL-3.0. The permissive alternatives are slower or less proven for this job.
+2. **License, pricing, exit path:** free. Used unmodified, dynamically linked, only on our servers; nothing is distributed to browsers or phones, and LGPL has no network clause. If this changes, image handling sits in two places (`apps/api/src/routes/documents.ts`, `packages/ocr`) and can move to an MIT/Apache library such as `@napi-rs/image`.
+3. **Approved by:** Prasanna Wagh, 2026-11-16. The license gate (`scripts/check-licenses.mjs`) allowlists only `@img/sharp-libvips-*`.
+4. **New default for future projects?** No: decide per project.
+
+### Dev-only note
+
+`@fastify/swagger-ui` pulls in BlueOak-1.0.0 packages, so it is a dev-only dependency. It is not loaded in production and is not part of the shipped dependency tree, so no exception is needed.

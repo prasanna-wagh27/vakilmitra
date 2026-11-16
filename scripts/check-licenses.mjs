@@ -11,8 +11,14 @@ const ALLOWED = new Set(["MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "I
 const BANNED = /\b(A?GPL|SSPL|BUSL|BSL|Elastic|Commons[- ]Clause|Sustainable[- ]Use|UNLICENSED|UNKNOWN)\b/i;
 const REVIEW = /\b(LGPL|EPL)\b/i;
 
-/** Packages approved through the exception process: "name": "who approved, when, why". */
-const REVIEWED = {};
+/**
+ * Packages approved through the exception process (see README, "Exceptions to the standard").
+ * Keys are package names; a trailing "*" matches a family of platform builds.
+ */
+const REVIEWED = {
+  "@img/sharp-libvips-*": "LGPL-3.0, approved by Prasanna Wagh on 2026-11-16: unmodified prebuilt libvips under sharp, server-side only",
+};
+const reviewed = (name) => Object.keys(REVIEWED).some((k) => (k.endsWith("*") ? name.startsWith(k.slice(0, -1)) : name === k));
 
 /** "MIT OR Apache-2.0" passes if any alternative is allowed; "A AND B" needs all. */
 function allowed(expr) {
@@ -27,7 +33,7 @@ const problems = [];
 for (const [license, pkgs] of Object.entries(report)) {
   if (allowed(license) && !BANNED.test(license)) continue;
   for (const p of pkgs) {
-    if (REVIEWED[p.name] && !BANNED.test(license)) continue;
+    if (reviewed(p.name) && !BANNED.test(license)) continue;
     const kind = BANNED.test(license) ? "BANNED" : REVIEW.test(license) ? "NEEDS REVIEW" : "NOT ON ALLOWED LIST";
     problems.push(`${kind}: ${p.name}@${p.versions.join(",")} (${license})`);
   }
