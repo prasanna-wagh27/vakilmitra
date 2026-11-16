@@ -26,11 +26,11 @@ function FeesPage() {
             <Card className="mb-4 grid grid-cols-2 gap-3">
               <div>
                 <p className="text-sm text-muted-foreground">{t("fees.outstanding")}</p>
-                <p className="text-2xl font-bold">{rupees(data.totals.outstandingPaise, locale)}</p>
+                <p className="font-display text-3xl">{rupees(data.totals.outstandingPaise, locale)}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t("fees.overdue")}</p>
-                <p className={`text-2xl font-bold ${data.totals.overduePaise ? "text-destructive" : ""}`}>
+                <p className={`font-display text-3xl ${data.totals.overduePaise ? "text-destructive" : ""}`}>
                   {rupees(data.totals.overduePaise, locale)}
                 </p>
               </div>
@@ -41,7 +41,7 @@ function FeesPage() {
             {owing.length === 0 ? (
               <Empty>{t("fees.allClear")}</Empty>
             ) : (
-              <ul className="divide-y rounded-2xl border bg-card">
+              <ul className="panel divide-y overflow-hidden">
                 {owing.map((c) => (
                   <li key={c.clientId}>
                     <Link

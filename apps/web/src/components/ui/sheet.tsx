@@ -20,17 +20,18 @@ export function Sheet({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-[rgb(17_17_20/0.45)] backdrop-blur-[2px]" />
         <Dialog.Content
           aria-describedby={undefined}
           className={cn(
-            "fixed inset-x-0 bottom-0 z-50 max-h-[92dvh] overflow-y-auto rounded-t-3xl border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-xl sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl",
+            "fixed inset-x-0 bottom-0 z-50 max-h-[92dvh] overflow-y-auto rounded-t-3xl border bg-card px-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[var(--shadow-float)] sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl",
             className,
           )}
         >
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <Dialog.Title className="text-lg font-semibold">{title}</Dialog.Title>
-            <Dialog.Close className="flex size-11 items-center justify-center rounded-full hover:bg-muted" aria-label="Close">
+          <div aria-hidden className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-muted sm:hidden" />
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <Dialog.Title className="font-display text-2xl">{title}</Dialog.Title>
+            <Dialog.Close className="icon-ring size-11 hover:bg-muted" aria-label="Close">
               <X className="size-5" />
             </Dialog.Close>
           </div>

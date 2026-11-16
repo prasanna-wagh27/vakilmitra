@@ -7,7 +7,7 @@ function NotFound() {
   return (
     <div className="p-10 text-center">
       <p className="mb-3">404</p>
-      <Link to="/" className="text-primary underline">
+      <Link to="/" className="text-accent underline underline-offset-4">
         {t("nav.today")}
       </Link>
     </div>

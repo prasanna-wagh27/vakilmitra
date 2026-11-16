@@ -48,7 +48,7 @@ function SearchPage() {
                 to="/cases/$caseId/documents/$documentId"
                 params={{ caseId: h.caseId, documentId: h.documentId }}
                 search={{ page: h.pageNo }}
-                className="block rounded-2xl border bg-card p-3 hover:bg-muted"
+                className="row-card block p-4"
               >
                 <div className="mb-1 flex flex-wrap items-center gap-2 text-sm">
                   <span className="font-semibold">{h.caseTitle}</span>

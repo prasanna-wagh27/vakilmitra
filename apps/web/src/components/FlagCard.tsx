@@ -21,11 +21,7 @@ export function FlagCard({
   const { t } = useI18n();
   return (
     <div
-      className={cn(
-        "rounded-2xl border bg-card p-3",
-        flag.resolved && "opacity-60",
-        !flag.resolved && flag.severity === "HIGH" && "border-destructive/40",
-      )}
+      className={cn("row-card p-4", flag.resolved && "opacity-60", !flag.resolved && flag.severity === "HIGH" && "border-destructive/40")}
     >
       <div className="mb-1 flex flex-wrap items-center gap-2">
         <Badge tone={flag.resolved ? "green" : tone[flag.severity]}>
@@ -37,7 +33,7 @@ export function FlagCard({
       <p className={compact ? "text-sm" : ""}>{flag.message}</p>
       {flag.resolution && <p className="mt-1 text-sm text-muted-foreground">✓ {flag.resolution}</p>}
       {onSource && flag.eventIds.length > 0 && (
-        <button type="button" className="mt-1 text-sm text-primary underline" onClick={() => onSource(flag.eventIds)}>
+        <button type="button" className="mt-1 text-sm text-accent underline underline-offset-4" onClick={() => onSource(flag.eventIds)}>
           {t("land.sources")} ({flag.eventIds.length})
         </button>
       )}
