@@ -30,7 +30,9 @@ export async function runMigrations(url: string) {
     await client.query("SELECT pg_advisory_lock($1)", [MIGRATION_LOCK_ID]);
     try {
       // Same connection as the lock: the pool has exactly one client.
-      await migrate(drizzle(client, { schema, casing: "snake_case" }), { migrationsFolder: new URL("../migrations", import.meta.url).pathname });
+      await migrate(drizzle(client, { schema, casing: "snake_case" }), {
+        migrationsFolder: new URL("../migrations", import.meta.url).pathname,
+      });
     } finally {
       await client.query("SELECT pg_advisory_unlock($1)", [MIGRATION_LOCK_ID]);
     }
