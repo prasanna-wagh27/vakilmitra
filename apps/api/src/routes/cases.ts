@@ -19,11 +19,13 @@ import {
   properties,
 } from "@vakilmitra/db";
 import { caseInput, caseListQuery, grantInput, istDayRange, partyInput } from "@vakilmitra/shared";
+import { keys } from "@vakilmitra/storage";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { db } from "../db.js";
 import { logAccess, requireCaseAccess, requireCaseOwner, visibleCase } from "../lib/access.js";
 import { HttpError, likePattern, notFound } from "../lib/http.js";
+import { getServices } from "../services.js";
 
 const idParams = z.object({ id: z.string() });
 
@@ -142,6 +144,8 @@ export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
   app.delete("/:id", { schema: { params: idParams } }, async (req, reply) => {
     await requireCaseOwner(req.advocateId, req.params.id);
     await db.delete(cases).where(eq(cases.id, req.params.id));
+    // Delete scanned files after the rows: a failure here leaves unreachable ciphertext, never a dangling row.
+    await getServices().storage.deletePrefix(keys.case(req.advocateId, req.params.id));
     await logAccess(req, "case.delete", "case", req.params.id);
     return reply.code(204).send();
   });

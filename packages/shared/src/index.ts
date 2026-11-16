@@ -29,6 +29,20 @@ export const MUTATION_SUBTYPES = [
 ] as const;
 export const SEVERITIES = ["HIGH", "MEDIUM", "LOW"] as const;
 export const PAYMENT_MODES = ["cash", "upi", "cheque", "bank"] as const;
+export const DOC_TYPES = [
+  "SEVEN_TWELVE",
+  "FERFAR",
+  "EIGHT_A",
+  "INDEX_II",
+  "SALE_DEED",
+  "GIFT_DEED",
+  "WILL",
+  "PARTITION_DEED",
+  "MORTGAGE_DEED",
+  "COURT_ORDER",
+  "OTHER",
+] as const;
+export const OCR_STATUSES = ["PENDING", "PROCESSING", "DONE", "FAILED"] as const;
 
 export type Locale = (typeof LOCALES)[number];
 export type CaseKind = (typeof CASE_KINDS)[number];
@@ -38,6 +52,8 @@ export type CaseRole = (typeof CASE_ROLES)[number];
 export type EventKind = (typeof EVENT_KINDS)[number];
 export type Severity = (typeof SEVERITIES)[number];
 export type PaymentMode = (typeof PAYMENT_MODES)[number];
+export type DocType = (typeof DOC_TYPES)[number];
+export type OcrStatus = (typeof OCR_STATUSES)[number];
 export type CaseAccessLevel = "OWNER" | CaseRole;
 
 // ---------- Building blocks ----------
@@ -178,6 +194,24 @@ export const paymentInput = z.object({
 export type PaymentInput = z.input<typeof paymentInput>;
 
 export const searchQuery = z.object({ q: z.string().trim().max(200).optional() });
+
+export const documentInput = z.object({
+  type: z.enum(DOC_TYPES).default("OTHER"),
+  year: z.number().int().min(1800).max(2100).nullable().optional(),
+  title: optText(200),
+  propertyId: z.string().nullable().optional(),
+  source: z.enum(["scan", "upload"]).default("scan"),
+});
+export type DocumentInput = z.input<typeof documentInput>;
+export const documentUpdateInput = documentInput.omit({ source: true }).partial();
+
+/** Upload limits shared by clients (to resize before sending) and the API (to enforce). */
+export const PAGE_UPLOAD = { maxBytes: 15 * 1024 * 1024, maxPages: 300, types: ["image/jpeg", "image/png", "image/webp"] } as const;
+
+export const textSearchQuery = z.object({
+  q: z.string().trim().min(2).max(200),
+  caseId: z.string().optional(),
+});
 
 // ---------- Response shapes (dates are ISO strings over the wire) ----------
 
@@ -320,6 +354,48 @@ export interface ClientTotals {
   overduePaise: number;
   nextDue: { date: string; amountPaise: number } | null;
 }
+export interface PageSummary {
+  id: string;
+  pageNo: number;
+  width: number | null;
+  height: number | null;
+  ocrStatus: OcrStatus;
+  ocrConfidence: number | null;
+  ocrError: string | null;
+}
+export interface PageDetail extends PageSummary {
+  ocrText: string | null;
+  ocrWords: { t: string; c: number; b: [number, number, number, number] }[] | null;
+}
+export interface DocumentSummary {
+  id: string;
+  caseId: string;
+  propertyId: string | null;
+  type: DocType;
+  year: number | null;
+  title: string | null;
+  source: string;
+  ocrStatus: OcrStatus;
+  pageCount: number;
+  createdAt: string;
+}
+export interface DocumentDetail extends DocumentSummary {
+  pages: PageDetail[];
+}
+export interface SearchHit {
+  pageId: string;
+  pageNo: number;
+  documentId: string;
+  documentType: DocType;
+  documentTitle: string | null;
+  caseId: string;
+  caseTitle: string;
+  /** Text around the first match; the match is at [matchStart, matchEnd). */
+  snippet: string;
+  matchStart: number;
+  matchEnd: number;
+}
+
 export interface FeeTotals {
   totalPaise: number;
   paidPaise: number;

@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppDiaryRouteImport } from './routes/_app/diary'
+import { Route as AppSearchRouteImport } from './routes/_app/search'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppCasesIndexRouteImport } from './routes/_app/cases/index'
 import { Route as AppCasesNewRouteImport } from './routes/_app/cases/new'
@@ -21,7 +22,9 @@ import { Route as AppClientsIndexRouteImport } from './routes/_app/clients/index
 import { Route as AppClientsClientIdRouteImport } from './routes/_app/clients/$clientId'
 import { Route as AppFeesIndexRouteImport } from './routes/_app/fees/index'
 import { Route as AppCasesCaseIdIndexRouteImport } from './routes/_app/cases/$caseId/index'
+import { Route as AppCasesCaseIdScanRouteImport } from './routes/_app/cases/$caseId/scan'
 import { Route as AppFeesInvoiceClientIdRouteImport } from './routes/_app/fees/invoice/$clientId'
+import { Route as AppCasesCaseIdDocumentsDocumentIdRouteImport } from './routes/_app/cases/$caseId/documents/$documentId'
 import { Route as AppCasesCaseIdPropertiesPropertyIdRouteImport } from './routes/_app/cases/$caseId/properties/$propertyId'
 
 const AppRoute = AppRouteImport.update({
@@ -46,6 +49,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppDiaryRoute = AppDiaryRouteImport.update({
   id: '/diary',
   path: '/diary',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSearchRoute = AppSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
@@ -83,11 +91,22 @@ const AppCasesCaseIdIndexRoute = AppCasesCaseIdIndexRouteImport.update({
   path: '/cases/$caseId/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCasesCaseIdScanRoute = AppCasesCaseIdScanRouteImport.update({
+  id: '/cases/$caseId/scan',
+  path: '/cases/$caseId/scan',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppFeesInvoiceClientIdRoute = AppFeesInvoiceClientIdRouteImport.update({
   id: '/fees/invoice/$clientId',
   path: '/fees/invoice/$clientId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCasesCaseIdDocumentsDocumentIdRoute =
+  AppCasesCaseIdDocumentsDocumentIdRouteImport.update({
+    id: '/cases/$caseId/documents/$documentId',
+    path: '/cases/$caseId/documents/$documentId',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppCasesCaseIdPropertiesPropertyIdRoute =
   AppCasesCaseIdPropertiesPropertyIdRouteImport.update({
     id: '/cases/$caseId/properties/$propertyId',
@@ -100,20 +119,24 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/diary': typeof AppDiaryRoute
+  '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
   '/cases/new': typeof AppCasesNewRoute
   '/clients/$clientId': typeof AppClientsClientIdRoute
   '/cases/': typeof AppCasesIndexRoute
   '/clients/': typeof AppClientsIndexRoute
   '/fees/': typeof AppFeesIndexRoute
+  '/cases/$caseId/scan': typeof AppCasesCaseIdScanRoute
   '/fees/invoice/$clientId': typeof AppFeesInvoiceClientIdRoute
   '/cases/$caseId/': typeof AppCasesCaseIdIndexRoute
+  '/cases/$caseId/documents/$documentId': typeof AppCasesCaseIdDocumentsDocumentIdRoute
   '/cases/$caseId/properties/$propertyId': typeof AppCasesCaseIdPropertiesPropertyIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/diary': typeof AppDiaryRoute
+  '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
   '/cases/new': typeof AppCasesNewRoute
@@ -121,8 +144,10 @@ export interface FileRoutesByTo {
   '/cases': typeof AppCasesIndexRoute
   '/clients': typeof AppClientsIndexRoute
   '/fees': typeof AppFeesIndexRoute
+  '/cases/$caseId/scan': typeof AppCasesCaseIdScanRoute
   '/fees/invoice/$clientId': typeof AppFeesInvoiceClientIdRoute
   '/cases/$caseId': typeof AppCasesCaseIdIndexRoute
+  '/cases/$caseId/documents/$documentId': typeof AppCasesCaseIdDocumentsDocumentIdRoute
   '/cases/$caseId/properties/$propertyId': typeof AppCasesCaseIdPropertiesPropertyIdRoute
 }
 export interface FileRoutesById {
@@ -131,6 +156,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_app/diary': typeof AppDiaryRoute
+  '/_app/search': typeof AppSearchRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/cases/new': typeof AppCasesNewRoute
@@ -138,8 +164,10 @@ export interface FileRoutesById {
   '/_app/cases/': typeof AppCasesIndexRoute
   '/_app/clients/': typeof AppClientsIndexRoute
   '/_app/fees/': typeof AppFeesIndexRoute
+  '/_app/cases/$caseId/scan': typeof AppCasesCaseIdScanRoute
   '/_app/fees/invoice/$clientId': typeof AppFeesInvoiceClientIdRoute
   '/_app/cases/$caseId/': typeof AppCasesCaseIdIndexRoute
+  '/_app/cases/$caseId/documents/$documentId': typeof AppCasesCaseIdDocumentsDocumentIdRoute
   '/_app/cases/$caseId/properties/$propertyId': typeof AppCasesCaseIdPropertiesPropertyIdRoute
 }
 export interface FileRouteTypes {
@@ -149,20 +177,24 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/diary'
+    | '/search'
     | '/settings'
     | '/cases/new'
     | '/clients/$clientId'
     | '/cases/'
     | '/clients/'
     | '/fees/'
+    | '/cases/$caseId/scan'
     | '/fees/invoice/$clientId'
     | '/cases/$caseId/'
+    | '/cases/$caseId/documents/$documentId'
     | '/cases/$caseId/properties/$propertyId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/register'
     | '/diary'
+    | '/search'
     | '/settings'
     | '/'
     | '/cases/new'
@@ -170,8 +202,10 @@ export interface FileRouteTypes {
     | '/cases'
     | '/clients'
     | '/fees'
+    | '/cases/$caseId/scan'
     | '/fees/invoice/$clientId'
     | '/cases/$caseId'
+    | '/cases/$caseId/documents/$documentId'
     | '/cases/$caseId/properties/$propertyId'
   id:
     | '__root__'
@@ -179,6 +213,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_app/diary'
+    | '/_app/search'
     | '/_app/settings'
     | '/_app/'
     | '/_app/cases/new'
@@ -186,8 +221,10 @@ export interface FileRouteTypes {
     | '/_app/cases/'
     | '/_app/clients/'
     | '/_app/fees/'
+    | '/_app/cases/$caseId/scan'
     | '/_app/fees/invoice/$clientId'
     | '/_app/cases/$caseId/'
+    | '/_app/cases/$caseId/documents/$documentId'
     | '/_app/cases/$caseId/properties/$propertyId'
   fileRoutesById: FileRoutesById
 }
@@ -232,6 +269,13 @@ declare module '@tanstack/react-router' {
       path: '/diary'
       fullPath: '/diary'
       preLoaderRoute: typeof AppDiaryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/search': {
+      id: '/_app/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof AppSearchRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/settings': {
@@ -283,11 +327,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCasesCaseIdIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/cases/$caseId/scan': {
+      id: '/_app/cases/$caseId/scan'
+      path: '/cases/$caseId/scan'
+      fullPath: '/cases/$caseId/scan'
+      preLoaderRoute: typeof AppCasesCaseIdScanRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/fees/invoice/$clientId': {
       id: '/_app/fees/invoice/$clientId'
       path: '/fees/invoice/$clientId'
       fullPath: '/fees/invoice/$clientId'
       preLoaderRoute: typeof AppFeesInvoiceClientIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/cases/$caseId/documents/$documentId': {
+      id: '/_app/cases/$caseId/documents/$documentId'
+      path: '/cases/$caseId/documents/$documentId'
+      fullPath: '/cases/$caseId/documents/$documentId'
+      preLoaderRoute: typeof AppCasesCaseIdDocumentsDocumentIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/cases/$caseId/properties/$propertyId': {
@@ -302,6 +360,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppDiaryRoute: typeof AppDiaryRoute
+  AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppCasesNewRoute: typeof AppCasesNewRoute
@@ -309,13 +368,16 @@ interface AppRouteChildren {
   AppCasesIndexRoute: typeof AppCasesIndexRoute
   AppClientsIndexRoute: typeof AppClientsIndexRoute
   AppFeesIndexRoute: typeof AppFeesIndexRoute
+  AppCasesCaseIdScanRoute: typeof AppCasesCaseIdScanRoute
   AppFeesInvoiceClientIdRoute: typeof AppFeesInvoiceClientIdRoute
   AppCasesCaseIdIndexRoute: typeof AppCasesCaseIdIndexRoute
+  AppCasesCaseIdDocumentsDocumentIdRoute: typeof AppCasesCaseIdDocumentsDocumentIdRoute
   AppCasesCaseIdPropertiesPropertyIdRoute: typeof AppCasesCaseIdPropertiesPropertyIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDiaryRoute: AppDiaryRoute,
+  AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
   AppCasesNewRoute: AppCasesNewRoute,
@@ -323,8 +385,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppCasesIndexRoute: AppCasesIndexRoute,
   AppClientsIndexRoute: AppClientsIndexRoute,
   AppFeesIndexRoute: AppFeesIndexRoute,
+  AppCasesCaseIdScanRoute: AppCasesCaseIdScanRoute,
   AppFeesInvoiceClientIdRoute: AppFeesInvoiceClientIdRoute,
   AppCasesCaseIdIndexRoute: AppCasesCaseIdIndexRoute,
+  AppCasesCaseIdDocumentsDocumentIdRoute:
+    AppCasesCaseIdDocumentsDocumentIdRoute,
   AppCasesCaseIdPropertiesPropertyIdRoute:
     AppCasesCaseIdPropertiesPropertyIdRoute,
 }
