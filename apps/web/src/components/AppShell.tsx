@@ -1,8 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarDays, FolderOpen, IndianRupee, Scale, Search, Settings, Sun, Users } from "lucide-react";
+import { CalendarDays, FolderOpen, IndianRupee, Search, Settings, Sun, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { type MessageKey, useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { Brand } from "./Brand";
 import { LanguageToggle } from "./LanguageToggle";
 
 const NAV: { to: string; key: MessageKey; icon: typeof Sun }[] = [
@@ -12,25 +13,6 @@ const NAV: { to: string; key: MessageKey; icon: typeof Sun }[] = [
   { to: "/clients", key: "nav.clients", icon: Users },
   { to: "/fees", key: "nav.fees", icon: IndianRupee },
 ];
-
-/** Brand: a scales mark on an ink tile, with the Marathi-first serif wordmark. */
-export function Brand({ compact = false, onDark = false }: { compact?: boolean; onDark?: boolean }) {
-  const { t } = useI18n();
-  return (
-    <span className="flex items-center gap-2.5">
-      <span
-        aria-hidden
-        className={cn(
-          "flex size-9 items-center justify-center rounded-xl",
-          onDark ? "bg-white text-black" : "bg-primary text-primary-foreground shadow-[0_6px_14px_-8px_rgb(17_17_20/0.7)]",
-        )}
-      >
-        <Scale className="size-[18px]" strokeWidth={2.2} />
-      </span>
-      {!compact && <span className="font-display text-[1.35rem] leading-none">{t("app.name")}</span>}
-    </span>
-  );
-}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useI18n();

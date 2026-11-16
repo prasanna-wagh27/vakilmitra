@@ -196,7 +196,10 @@ function CasePage() {
               const isToday = d === today;
               const isPast = d < today;
               return (
-                <li key={h.id} className={cn("row-card p-4", isToday && "border-primary", isPast && h.outcome && "opacity-75")}>
+                <li
+                  key={h.id}
+                  className={cn("row-card p-4", isToday && "border-accent ring-2 ring-accent/20", isPast && h.outcome && "opacity-75")}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="font-semibold">

@@ -139,7 +139,7 @@ function TodayPage() {
                   <CalendarClock className="size-5" aria-hidden />
                 </span>
                 <span className="min-w-0">
-                  <span className="block truncate font-medium">{c.title}</span>
+                  <span className="line-clamp-2 block font-medium break-words">{c.title}</span>
                   {c.lastHearing && (
                     <span className="block text-sm text-muted-foreground">
                       {t("today.lastHearing")}: {fmtDate(c.lastHearing.date, locale)}

@@ -17,7 +17,6 @@
   /* Primary actions are ink: black pills, white text. */
   --primary: #111114;
   --primary-foreground: #ffffff;
-  --primary-soft: #e9e9ee;
   /* Accent for links, focus and information. */
   --accent: #3045b5;
   --accent-soft: #e8ebfb;
@@ -28,7 +27,6 @@
   --success-soft: #e2f3e8;
   --success: #1c6b3a;
   --ring: #3045b5;
-  --radius: 1.25rem;
   --hero: #111114;
   --hero-foreground: #f4f4f6;
 }
@@ -43,7 +41,6 @@
   --color-input: var(--input);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-destructive: var(--destructive);
@@ -95,8 +92,8 @@
 
 @layer components {
   /* Display headings: the serif that carries the brand. */
+  /* Tailwind's font-display utility sets the family (from --font-display); this adds weight and tracking. */
   .font-display {
-    font-family: var(--font-display);
     font-weight: 400;
     letter-spacing: -0.01em;
   }
@@ -115,8 +112,7 @@
     box-shadow: 0 1px 0 rgb(17 17 20 / 0.02);
     transition:
       border-color 0.15s,
-      box-shadow 0.15s,
-      transform 0.15s;
+      box-shadow 0.15s;
   }
   a.row-card:hover,
   button.row-card:hover {

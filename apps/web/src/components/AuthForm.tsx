@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { authClient } from "@/lib/auth-client";
 import { useI18n } from "@/lib/i18n";
-import { Brand } from "./AppShell";
+import { Brand } from "./Brand";
 import { ErrorBox, Field } from "./common";
 import { LanguageToggle } from "./LanguageToggle";
 import { Button } from "./ui/button";
@@ -60,12 +60,12 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
     { icon: ShieldCheck, text: t("auth.trust3") },
   ];
   return (
-    <main className="mx-auto grid min-h-dvh max-w-5xl items-center gap-6 px-4 py-6 md:grid-cols-[1.05fr_1fr] md:gap-10 md:py-10">
+    <main className="mx-auto grid min-h-dvh max-w-5xl content-start items-center gap-4 px-4 py-4 md:content-center md:grid-cols-[1.05fr_1fr] md:gap-10 md:py-10">
       {/* Brand side: what this is and why it can be trusted. */}
-      <section className="hero-ink relative overflow-hidden px-6 py-7 sm:px-9 sm:py-10">
+      <section className="hero-ink relative overflow-hidden px-5 py-5 sm:px-9 sm:py-10">
         <Brand onDark />
-        <h1 className="font-display mt-8 text-[2rem] leading-[1.15] sm:text-[2.6rem]">{t("auth.hero")}</h1>
-        <p className="mt-3 max-w-md text-white/70">{t("auth.heroSub")}</p>
+        <h1 className="font-display mt-4 text-[1.6rem] leading-[1.2] sm:mt-8 sm:text-[2.6rem] sm:leading-[1.15]">{t("auth.hero")}</h1>
+        <p className="mt-3 hidden max-w-md text-white/70 sm:block">{t("auth.heroSub")}</p>
         <ul className="mt-7 hidden space-y-3 sm:block">
           {trust.map((x) => (
             <li key={x.text} className="flex items-center gap-3 text-sm text-white/85">
