@@ -1,0 +1,421 @@
+// VakilMitra core data model.
+// The case file is the single core object: every feature reads from and writes to it,
+// and every extracted fact keeps a link to the exact crop of the scan it came from.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Locale {
+  mr
+  en
+}
+
+model Advocate {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   @unique
+  phone           String?
+  passwordHash    String
+  barCouncilNo    String?
+  locale          Locale   @default(mr)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  ownedChamber    Chamber?        @relation("ChamberOwner")
+  memberships     ChamberMember[]
+  clients         Client[]
+  cases           CaseFile[]
+  caseGrants      CaseAccess[]
+  accessLogs      AccessLog[]
+}
+
+// ---------- Chambers: seniors grant juniors access case by case ----------
+
+model Chamber {
+  id        String          @id @default(cuid())
+  name      String
+  ownerId   String          @unique
+  owner     Advocate        @relation("ChamberOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members   ChamberMember[]
+  createdAt DateTime        @default(now())
+}
+
+model ChamberMember {
+  id         String   @id @default(cuid())
+  chamberId  String
+  advocateId String
+  chamber    Chamber  @relation(fields: [chamberId], references: [id], onDelete: Cascade)
+  advocate   Advocate @relation(fields: [advocateId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([chamberId, advocateId])
+}
+
+enum CaseRole {
+  EDITOR
+  VIEWER
+}
+
+model CaseAccess {
+  id         String   @id @default(cuid())
+  caseId     String
+  advocateId String
+  role       CaseRole @default(VIEWER)
+  case       CaseFile @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  advocate   Advocate @relation(fields: [advocateId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([caseId, advocateId])
+}
+
+// ---------- Clients and case files ----------
+
+model Client {
+  id            String         @id @default(cuid())
+  advocateId    String
+  advocate      Advocate       @relation(fields: [advocateId], references: [id], onDelete: Cascade)
+  name          String
+  phone         String?
+  email         String?
+  address       String?
+  // Client consented to receive case updates on WhatsApp. Each message still needs advocate approval.
+  whatsappOptIn Boolean        @default(false)
+  notes         String?
+  cases         CaseFile[]
+  feeAgreements FeeAgreement[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([advocateId])
+}
+
+enum CaseStatus {
+  ACTIVE
+  DISPOSED
+  ON_HOLD
+  CLOSED
+}
+
+enum CaseKind {
+  CIVIL
+  LAND_PROPERTY
+  TITLE_SEARCH
+  CRIMINAL
+  FAMILY
+  REVENUE
+  OTHER
+}
+
+model CaseFile {
+  id          String     @id @default(cuid())
+  advocateId  String
+  advocate    Advocate   @relation(fields: [advocateId], references: [id], onDelete: Cascade)
+  clientId    String?
+  client      Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  title       String
+  kind        CaseKind   @default(CIVIL)
+  caseNumber  String?
+  court       String?
+  cnrNumber   String?    // eCourts CNR, used later for status fetch where reliable
+  status      CaseStatus @default(ACTIVE)
+  filedOn     DateTime?
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  parties       Party[]
+  properties    Property[]
+  documents     Document[]
+  facts         Fact[]
+  flags         Flag[]
+  drafts        Draft[]
+  hearings      Hearing[]
+  feeAgreements FeeAgreement[]
+  grants        CaseAccess[]
+
+  @@index([advocateId, status])
+  @@index([clientId])
+}
+
+enum PartyRole {
+  PETITIONER
+  RESPONDENT
+  PLAINTIFF
+  DEFENDANT
+  APPLICANT
+  OPPONENT
+  APPELLANT
+  OTHER
+}
+
+model Party {
+  id             String    @id @default(cuid())
+  caseId         String
+  case           CaseFile  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  name           String
+  role           PartyRole
+  isOurClient    Boolean   @default(false)
+  opposingCounsel String?
+  address        String?
+  createdAt      DateTime  @default(now())
+
+  @@index([caseId])
+}
+
+// ---------- Land records: documents, facts with source crops, property chain, flags ----------
+
+model Property {
+  id        String           @id @default(cuid())
+  caseId    String
+  case      CaseFile         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  surveyNo  String?          // सर्वे नंबर
+  gatNo     String?          // गट नंबर
+  hissaNo   String?          // हिस्सा नंबर
+  village   String?
+  taluka    String?
+  district  String?
+  events    OwnershipEvent[]
+  documents Document[]
+  flags     Flag[]
+  createdAt DateTime         @default(now())
+
+  @@index([caseId])
+}
+
+enum DocType {
+  SEVEN_TWELVE   // ७/१२ उतारा
+  FERFAR         // फेरफार नोंद
+  EIGHT_A        // ८-अ
+  INDEX_II       // सूची क्र. २
+  SALE_DEED
+  GIFT_DEED
+  WILL
+  PARTITION_DEED
+  MORTGAGE_DEED
+  COURT_ORDER
+  OTHER
+}
+
+enum OcrStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+model Document {
+  id          String    @id @default(cuid())
+  caseId      String
+  case        CaseFile  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  type        DocType   @default(OTHER)
+  year        Int?
+  title       String?
+  storageKey  String?   // encrypted object key in India-region storage
+  mimeType    String?
+  ocrStatus   OcrStatus @default(PENDING)
+  pages       Page[]
+  facts       Fact[]
+  createdAt   DateTime  @default(now())
+
+  @@index([caseId])
+}
+
+model Page {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  pageNo     Int
+  storageKey String?
+  ocrText    String?
+  width      Int?
+  height     Int?
+  facts      Fact[]
+
+  @@unique([documentId, pageNo])
+}
+
+model Fact {
+  id           String    @id @default(cuid())
+  caseId       String
+  case         CaseFile  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  documentId   String?
+  document     Document? @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  pageId       String?
+  page         Page?     @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  field        String    // e.g. "owner_name", "area", "land_class", "ferfar_no"
+  value        String
+  confidence   Float     @default(1)
+  // Source crop on the page, as fractions (0..1) of page width/height.
+  cropX        Float?
+  cropY        Float?
+  cropW        Float?
+  cropH        Float?
+  reviewed     Boolean   @default(false)
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([caseId, field])
+}
+
+enum EventKind {
+  RECORD_SNAPSHOT   // a 7/12 or 8A extract as of a year: owners, area, class, other rights
+  DEED              // registered instrument (sale, gift, partition, mortgage, will)
+  MUTATION          // Ferfar entry
+}
+
+model OwnershipEvent {
+  id          String    @id @default(cuid())
+  propertyId  String
+  property    Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  kind        EventKind
+  date        DateTime
+  // DEED: SALE, GIFT, PARTITION, MORTGAGE, WILL, RELEASE, ...
+  // MUTATION: SALE, HEIRSHIP, GIFT, PARTITION, MORTGAGE, CORRECTION, ...
+  subtype     String?
+  ferfarNo    String?
+  deedRegNo   String?
+  fromParties String[]
+  toParties   String[]
+  owners      String[]  // RECORD_SNAPSHOT: owners shown on the extract
+  areaSqm     Float?
+  landClass   String?   // e.g. "Class-I", "Class-II"
+  otherRights String[]  // इतर हक्क column entries
+  section155  Boolean   @default(false)
+  refDeedRegNo String?  // MUTATION: deed it was certified from, if stated
+  factIds     String[]  // facts this event was built from
+  notes       String?
+  createdAt   DateTime  @default(now())
+
+  @@index([propertyId, date])
+}
+
+enum FlagSeverity {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model Flag {
+  id         String       @id @default(cuid())
+  caseId     String
+  case       CaseFile     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  propertyId String?
+  property   Property?    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  rule       String
+  severity   FlagSeverity
+  message    String
+  eventIds   String[]
+  factIds    String[]
+  resolved   Boolean      @default(false)
+  resolution String?
+  createdAt  DateTime     @default(now())
+
+  @@index([caseId])
+}
+
+// ---------- Drafts ----------
+
+enum DraftStatus {
+  DRAFT        // "draft for advocate review"
+  APPROVED
+}
+
+model Draft {
+  id         String      @id @default(cuid())
+  caseId     String
+  case       CaseFile    @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  template   String
+  language   Locale      @default(mr)
+  title      String
+  body       String
+  // Filled values, each linked back to the fact it came from: { key: { value, factId } }
+  values     Json        @default("{}")
+  version    Int         @default(1)
+  status     DraftStatus @default(DRAFT)
+  approvedAt DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([caseId])
+}
+
+// ---------- Case diary ----------
+
+model Hearing {
+  id             String    @id @default(cuid())
+  caseId         String
+  case           CaseFile  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  date           DateTime
+  court          String?
+  purpose        String?   // stage, e.g. "Evidence", "Arguments"
+  nextStep       String?
+  outcome        String?
+  reminderSentAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([caseId, date])
+}
+
+// ---------- Fees (amounts in paise) ----------
+
+model FeeAgreement {
+  id           String        @id @default(cuid())
+  caseId       String?
+  case         CaseFile?     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  clientId     String
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  description  String
+  totalPaise   Int
+  installments Installment[]
+  payments     Payment[]
+  createdAt    DateTime      @default(now())
+
+  @@index([clientId])
+}
+
+model Installment {
+  id          String       @id @default(cuid())
+  agreementId String
+  agreement   FeeAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  dueDate     DateTime
+  amountPaise Int
+  note        String?
+}
+
+model Payment {
+  id          String       @id @default(cuid())
+  agreementId String
+  agreement   FeeAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  amountPaise Int
+  paidOn      DateTime
+  mode        String?      // cash, UPI, cheque, bank
+  reference   String?
+  createdAt   DateTime     @default(now())
+}
+
+// ---------- Audit ----------
+
+model AccessLog {
+  id         String   @id @default(cuid())
+  advocateId String?
+  advocate   Advocate? @relation(fields: [advocateId], references: [id], onDelete: SetNull)
+  action     String   // e.g. "case.view", "document.view", "draft.export", "case.delete"
+  entityType String
+  entityId   String
+  ip         String?
+  at         DateTime @default(now())
+
+  @@index([advocateId, at])
+  @@index([entityType, entityId])
+}
