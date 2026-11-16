@@ -57,7 +57,7 @@ export function wer(truth: string, ocr: string): number {
 
 /**
  * Field groups from the spec's quality gates, with their accuracy targets.
- * A field "matches" when its exact normalised value appears in the OCR text.
+ * A field "matches" when its exact normalised value appears in the OCR text as a whole token.
  */
 export const FIELD_GROUPS = {
   location: {
@@ -81,6 +81,19 @@ export interface FieldResult {
   found: boolean;
 }
 
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * True when `value` appears in `text` as a whole token: not inside a longer number or word.
+ * "112" is not found in "1120", "2" is not found in "112", "0.8" is not found in "0.81",
+ * but "112" is found in "गट 112." and "सुरेश जाधव" in "सुरेश जाधव, अनिल".
+ */
+export function containsToken(text: string, value: string): boolean {
+  if (!value) return false;
+  const re = new RegExp(`(?<![\\p{L}\\p{M}\\p{N}])${escapeRegExp(value)}(?![\\p{L}\\p{M}\\p{N}]|[.,/]\\p{N})`, "u");
+  return re.test(text);
+}
+
 export function matchFields(fields: TruthFields, ocr: string): FieldResult[] {
   const text = normalize(ocr);
   const out: FieldResult[] = [];
@@ -89,7 +102,7 @@ export function matchFields(fields: TruthFields, ocr: string): FieldResult[] {
       const v = fields[field];
       for (const expected of Array.isArray(v) ? v : v ? [v] : []) {
         const want = normalize(expected);
-        if (want) out.push({ group, field, expected, found: text.includes(want) });
+        if (want) out.push({ group, field, expected, found: containsToken(text, want) });
       }
     }
   }

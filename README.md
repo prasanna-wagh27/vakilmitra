@@ -82,6 +82,7 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - Prototype tier: Neon/Supabase Postgres, API + worker on Railway/Render/Coolify, Valkey container, SPA on Cloudflare Pages.
 - Files must stay in India: set `STORAGE_DRIVER=s3` with an India-region S3-compatible bucket (for example AWS S3 `ap-south-1`). Keep `STORAGE_MASTER_KEYS` in the host's secret store, never in the bucket's account.
 - The worker is CPU-bound (about 1 s per page per core); set `OCR_CONCURRENCY` to the number of cores.
+- Known limit, to fix before switching cloud OCR on: a cloud read (Sarvam polls its job for up to 2 minutes) holds one worker slot for its whole duration, so with low `OCR_CONCURRENCY` it delays pages behind it. Planned fix: a separate queue for cloud reads with its own concurrency.
 
 ## Kickoff checklist
 

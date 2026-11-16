@@ -1,7 +1,7 @@
 /**
  * Compare OCR engines on a labelled set of pages.
  *
- *   pnpm --filter @vakilmitra/ocr eval -- --data ../../eval-data --engines tesseract,sarvam,gemini
+ *   pnpm --filter @vakilmitra/ocr eval --data ../../eval-data --engines tesseract,sarvam,gemini
  *
  * Real client pages belong in /eval-data at the repo root, which git ignores: never commit them.
  * Cloud engines read their keys from the environment (see packages/ocr/.env.example).
@@ -9,10 +9,12 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { createEngine, ocrEnv } from "../src/index.js";
+import { createEngine, ENGINE_NAMES, ocrEnv } from "../src/index.js";
 import { loadCases, renderMarkdown, runEngine, summarize } from "./harness.js";
 
 const { values } = parseArgs({
+  // pnpm 10 passes a literal "--" through; tolerate it (and nothing else) as a positional.
+  allowPositionals: true,
   options: {
     data: { type: "string", default: new URL("./sample", import.meta.url).pathname },
     engines: { type: "string", default: "tesseract" },
@@ -21,7 +23,13 @@ const { values } = parseArgs({
 });
 
 const env = ocrEnv(process.env);
-const names = values.engines!.split(",").map((s) => s.trim()) as ("tesseract" | "sarvam" | "gemini")[];
+const names = values.engines!.split(",").map((s) => s.trim());
+const unknown = names.filter((n) => !(ENGINE_NAMES as readonly string[]).includes(n));
+if (unknown.length) {
+  // Fail before touching any page: a typo must never route pages to an unintended provider.
+  console.error(`Unknown engine(s): ${unknown.join(", ")}. Use: ${ENGINE_NAMES.join(", ")}`);
+  process.exit(1);
+}
 const cases = await loadCases(resolve(values.data!));
 if (cases.length === 0) {
   console.error(`No labelled pages in ${values.data}. Each page needs a folder with page.jpg|png and truth.txt.`);

@@ -46,7 +46,7 @@ version in `truth.txt` and `fields.json` too.
 ## 2. Run
 
 ```bash
-pnpm --filter @vakilmitra/ocr eval -- --data ../../eval-data --engines tesseract,sarvam,gemini
+pnpm --filter @vakilmitra/ocr eval --data ../../eval-data --engines tesseract,sarvam,gemini
 ```
 
 Cloud engines need keys in `packages/ocr/.env` (see `.env.example`). Only run them on real client

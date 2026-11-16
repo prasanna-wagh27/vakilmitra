@@ -41,24 +41,35 @@ export function ocrEnv(env: Record<string, string | undefined>): OcrEnv {
   return envSchema.parse(env);
 }
 
-/** Build one engine by name from env. Throws with a clear message when its keys are missing. */
-export function createEngine(name: "tesseract" | CloudEngineName, env: OcrEnv): OcrEngine {
-  if (name === "tesseract") return new TesseractEngine();
-  if (name === "sarvam") {
-    if (!env.SARVAM_API_KEY) throw new Error("SARVAM_API_KEY is required for the sarvam engine");
-    return new SarvamEngine({ apiKey: env.SARVAM_API_KEY, baseUrl: env.SARVAM_BASE_URL, model: env.SARVAM_MODEL });
+export const ENGINE_NAMES = ["tesseract", ...CLOUD_ENGINES] as const;
+export type EngineName = (typeof ENGINE_NAMES)[number];
+
+/**
+ * Build one engine by name from env. Unknown names throw: a typo must never fall through to
+ * an engine that sends pages outside our servers.
+ */
+export function createEngine(name: string, env: OcrEnv): OcrEngine {
+  switch (name) {
+    case "tesseract":
+      return new TesseractEngine();
+    case "sarvam":
+      if (!env.SARVAM_API_KEY) throw new Error("SARVAM_API_KEY is required for the sarvam engine");
+      return new SarvamEngine({ apiKey: env.SARVAM_API_KEY, baseUrl: env.SARVAM_BASE_URL, model: env.SARVAM_MODEL });
+    case "gemini":
+      if (env.GEMINI_PROVIDER === "vertex") {
+        if (!env.GOOGLE_VERTEX_PROJECT) throw new Error("GOOGLE_VERTEX_PROJECT is required for gemini on Vertex AI");
+        return new GeminiEngine({
+          provider: "vertex",
+          model: env.GEMINI_MODEL,
+          project: env.GOOGLE_VERTEX_PROJECT,
+          location: env.GOOGLE_VERTEX_LOCATION,
+        });
+      }
+      if (!env.GOOGLE_GENERATIVE_AI_API_KEY) throw new Error("GOOGLE_GENERATIVE_AI_API_KEY is required for gemini on the Gemini API");
+      return new GeminiEngine({ provider: "google", model: env.GEMINI_MODEL, apiKey: env.GOOGLE_GENERATIVE_AI_API_KEY });
+    default:
+      throw new Error(`Unknown OCR engine "${name}". Use one of: ${ENGINE_NAMES.join(", ")}`);
   }
-  if (env.GEMINI_PROVIDER === "vertex") {
-    if (!env.GOOGLE_VERTEX_PROJECT) throw new Error("GOOGLE_VERTEX_PROJECT is required for gemini on Vertex AI");
-    return new GeminiEngine({
-      provider: "vertex",
-      model: env.GEMINI_MODEL,
-      project: env.GOOGLE_VERTEX_PROJECT,
-      location: env.GOOGLE_VERTEX_LOCATION,
-    });
-  }
-  if (!env.GOOGLE_GENERATIVE_AI_API_KEY) throw new Error("GOOGLE_GENERATIVE_AI_API_KEY is required for gemini on the Gemini API");
-  return new GeminiEngine({ provider: "google", model: env.GEMINI_MODEL, apiKey: env.GOOGLE_GENERATIVE_AI_API_KEY });
 }
 
 export interface ReadPolicy {
@@ -78,37 +89,56 @@ export function policyFromEnv(env: OcrEnv): ReadPolicy {
   };
 }
 
+export type ReadRoute = "local" | "local:no-consent" | "local:confident" | "cloud" | "local:cloud-failed" | "local:cloud-empty";
+
 export interface ReadOutcome {
   result: OcrResult;
   /** Why this engine's result was kept. */
-  route: "local" | "local:no-consent" | "local:confident" | "cloud" | "local:cloud-failed";
+  route: ReadRoute;
   localConfidence: number | null;
   cloudError?: string;
 }
 
-/**
- * Read one page under the policy. A page image goes to a cloud engine only when `cloudAllowed`
- * (the case owner's consent) is true. If the cloud call fails, the local result is kept.
- */
-export async function readPage(policy: ReadPolicy, image: Buffer, opts: { cloudAllowed: boolean; hints?: OcrHints }): Promise<ReadOutcome> {
-  const { cloud } = policy;
-  if (cloud && opts.cloudAllowed && policy.mode === "always") {
-    try {
-      return { result: await cloud.recognize(image, opts.hints), route: "cloud", localConfidence: null };
-    } catch (e) {
-      const local = await policy.local.recognize(image, opts.hints);
-      return { result: local, route: "local:cloud-failed", localConfidence: local.confidence, cloudError: errorMessage(e) };
-    }
-  }
-  const local = await policy.local.recognize(image, opts.hints);
-  if (!cloud) return { result: local, route: "local", localConfidence: local.confidence };
-  if (!opts.cloudAllowed) return { result: local, route: "local:no-consent", localConfidence: local.confidence };
-  if ((local.confidence ?? 0) >= policy.below) return { result: local, route: "local:confident", localConfidence: local.confidence };
-  try {
-    return { result: await cloud.recognize(image, opts.hints), route: "cloud", localConfidence: local.confidence };
-  } catch (e) {
-    return { result: local, route: "local:cloud-failed", localConfidence: local.confidence, cloudError: errorMessage(e) };
-  }
+export interface ReadOptions {
+  /** The case owner's consent to cloud reading. Without it, no page leaves our servers. */
+  cloudAllowed: boolean;
+  hints?: OcrHints;
+  /**
+   * Awaited just before the page is sent to the cloud engine (e.g. to write the audit row).
+   * If it throws, nothing is sent and the error propagates: a page never leaves unrecorded.
+   */
+  beforeCloudSend?: (engine: string) => Promise<void>;
 }
 
-const errorMessage = (e: unknown) => (e instanceof Error ? e.message : String(e));
+/**
+ * Read one page under the policy.
+ * - Tesseract always reads first, on our servers (it is also the fallback and gives word boxes).
+ * - The cloud engine is used only with consent, and in fallback mode only below the threshold.
+ * - If the cloud call fails or returns no text, the local reading is kept.
+ * - If the cloud engine gives no boxes (Sarvam's text output), the local word boxes are kept so
+ *   unclear regions stay marked on the scan. Their text is Tesseract's, not the stored text.
+ */
+export async function readPage(policy: ReadPolicy, image: Buffer, opts: ReadOptions): Promise<ReadOutcome> {
+  const { cloud } = policy;
+  const local = await policy.local.recognize(image, opts.hints);
+  const keep = (route: ReadRoute, cloudError?: string): ReadOutcome => ({
+    result: local,
+    route,
+    localConfidence: local.confidence,
+    cloudError,
+  });
+  if (!cloud) return keep("local");
+  if (!opts.cloudAllowed) return keep("local:no-consent");
+  if (policy.mode === "fallback" && (local.confidence ?? 0) >= policy.below) return keep("local:confident");
+
+  await opts.beforeCloudSend?.(cloud.name);
+  let remote: OcrResult;
+  try {
+    remote = await cloud.recognize(image, opts.hints);
+  } catch (e) {
+    return keep("local:cloud-failed", e instanceof Error ? e.message : String(e));
+  }
+  if (!remote.text.trim()) return keep("local:cloud-empty", `${cloud.name} returned no text`);
+  const result = remote.words.length ? remote : { ...remote, words: local.words };
+  return { result, route: "cloud", localConfidence: local.confidence };
+}

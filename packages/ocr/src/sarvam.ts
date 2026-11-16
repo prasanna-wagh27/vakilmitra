@@ -5,8 +5,7 @@
  * Flow: POST /doc-ai/v1/job/parse (multipart) -> poll GET /job/{id}/status -> GET /job/{id}/results.
  * The parse results give page text (Markdown) but no per-word confidence, so `confidence` is null.
  */
-import sharp from "sharp";
-import type { OcrEngine, OcrHints, OcrResult } from "./types.js";
+import { type OcrEngine, type OcrHints, type OcrResult, toJpeg } from "./types.js";
 
 export interface SarvamConfig {
   apiKey: string;
@@ -73,11 +72,7 @@ export class SarvamEngine implements OcrEngine {
   }
 
   async recognize(image: Buffer, hints: OcrHints = {}): Promise<OcrResult> {
-    const { data: jpeg, info } = await sharp(image, { failOn: "error" })
-      .rotate()
-      .resize({ width: 3000, height: 3000, fit: "inside", withoutEnlargement: true })
-      .jpeg({ quality: 90 })
-      .toBuffer({ resolveWithObject: true });
+    const { jpeg, width, height } = await toJpeg(image, 3000);
 
     const form = new FormData();
     form.append("file", new Blob([new Uint8Array(jpeg)], { type: "image/jpeg" }), "page.jpg");
@@ -100,7 +95,7 @@ export class SarvamEngine implements OcrEngine {
     const pages = (results.documents ?? []).flatMap((d) => d.pages ?? []);
     pages.sort((a, b) => (a.page_number ?? 0) - (b.page_number ?? 0));
     const text = markdownToText(pages.map((p) => p.content ?? "").join("\n\n")).normalize("NFC");
-    return { engine: this.name, text, confidence: null, words: [], width: info.width, height: info.height };
+    return { engine: this.name, text, confidence: null, words: [], width, height };
   }
 
   async close() {}

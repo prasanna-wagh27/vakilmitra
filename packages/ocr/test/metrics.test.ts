@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cer, matchFields, median, normalize, wer } from "../src/metrics.js";
+import { cer, containsToken, matchFields, median, normalize, wer } from "../src/metrics.js";
 
 describe("normalize", () => {
   it("treats Devanagari and ASCII digits, ZWJ and spacing as equal", () => {
@@ -55,4 +55,26 @@ describe("matchFields", () => {
 it("median", () => {
   expect(median([3, 1, 2])).toBe(2);
   expect(median([4, 1, 2, 3])).toBe(2.5);
+});
+
+describe("containsToken", () => {
+  it("does not count a value found inside a longer number or word", () => {
+    expect(containsToken("गट 1120", "112")).toBe(false);
+    expect(containsToken("हिस्सा 112", "2")).toBe(false);
+    expect(containsToken("0.81 हेक्टर", "0.8")).toBe(false);
+    expect(containsToken("सुरेश जाधवराव", "सुरेश जाधव")).toBe(false);
+    expect(containsToken("माळेगावचे", "माळेगाव")).toBe(false);
+  });
+
+  it("finds a value standing on its own, next to punctuation", () => {
+    expect(containsToken("गट 112.", "112")).toBe(true);
+    expect(containsToken("सुरेश जाधव, अनिल", "सुरेश जाधव")).toBe(true);
+    expect(containsToken("दि. 02/04/2019", "02/04/2019")).toBe(true);
+    expect(containsToken("क्षेत्र 0.81 (हे.)", "0.81")).toBe(true);
+  });
+
+  it("is used by matchFields, so a misread number fails the gate", () => {
+    const r = matchFields({ gat_no: "112", hissa_no: "2" }, "गट क्रमांक 1120");
+    expect(r.map((x) => x.found)).toEqual([false, false]);
+  });
 });

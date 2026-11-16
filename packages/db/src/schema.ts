@@ -253,7 +253,7 @@ export const pages = pgTable(
     height: integer("height"),
     ocrStatus: ocrStatusEnum("ocr_status").notNull().default("PENDING"),
     ocrEngine: text("ocr_engine"), // e.g. tesseract-mar+eng, sarvam-vision, gemini-vertex:gemini-3.5-flash
-    // How the engine was chosen: local | local:no-consent | local:confident | cloud | local:cloud-failed
+    // How the engine was chosen: local | local:no-consent | local:confident | cloud | local:cloud-failed | local:cloud-empty
     ocrRoute: text("ocr_route"),
     ocrText: text("ocr_text"),
     ocrConfidence: real("ocr_confidence"), // 0..1, mean word confidence

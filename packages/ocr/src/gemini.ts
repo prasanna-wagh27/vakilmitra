@@ -9,9 +9,8 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createVertex } from "@ai-sdk/google-vertex";
 import { generateText, type LanguageModel, Output } from "ai";
-import sharp from "sharp";
 import { z } from "zod";
-import { type OcrEngine, type OcrHints, type OcrResult, type OcrWord, round4 } from "./types.js";
+import { type OcrEngine, type OcrHints, type OcrResult, type OcrWord, round4, toJpeg } from "./types.js";
 
 export type GeminiConfig =
   | { provider: "vertex"; model?: string; project: string; location?: string }
@@ -67,11 +66,7 @@ export class GeminiEngine implements OcrEngine {
 
   async recognize(image: Buffer, _hints?: OcrHints): Promise<OcrResult> {
     // Colour kept: stamps and coloured ink help the model tell entries apart.
-    const { data: jpeg, info } = await sharp(image, { failOn: "error" })
-      .rotate()
-      .resize({ width: 2400, height: 2400, fit: "inside", withoutEnlargement: true })
-      .jpeg({ quality: 90 })
-      .toBuffer({ resolveWithObject: true });
+    const { jpeg, width, height } = await toJpeg(image, 2400);
 
     const { output } = await generateText({
       model: this.model,
@@ -98,7 +93,7 @@ export class GeminiEngine implements OcrEngine {
       });
     const text = words.map((w) => w.t).join("\n");
     const confidence = words.length ? round4(words.reduce((s, w) => s + w.c, 0) / words.length) : 0;
-    return { engine: this.name, text, confidence, words, width: info.width, height: info.height };
+    return { engine: this.name, text, confidence, words, width, height };
   }
 
   async close() {}

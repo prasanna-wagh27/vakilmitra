@@ -31,3 +31,14 @@ export interface OcrEngine {
 }
 
 export const round4 = (n: number) => Math.round(n * 10_000) / 10_000;
+
+/** Upright, size-capped JPEG for sending to an engine (EXIF orientation applied, metadata dropped). */
+export async function toJpeg(image: Buffer, maxSide: number, quality = 90) {
+  const { default: sharp } = await import("sharp");
+  const { data, info } = await sharp(image, { failOn: "error" })
+    .rotate()
+    .resize({ width: maxSide, height: maxSide, fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality })
+    .toBuffer({ resolveWithObject: true });
+  return { jpeg: data, width: info.width, height: info.height };
+}

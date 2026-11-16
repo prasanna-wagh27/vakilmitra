@@ -1,7 +1,16 @@
 import { readFile } from "node:fs/promises";
 import { MockLanguageModelV4 } from "ai/test";
 import { describe, expect, it } from "vitest";
-import { GeminiEngine, markdownToText, type OcrEngine, type OcrResult, readPage, SarvamEngine } from "../src/index.js";
+import {
+  createEngine,
+  GeminiEngine,
+  markdownToText,
+  type OcrEngine,
+  type OcrResult,
+  ocrEnv,
+  readPage,
+  SarvamEngine,
+} from "../src/index.js";
 
 const fixture = await readFile(new URL("./fixtures/satbara.png", import.meta.url));
 
@@ -107,14 +116,15 @@ describe("GeminiEngine (AI SDK, mock model)", () => {
 });
 
 describe("readPage policy", () => {
-  const fake = (name: string, external: boolean, confidence: number | null, fail = false): OcrEngine & { calls: number } => ({
+  const box = { t: "w", c: 0.4, b: [0, 0, 0.1, 0.1] as [number, number, number, number] };
+  const fake = (name: string, external: boolean, confidence: number | null, fail = false, text = name): OcrEngine & { calls: number } => ({
     name,
     external,
     calls: 0,
     async recognize(): Promise<OcrResult> {
       this.calls++;
       if (fail) throw new Error(`${name} down`);
-      return { engine: name, text: name, confidence, words: [], width: 1, height: 1 };
+      return { engine: name, text, confidence, words: external ? [] : [box], width: 1, height: 1 };
     },
     async close() {},
   });
@@ -139,11 +149,54 @@ describe("readPage policy", () => {
     expect(unsure).toMatchObject({ route: "cloud", localConfidence: 0.5, result: { engine: "cloud" } });
   });
 
-  it("in always mode uses the cloud engine directly", async () => {
-    const local = fake("local", false, 0.99);
-    const r = await readPage({ local, cloud: fake("cloud", true, 0.9), mode: "always", below: 0.85 }, img, { cloudAllowed: true });
+  it("in always mode uses the cloud engine even for confident pages", async () => {
+    const r = await readPage({ local: fake("local", false, 0.99), cloud: fake("cloud", true, 0.9), mode: "always", below: 0.85 }, img, {
+      cloudAllowed: true,
+    });
     expect(r.route).toBe("cloud");
-    expect(local.calls).toBe(0);
+  });
+
+  it("keeps the local reading when the cloud engine returns no text", async () => {
+    const r = await readPage(
+      { local: fake("local", false, 0.5), cloud: fake("cloud", true, 0.9, false, "  \n "), mode: "fallback", below: 0.85 },
+      img,
+      {
+        cloudAllowed: true,
+      },
+    );
+    expect(r).toMatchObject({ route: "local:cloud-empty", result: { engine: "local", text: "local" } });
+  });
+
+  it("keeps local word boxes when the cloud engine has none", async () => {
+    const r = await readPage({ local: fake("local", false, 0.5), cloud: fake("cloud", true, null), mode: "fallback", below: 0.85 }, img, {
+      cloudAllowed: true,
+    });
+    expect(r.result).toMatchObject({ engine: "cloud", text: "cloud", words: [box] });
+  });
+
+  it("records the send before it happens, and sends nothing if recording fails", async () => {
+    const order: string[] = [];
+    const cloud = fake("cloud", true, null);
+    const orig = cloud.recognize.bind(cloud);
+    cloud.recognize = async (...a) => {
+      order.push("send");
+      return orig(...a);
+    };
+    await readPage({ local: fake("local", false, 0.5), cloud, mode: "fallback", below: 0.85 }, img, {
+      cloudAllowed: true,
+      beforeCloudSend: async (engine) => void order.push(`audit:${engine}`),
+    });
+    expect(order).toEqual(["audit:cloud", "send"]);
+
+    const cloud2 = fake("cloud", true, null);
+    const failing = readPage({ local: fake("local", false, 0.5), cloud: cloud2, mode: "always", below: 0.85 }, img, {
+      cloudAllowed: true,
+      beforeCloudSend: async () => {
+        throw new Error("audit db down");
+      },
+    });
+    await expect(failing).rejects.toThrow("audit db down");
+    expect(cloud2.calls).toBe(0);
   });
 
   it("keeps the local read when the cloud engine fails", async () => {
@@ -158,5 +211,14 @@ describe("readPage policy", () => {
   it("works with no cloud engine configured", async () => {
     const r = await readPage({ local: fake("local", false, 0.4), cloud: null, mode: "fallback", below: 0.85 }, img, { cloudAllowed: true });
     expect(r.route).toBe("local");
+  });
+});
+
+describe("createEngine", () => {
+  it("rejects unknown engine names instead of falling through to a cloud engine", () => {
+    const env = ocrEnv({ GEMINI_PROVIDER: "google", GOOGLE_GENERATIVE_AI_API_KEY: "x" });
+    expect(() => createEngine("sarvan", env)).toThrow(/Unknown OCR engine "sarvan"/);
+    expect(createEngine("gemini", env).name).toBe("gemini-api:gemini-3.5-flash");
+    expect(createEngine("tesseract", env).external).toBe(false);
   });
 });

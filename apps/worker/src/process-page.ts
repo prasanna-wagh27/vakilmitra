@@ -32,15 +32,18 @@ export async function processPage({ db, storage, policy, log }: Deps, pageId: st
 
   const owner = page.document.case.advocate;
   const image = await storage.get(page.storageKey);
-  const outcome = await readPage(policy, image, { cloudAllowed: owner.cloudOcrConsent });
+  const outcome = await readPage(policy, image, {
+    cloudAllowed: owner.cloudOcrConsent,
+    // DPDP audit trail, written before the page leaves our servers: if this insert fails, nothing is sent.
+    // Recorded against the advocate whose consent allowed it, so it shows in their access history.
+    beforeCloudSend: async (engine) => {
+      await db
+        .insert(accessLogs)
+        .values({ advocateId: owner.id, action: `page.sent_to_ocr:${engine}`, entityType: "page", entityId: page.id });
+    },
+  });
   const r = outcome.result;
 
-  if (outcome.route === "cloud" || outcome.route === "local:cloud-failed") {
-    // DPDP audit trail: a client page left our servers (or was attempted), and to whom.
-    await db
-      .insert(accessLogs)
-      .values({ advocateId: null, action: `page.sent_to_ocr:${policy.cloud?.name ?? "unknown"}`, entityType: "page", entityId: page.id });
-  }
   if (outcome.cloudError) log?.warn({ pageId, error: outcome.cloudError }, "cloud OCR failed, kept local result");
 
   await db

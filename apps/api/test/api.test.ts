@@ -96,6 +96,16 @@ describe("cloud OCR consent", () => {
     expect(await countLogs(me.body.advocate.id, "consent.cloud_ocr.off")).toBe(1);
   });
 
+  it("keeps the original consent date when 'on' is sent again, and does not log it twice", async () => {
+    const me = await senior.get("/api/me");
+    const first = (await senior.patch("/api/me").send({ cloudOcrConsent: true })).body.advocate.cloudOcrConsentAt;
+    await new Promise((r) => setTimeout(r, 20));
+    const again = (await senior.patch("/api/me").send({ cloudOcrConsent: true })).body.advocate.cloudOcrConsentAt;
+    expect(again).toBe(first);
+    expect(await countLogs(me.body.advocate.id, "consent.cloud_ocr.on")).toBe(2); // one from the earlier test, one here
+    await senior.patch("/api/me").send({ cloudOcrConsent: false });
+  });
+
   it("leaves consent alone when other profile fields change", async () => {
     await senior.patch("/api/me").send({ cloudOcrConsent: true });
     const r = await senior.patch("/api/me").send({ phone: "9800000009" });

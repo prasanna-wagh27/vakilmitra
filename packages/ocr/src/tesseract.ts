@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import { createWorker, OEM, type Worker } from "tesseract.js";
-import type { OcrEngine, OcrResult, OcrWord } from "./types.js";
+import { type OcrEngine, type OcrResult, type OcrWord, round4 } from "./types.js";
 
 /** Longest side after preprocessing. Enough for small Devanagari matras, small enough to be fast. */
 const MAX_SIDE = 2400;
@@ -24,8 +24,6 @@ export async function preprocess(image: Buffer) {
     .toBuffer({ resolveWithObject: true });
   return { png: data, width: info.width, height: info.height };
 }
-
-const round = (n: number) => Math.round(n * 10_000) / 10_000;
 
 /** Put both language files in one folder, since Tesseract takes a single language path. */
 async function stageLanguageData(langs: string[]): Promise<string> {
@@ -78,8 +76,8 @@ export class TesseractEngine implements OcrEngine {
             if (!t) continue;
             words.push({
               t,
-              c: round(w.confidence / 100),
-              b: [round(w.bbox.x0 / width), round(w.bbox.y0 / height), round(w.bbox.x1 / width), round(w.bbox.y1 / height)],
+              c: round4(w.confidence / 100),
+              b: [round4(w.bbox.x0 / width), round4(w.bbox.y0 / height), round4(w.bbox.x1 / width), round4(w.bbox.y1 / height)],
             });
           }
         }
@@ -91,7 +89,7 @@ export class TesseractEngine implements OcrEngine {
         .normalize("NFC")
         .replace(/[ \t]+\n/g, "\n")
         .trim(),
-      confidence: round((data.confidence ?? 0) / 100),
+      confidence: round4((data.confidence ?? 0) / 100),
       words,
       width,
       height,
