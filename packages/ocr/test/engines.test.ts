@@ -218,8 +218,9 @@ describe("readPage policy", () => {
     expect(localRoute(policy, { confidence: 0.9 }, true)).toBe("local:confident");
     expect(localRoute(policy, local, true)).toBeNull();
     expect(localRoute({ ...policy, cloud: null }, local, true)).toBe("local");
-    expect(await readCloud(policy, img, local, {})).toMatchObject({ route: "cloud", result: { engine: "cloud", words: [box] } });
-    await expect(readCloud({ ...policy, cloud: fake("cloud", true, null, true) }, img, local, {})).rejects.toThrow("cloud down");
+    expect(await readCloud(policy, img, () => local.words, {})).toMatchObject({ result: { engine: "cloud", words: [box] } });
+    expect(await readCloud({ ...policy, cloud: fake("cloud", true, null, false, " ") }, img, () => [], {})).toMatchObject({ result: null });
+    await expect(readCloud({ ...policy, cloud: fake("cloud", true, null, true) }, img, () => [], {})).rejects.toThrow("cloud down");
   });
 
   it("works with no cloud engine configured", async () => {

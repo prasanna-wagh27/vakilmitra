@@ -47,7 +47,7 @@ async function addPage(pageNo: number, body?: Buffer) {
   const id = randomUUID();
   const storageKey = keys.page(advocateId, caseId, documentId, id);
   if (body) await storage.put(storageKey, body);
-  await db.insert(pages).values({ id, documentId, pageNo, storageKey });
+  await db.insert(pages).values({ id, documentId, pageNo, storageKey, byteSize: body?.length ?? 0 });
   return id;
 }
 
@@ -126,6 +126,17 @@ describe("processPage", () => {
       queued.length = 0;
       expect(await processPage(deps, pageId)).toBe("cloud-queued");
       expect(queued).toEqual([[pageId, 1]]);
+      await db.delete(pages).where(eq(pages.id, pageId));
+    });
+
+    it("if queueing the cloud read keeps failing, the page keeps its local reading (not FAILED)", async () => {
+      const pageId = await addPage(16, fixture);
+      const err = await processPage({ ...deps, enqueueCloud: async () => Promise.reject(new Error("valkey down")) }, pageId).catch(
+        (e) => e,
+      );
+      expect(err).toMatchObject({ message: "valkey down", pageVersion: 1 });
+      await markFailed(db, pageId, err);
+      expect(await get(pageId)).toMatchObject({ ocrStatus: "DONE", ocrRoute: "local:cloud-failed", ocrError: null });
       await db.delete(pages).where(eq(pages.id, pageId));
     });
 

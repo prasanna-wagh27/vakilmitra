@@ -9,7 +9,7 @@ import { z } from "zod";
 import { DEFAULT_GEMINI_MODEL, GeminiEngine } from "./gemini.js";
 import { SarvamEngine } from "./sarvam.js";
 import { TesseractEngine } from "./tesseract.js";
-import type { OcrEngine, OcrHints, OcrResult } from "./types.js";
+import type { OcrEngine, OcrHints, OcrResult, OcrWord } from "./types.js";
 
 export { DEFAULT_GEMINI_MODEL, type GeminiConfig, GeminiEngine, TRANSCRIBE_PROMPT, transcriptionSchema } from "./gemini.js";
 export * from "./metrics.js";
@@ -139,48 +139,51 @@ export function localRoute(policy: ReadPolicy, local: Pick<OcrResult, "confidenc
 }
 
 /**
- * Read a page with the cloud engine, given the local reading of the same image.
- * The caller must already have checked consent (see `localRoute`). Engine errors are thrown,
- * so a job queue can retry them; an empty answer keeps the local reading.
+ * Read a page with the cloud engine. The caller must already have checked consent (see
+ * `localRoute`). `beforeCloudSend` is awaited first (if it throws, nothing is sent). Engine errors
+ * are thrown, so a job queue can retry them; an empty answer returns no result.
  * If the cloud engine gives no boxes (Sarvam's text output), the local word boxes are kept so
  * unclear regions stay marked on the scan. Their text is Tesseract's, not the stored text.
  */
 export async function readCloud(
   policy: ReadPolicy,
   image: Buffer,
-  local: OcrResult,
+  /** The local word boxes, fetched only if the cloud engine returns none. */
+  localWords: () => OcrWord[] | Promise<OcrWord[]>,
   opts: Pick<ReadOptions, "hints" | "beforeCloudSend">,
-): Promise<ReadOutcome> {
+): Promise<{ result: OcrResult; cloudError?: undefined } | { result: null; cloudError: string }> {
   const { cloud } = policy;
   if (!cloud) throw new Error("No cloud OCR engine is configured");
   await opts.beforeCloudSend?.(cloud.name);
   const remote = await cloud.recognize(image, opts.hints);
-  if (!remote.text.trim())
-    return { result: local, route: "local:cloud-empty", localConfidence: local.confidence, cloudError: `${cloud.name} returned no text` };
-  const result = remote.words.length ? remote : { ...remote, words: local.words };
-  return { result, route: "cloud", localConfidence: local.confidence };
+  if (!remote.text.trim()) return { result: null, cloudError: `${cloud.name} returned no text` };
+  return { result: remote.words.length ? remote : { ...remote, words: await localWords() } };
 }
 
 /**
- * Read one page under the policy, in one go (used by evals and tests; the worker runs the two
- * halves on separate queues so slow cloud reads never hold up local ones).
+ * Read one page under the policy, in one go (used by evals and tests; the worker runs the same
+ * two steps, localRoute and readCloud, on separate queues so slow cloud reads never hold up local ones).
  * - Tesseract always reads first, on our servers (it is also the fallback and gives word boxes).
  * - The cloud engine is used only with consent, and in fallback mode only below the threshold.
  * - If the cloud call fails or returns no text, the local reading is kept.
  */
 export async function readPage(policy: ReadPolicy, image: Buffer, opts: ReadOptions): Promise<ReadOutcome> {
   const local = await policy.local.recognize(image, opts.hints);
+  const keep = (route: ReadRoute, cloudError?: string): ReadOutcome => ({
+    result: local,
+    route,
+    localConfidence: local.confidence,
+    cloudError,
+  });
   const final = localRoute(policy, local, opts.cloudAllowed);
-  if (final) return { result: local, route: final, localConfidence: local.confidence };
+  if (final) return keep(final);
+  // The audit write runs outside the try: if it fails, nothing is sent and the error propagates.
   await opts.beforeCloudSend?.(policy.cloud?.name ?? "");
+  let r: Awaited<ReturnType<typeof readCloud>>;
   try {
-    return await readCloud(policy, image, local, { hints: opts.hints });
+    r = await readCloud(policy, image, () => local.words, { hints: opts.hints });
   } catch (e) {
-    return {
-      result: local,
-      route: "local:cloud-failed",
-      localConfidence: local.confidence,
-      cloudError: e instanceof Error ? e.message : String(e),
-    };
+    return keep("local:cloud-failed", e instanceof Error ? e.message : String(e));
   }
+  return r.result ? { result: r.result, route: "cloud", localConfidence: local.confidence } : keep("local:cloud-empty", r.cloudError);
 }

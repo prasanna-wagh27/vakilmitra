@@ -13,7 +13,8 @@ const ocr = ocrEnv(process.env);
 const policy = policyFromEnv(ocr);
 const log = pino({ level: env.LOG_LEVEL, transport: env.NODE_ENV === "production" ? undefined : { target: "pino-pretty" } });
 const cloudOn = policy.cloud !== null;
-const { db, pool } = createDb(env.DATABASE_URL, { max: ocr.OCR_CONCURRENCY + (cloudOn ? ocr.OCR_CLOUD_CONCURRENCY : 0) + 1 });
+// Cloud jobs hold a connection only for short queries, never during the network wait, so a few extra suffice.
+const { db, pool } = createDb(env.DATABASE_URL, { max: ocr.OCR_CONCURRENCY + (cloudOn ? 2 : 0) + 1 });
 const storage = createStorage(storageConfigFromEnv(process.env));
 const cloudQueue = cloudOn ? createOcrCloudQueue(env.VALKEY_URL) : null;
 const deps = {

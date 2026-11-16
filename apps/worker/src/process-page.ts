@@ -1,4 +1,4 @@
-import { accessLogs, and, type Db, eq, pages } from "@vakilmitra/db";
+import { accessLogs, and, type Db, eq, ne, pages } from "@vakilmitra/db";
 import { rollUpDocumentStatus } from "@vakilmitra/jobs";
 import { localRoute, type OcrResult, type ReadPolicy, readCloud } from "@vakilmitra/ocr";
 import type { SecureStorage } from "@vakilmitra/storage";
@@ -35,21 +35,22 @@ export async function processPage(
     },
   });
   if (!page) return "missing"; // deleted after upload
-  if (page.ocrStatus === "DONE") {
-    // A retry of a job that already saved this version (e.g. it failed after saving).
-    // Make sure its cloud read was queued; never overwrite a newer cloud reading.
-    if (page.ocrRoute === CLOUD_QUEUED && enqueueCloud) await enqueueCloud(page.id, page.version);
-    return page.ocrRoute === CLOUD_QUEUED ? "cloud-queued" : "done";
-  }
-  const started = await db
-    .update(pages)
-    .set({ ocrStatus: "PROCESSING", ocrError: null })
-    .where(and(eq(pages.id, pageId), eq(pages.version, page.version)))
-    .returning({ id: pages.id });
-  if (!started.length) return "stale"; // re-uploaded between our read and now
-  await rollUpDocumentStatus(db, page.documentId);
-
   try {
+    if (page.ocrStatus === "DONE") {
+      // A retry of a job that already saved this version (e.g. queueing the cloud read failed).
+      // Make sure the cloud read is queued; never overwrite a reading that is already saved.
+      if (page.ocrRoute !== CLOUD_QUEUED) return "done";
+      await enqueueCloud?.(page.id, page.version);
+      return "cloud-queued";
+    }
+    const started = await db
+      .update(pages)
+      .set({ ocrStatus: "PROCESSING", ocrError: null })
+      .where(and(eq(pages.id, pageId), eq(pages.version, page.version)))
+      .returning({ id: pages.id });
+    if (!started.length) return "stale"; // re-uploaded between our read and now
+    await rollUpDocumentStatus(db, page.documentId);
+
     const image = await storage.get(page.storageKey);
     const local = await policy.local.recognize(image);
     const final = localRoute(policy, local, page.document.case.advocate.cloudOcrConsent);
@@ -60,12 +61,13 @@ export async function processPage(
       log?.info({ pageId }, "page changed while reading; newer job will save");
       return "stale";
     }
-    if (route === CLOUD_QUEUED) await enqueueCloud?.(page.id, page.version);
     await rollUpDocumentStatus(db, page.documentId);
     log?.info({ pageId, route, localConfidence: local.confidence }, "ocr page read");
-    return route === CLOUD_QUEUED ? "cloud-queued" : "done";
+    if (route !== CLOUD_QUEUED) return "done";
+    await enqueueCloud?.(page.id, page.version);
+    return "cloud-queued";
   } catch (e) {
-    // Tag the failure with the version this job read, so markFailed never overwrites a newer reading.
+    // Tag the failure with the version this job read, so markFailed never touches a newer upload.
     throw Object.assign(e instanceof Error ? e : new Error(String(e)), { pageVersion: page.version });
   }
 }
@@ -81,62 +83,55 @@ export async function processCloudPage(
   pageId: string,
   version: number,
 ): Promise<"done" | "missing" | "stale" | "no-consent" | "empty"> {
-  const page = await db.query.pages.findFirst({
-    where: eq(pages.id, pageId),
-    columns: {
-      id: true,
-      documentId: true,
-      storageKey: true,
-      version: true,
-      ocrStatus: true,
-      ocrRoute: true,
-      ocrEngine: true,
-      ocrText: true,
-      ocrConfidence: true,
-      ocrWords: true,
-    },
-    with: {
-      document: {
-        columns: { id: true },
-        with: { case: { columns: { id: true }, with: { advocate: { columns: { id: true, cloudOcrConsent: true } } } } },
+  const current = () =>
+    db.query.pages.findFirst({
+      where: eq(pages.id, pageId),
+      columns: { id: true, storageKey: true, byteSize: true, version: true, ocrStatus: true, ocrRoute: true },
+      with: {
+        document: {
+          columns: { id: true },
+          with: { case: { columns: { id: true }, with: { advocate: { columns: { id: true, cloudOcrConsent: true } } } } },
+        },
       },
-    },
-  });
-  if (!page) return "missing";
-  if (page.version !== version || page.ocrStatus !== "DONE" || page.ocrRoute !== CLOUD_QUEUED) return "stale";
+    });
+  const waiting = (p: Awaited<ReturnType<typeof current>>) =>
+    p !== undefined && p.version === version && p.ocrStatus === "DONE" && p.ocrRoute === CLOUD_QUEUED;
 
-  const owner = page.document.case.advocate;
+  const page = await current();
+  if (!page) return "missing";
+  if (!waiting(page)) return "stale";
+  const image = await storage.get(page.storageKey);
+  // Re-check after fetching: a re-upload writes the same storage key, then bumps the version.
+  // The size check catches an image swapped in before the version bump reaches the database.
+  const now = await current();
+  if (!waiting(now) || image.length !== page.byteSize) return "stale";
+  const owner = now!.document.case.advocate;
   if (!owner.cloudOcrConsent) {
-    await setRoute(db, page.id, version, "local:no-consent");
+    await setRoute(db, pageId, version, "local:no-consent");
     return "no-consent";
   }
 
-  const local: OcrResult = {
-    engine: page.ocrEngine ?? policy.local.name,
-    text: page.ocrText ?? "",
-    confidence: page.ocrConfidence,
-    words: page.ocrWords ?? [],
-    width: 0,
-    height: 0,
-  };
-  const image = await storage.get(page.storageKey);
-  const outcome = await readCloud(policy, image, local, {
-    // DPDP audit trail, written before the page leaves our servers: if this insert fails, nothing is sent.
-    // Recorded against the advocate whose consent allowed it, so it shows in their access history.
-    beforeCloudSend: async (engine) => {
-      await db
-        .insert(accessLogs)
-        .values({ advocateId: owner.id, action: `page.sent_to_ocr:${engine}`, entityType: "page", entityId: page.id });
+  const r = await readCloud(
+    policy,
+    image,
+    async () => (await db.query.pages.findFirst({ where: eq(pages.id, pageId), columns: { ocrWords: true } }))?.ocrWords ?? [],
+    {
+      // DPDP audit trail, written before the page leaves our servers: if this insert fails, nothing is sent.
+      // Recorded against the advocate whose consent allowed it, so it shows in their access history.
+      beforeCloudSend: async (engine) => {
+        await db
+          .insert(accessLogs)
+          .values({ advocateId: owner.id, action: `page.sent_to_ocr:${engine}`, entityType: "page", entityId: pageId });
+      },
     },
-  });
-  if (outcome.route !== "cloud") {
-    await setRoute(db, page.id, version, outcome.route);
-    log?.warn({ pageId, error: outcome.cloudError }, "cloud OCR returned nothing, kept local result");
+  );
+  if (!r.result) {
+    await setRoute(db, pageId, version, "local:cloud-empty");
+    log?.warn({ pageId, error: r.cloudError }, "cloud OCR returned nothing, kept local result");
     return "empty";
   }
-  const saved = await save(db, page.id, version, outcome.result, "cloud", CLOUD_QUEUED);
-  if (!saved) return "stale";
-  log?.info({ pageId, engine: outcome.result.engine, localConfidence: local.confidence }, "ocr page read in cloud");
+  if (!(await save(db, pageId, version, r.result, "cloud", CLOUD_QUEUED))) return "stale";
+  log?.info({ pageId, engine: r.result.engine }, "ocr page read in cloud");
   return "done";
 }
 
@@ -145,17 +140,25 @@ export async function markCloudFailed(db: Db, pageId: string, version: number) {
   await setRoute(db, pageId, version, "local:cloud-failed");
 }
 
-/** After the last retry: record the failure so the advocate sees it and can re-scan. */
+/**
+ * After the last retry: record the failure so the advocate sees it and can re-scan.
+ * A page that already has a reading for this version stays DONE (only queueing its cloud read failed).
+ */
 export async function markFailed(db: Db, pageId: string, error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
   const version = (error as { pageVersion?: number } | null)?.pageVersion;
+  // Only the version this job read: a newer upload's result must not be marked FAILED.
+  const thisVersion = version === undefined ? eq(pages.id, pageId) : and(eq(pages.id, pageId), eq(pages.version, version));
   const [page] = await db
     .update(pages)
     .set({ ocrStatus: "FAILED", ocrError: message.slice(0, 500) })
-    // Only the version this job read: a newer upload's result must not be marked FAILED.
-    .where(version === undefined ? eq(pages.id, pageId) : and(eq(pages.id, pageId), eq(pages.version, version)))
+    .where(and(thisVersion, ne(pages.ocrStatus, "DONE")))
     .returning({ documentId: pages.documentId });
-  if (page) await rollUpDocumentStatus(db, page.documentId);
+  if (page) {
+    await rollUpDocumentStatus(db, page.documentId);
+    return;
+  }
+  if (version !== undefined) await setRoute(db, pageId, version, "local:cloud-failed");
 }
 
 /** Save a reading for one page version (and, if given, only while the page is still on `fromRoute`). */

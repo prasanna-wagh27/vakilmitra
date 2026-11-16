@@ -182,6 +182,7 @@ export const documentRoutes: FastifyPluginAsyncZod = async (app) => {
         height: image.info.height,
         ocrStatus: "PENDING" as const,
         ocrEngine: null,
+        ocrRoute: null,
         ocrText: null,
         ocrConfidence: null,
         ocrWords: null,

@@ -117,7 +117,8 @@ export const documentQuery = (documentId: string) =>
       if (!d) return false;
       if (d.ocrStatus === "PROCESSING" || (d.ocrStatus === "PENDING" && d.pages.length > 0)) return 2000;
       // Local text is shown already; a cloud reading may still replace it (that can take a minute or two).
-      return d.pages.some((p) => p.ocrRoute === "local:cloud-queued") ? 5000 : false;
+      // Give up after about 5 minutes (a stuck cloud job must not keep the screen polling).
+      return d.pages.some((p) => p.ocrRoute === "local:cloud-queued") && q.state.dataUpdateCount < 60 ? 5000 : false;
     },
   });
 
