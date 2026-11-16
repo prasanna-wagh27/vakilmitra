@@ -87,7 +87,7 @@ export async function buildApp() {
       const url = new URL(req.url, env.API_URL);
       // Account deletion must go through DELETE /api/me, which always requires the password.
       // Checked on the normalised path, so "/api/auth/x/../delete-user" cannot slip past.
-      if (url.pathname.replace(/\/+$/, "").toLowerCase().endsWith("/delete-user")) {
+      if (url.pathname.toLowerCase().split("/").includes("delete-user")) {
         return reply.code(404).send({ error: "not_found", message: "Use DELETE /api/me" });
       }
       const request = new Request(url, {

@@ -61,7 +61,13 @@ describe("partial updates keep fields that were not sent", () => {
 
 describe("account deletion cannot bypass the password", () => {
   it("blocks dot-segment and trailing-slash variants of delete-user", async () => {
-    for (const path of ["/api/auth/delete-user", "/api/auth/x/../delete-user", "/api/auth/delete-user/", "/api/auth/DELETE-USER"]) {
+    for (const path of [
+      "/api/auth/delete-user",
+      "/api/auth/x/../delete-user",
+      "/api/auth/delete-user/",
+      "/api/auth/DELETE-USER",
+      "/api/auth/delete-user/callback?token=x",
+    ]) {
       const r = await owner.post(path).send({});
       expect(r.status, path).toBe(404);
     }
@@ -141,5 +147,8 @@ describe("search snippets", () => {
     expect(hit.snippet.slice(hit.matchStart, hit.matchEnd)).toBe("सुरेश");
     const miss = makeSnippet("abc def", "zzz");
     expect(miss.matchStart).toBe(miss.matchEnd);
+    // Decomposed query (क + nukta) against composed-form text: highlight the right characters.
+    const nfd = makeSnippet("कलम क़ानून १५५", "\u0915\u093c\u093e\u0928\u0942\u0928");
+    expect(nfd.snippet.slice(nfd.matchStart, nfd.matchEnd).normalize("NFC")).toBe("क़ानून".normalize("NFC"));
   });
 });

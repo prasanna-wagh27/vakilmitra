@@ -55,16 +55,18 @@ async function pageCounts(documentIds: string[]) {
 }
 
 /** Text around the first match, with the match position inside the snippet. */
-export function makeSnippet(text: string, q: string, radius = 70) {
-  const lower = text.normalize("NFC").toLocaleLowerCase();
-  const found = lower.indexOf(q.normalize("NFC").toLocaleLowerCase());
+export function makeSnippet(rawText: string, rawQ: string, radius = 70) {
+  // Work on one normalised form throughout, so positions and lengths agree.
+  const text = rawText.normalize("NFC");
+  const q = rawQ.normalize("NFC");
+  const lower = text.toLocaleLowerCase();
+  const at = lower.length === text.length ? lower.indexOf(q.toLocaleLowerCase()) : -1;
   // If JS can't locate what Postgres matched (case-folding differences), show the start of the
   // page with no highlight rather than highlighting the wrong words.
-  if (found < 0 || lower.length !== text.length) {
+  if (at < 0) {
     const end = Math.min(text.length, radius * 2);
     return { snippet: text.slice(0, end).replace(/\s/g, " ") + (end < text.length ? "…" : ""), matchStart: 0, matchEnd: 0 };
   }
-  const at = found;
   const start = Math.max(0, at - radius);
   const end = Math.min(text.length, at + q.length + radius);
   const prefix = start > 0 ? "…" : "";

@@ -61,10 +61,16 @@ export class TesseractEngine implements OcrEngine {
       const starting = (async () => {
         const langPath = await stageLanguageData(this.langs);
         const scheduler = createScheduler();
-        for (let i = 0; i < Math.max(1, this.workers); i++) {
-          const w = await createWorker(this.langs, OEM.LSTM_ONLY, { langPath, gzip: true, cacheMethod: "none" });
-          await w.setParameters({ preserve_interword_spaces: "1" });
-          scheduler.addWorker(w);
+        try {
+          for (let i = 0; i < Math.max(1, this.workers); i++) {
+            const w = await createWorker(this.langs, OEM.LSTM_ONLY, { langPath, gzip: true, cacheMethod: "none" });
+            scheduler.addWorker(w);
+            await w.setParameters({ preserve_interword_spaces: "1" });
+          }
+        } catch (e) {
+          // Don't leak the workers that did start: a retry would otherwise add more each time.
+          await scheduler.terminate().catch(() => undefined);
+          throw e;
         }
         return scheduler;
       })();
@@ -114,6 +120,6 @@ export class TesseractEngine implements OcrEngine {
   async close() {
     const pool = this.pool;
     this.pool = null;
-    if (pool) await (await pool).terminate();
+    if (pool) await pool.then((p) => p.terminate()).catch(() => undefined); // a failed start has nothing to close
   }
 }

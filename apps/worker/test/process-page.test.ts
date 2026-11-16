@@ -128,6 +128,16 @@ describe("processPage", () => {
     await db.delete(pages).where(eq(pages.id, pageId)); // keep the shared document's roll-up clean for later tests
   });
 
+  it("a stale job's final failure does not mark a newer reading FAILED", async () => {
+    const pageId = await addPage(21, fixture);
+    expect(await processPage({ db, storage, policy: localOnly }, pageId)).toBe("done"); // version 1 read
+    const err = Object.assign(new Error("old job timed out"), { pageVersion: 0 }); // from an older version
+    await markFailed(db, pageId, err);
+    const p = await db.query.pages.findFirst({ where: eq(pages.id, pageId) });
+    expect(p?.ocrStatus).toBe("DONE");
+    await db.delete(pages).where(eq(pages.id, pageId));
+  });
+
   it("marks a page FAILED after the last retry and the document follows", async () => {
     const pageId = await addPage(2); // no blob stored: storage.get throws
     await expect(processPage({ db, storage, policy: localOnly }, pageId)).rejects.toThrow();

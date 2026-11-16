@@ -183,7 +183,7 @@ function ScanPage() {
   }
 
   async function onFiles(files: FileList | null) {
-    if (!files?.length) return;
+    if (!files?.length || !numberingReady) return;
     setBusy(true);
     setError(null);
     try {
@@ -328,7 +328,11 @@ function ScanPage() {
         {phase === "capture" && (mode === "upload" || camError) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
             {camError && <p className="max-w-sm text-sm text-white/80">{t("doc.cameraDenied")}</p>}
-            <Button className="bg-white text-black hover:bg-white/90" onClick={() => fileInput.current?.click()} disabled={busy}>
+            <Button
+              className="bg-white text-black hover:bg-white/90"
+              onClick={() => fileInput.current?.click()}
+              disabled={busy || !numberingReady}
+            >
               <FileUp /> {mode === "upload" ? t("doc.upload") : t("doc.choosePhotos")}
             </Button>
             {busy && <Loader2 className="size-6 animate-spin" />}
@@ -413,6 +417,7 @@ function ScanPage() {
             className="size-14 text-white hover:bg-white/10"
             aria-label={t("doc.choosePhotos")}
             onClick={() => fileInput.current?.click()}
+            disabled={busy || !numberingReady}
           >
             <Images className="size-7!" />
           </Button>

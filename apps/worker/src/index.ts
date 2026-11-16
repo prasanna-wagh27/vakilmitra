@@ -8,10 +8,12 @@ import { loadEnv } from "./env.js";
 import { markFailed, processPage } from "./process-page.js";
 
 const env = loadEnv();
+// OCR settings (including OCR_CONCURRENCY, which sizes both the job concurrency and the Tesseract pool).
+const ocr = ocrEnv(process.env);
+const policy = policyFromEnv(ocr);
 const log = pino({ level: env.LOG_LEVEL, transport: env.NODE_ENV === "production" ? undefined : { target: "pino-pretty" } });
-const { db, pool } = createDb(env.DATABASE_URL, { max: env.OCR_CONCURRENCY + 1 });
+const { db, pool } = createDb(env.DATABASE_URL, { max: ocr.OCR_CONCURRENCY + 1 });
 const storage = createStorage(storageConfigFromEnv(process.env));
-const policy = policyFromEnv(ocrEnv(process.env));
 
 const worker = new Worker<OcrJob>(
   QUEUES.ocr,
@@ -27,7 +29,7 @@ const worker = new Worker<OcrJob>(
       throw err;
     }
   },
-  { connection: connectionFromUrl(env.VALKEY_URL), concurrency: env.OCR_CONCURRENCY },
+  { connection: connectionFromUrl(env.VALKEY_URL), concurrency: ocr.OCR_CONCURRENCY },
 );
 
 worker.on("ready", () =>
@@ -37,7 +39,7 @@ worker.on("ready", () =>
       cloud: policy.cloud?.name ?? "none",
       mode: policy.mode,
       below: policy.below,
-      concurrency: env.OCR_CONCURRENCY,
+      concurrency: ocr.OCR_CONCURRENCY,
     },
     "OCR worker ready",
   ),
