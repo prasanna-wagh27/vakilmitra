@@ -61,6 +61,7 @@ export const en = {
   "today.overdue": "overdue",
   "today.statHearings": "Hearings today",
   "today.statMissing": "Dates missing",
+  "today.statFees": "Fees due",
 
   "case.title": "Case title",
   "case.new": "New case",
@@ -441,6 +442,7 @@ export const mr: Partial<Record<MessageKey, string>> = {
   "today.overdue": "मुदत उलटलेली",
   "today.statHearings": "आजच्या सुनावण्या",
   "today.statMissing": "तारीख बाकी",
+  "today.statFees": "थकीत फी",
 
   "case.title": "प्रकरणाचे नाव",
   "case.new": "नवीन प्रकरण",

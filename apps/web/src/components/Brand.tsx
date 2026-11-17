@@ -16,7 +16,7 @@ export function Brand({ compact = false, onDark = false }: { compact?: boolean; 
       >
         <Scale className="size-4" strokeWidth={2.2} />
       </span>
-      {!compact && <span className="text-[17px] leading-none font-semibold tracking-tight">{t("app.name")}</span>}
+      {!compact && <span className="text-[17px] leading-none font-medium tracking-tight">{t("app.name")}</span>}
     </span>
   );
 }

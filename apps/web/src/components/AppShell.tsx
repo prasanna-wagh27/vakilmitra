@@ -21,10 +21,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <header className="no-print sticky top-0 z-30 border-b bg-card">
-        <div className="mx-auto flex h-14 max-w-4xl items-center gap-2 px-4">
-          <Link to="/" aria-label={t("app.name")} className="mr-4">
-            <Brand />
+      <header className="no-print sticky top-0 z-30 bg-background/90 px-3 pt-3 pb-2 backdrop-blur-sm">
+        <div className="mx-auto flex h-12 max-w-4xl items-center gap-2 rounded-xl bg-ink px-3 text-white">
+          <Link to="/" aria-label={t("app.name")} className="mr-3">
+            <Brand onDark />
           </Link>
           <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
             {NAV.map((n) => (
@@ -33,8 +33,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={n.to}
                 aria-current={active(n.to) ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                  active(n.to) ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+                  "rounded-md px-3 py-1.5 text-sm transition-colors",
+                  active(n.to) ? "bg-white/12 text-white" : "text-white/70 hover:text-white",
                 )}
               >
                 {t(n.key)}
@@ -42,18 +42,18 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-1">
-            <LanguageToggle persist compact />
+            <LanguageToggle persist compact onDark />
             <Link
               to="/search"
               aria-label={t("nav.search")}
-              className="inline-flex size-9 items-center justify-center rounded-md text-foreground hover:bg-muted"
+              className="inline-flex size-9 items-center justify-center rounded-md text-white/85 hover:bg-white/10 hover:text-white"
             >
               <Search className="size-[18px]" />
             </Link>
             <Link
               to="/settings"
               aria-label={t("nav.settings")}
-              className="inline-flex size-9 items-center justify-center rounded-md text-foreground hover:bg-muted"
+              className="inline-flex size-9 items-center justify-center rounded-md text-white/85 hover:bg-white/10 hover:text-white"
             >
               <Settings className="size-[18px]" />
             </Link>
@@ -61,7 +61,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 pt-6 pb-28 md:pb-12">{children}</main>
+      <main className="mx-auto max-w-4xl px-4 pt-4 pb-28 md:pb-12">{children}</main>
 
       {/* Phone: a flat tab bar on the bottom edge, easy to reach one-handed. */}
       <nav className="no-print fixed inset-x-0 bottom-0 z-30 border-t bg-card pb-[env(safe-area-inset-bottom)] md:hidden" aria-label="Main">

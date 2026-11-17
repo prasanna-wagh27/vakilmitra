@@ -1,7 +1,15 @@
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 
-export function LanguageToggle({ persist = false, compact = false }: { persist?: boolean; compact?: boolean }) {
+export function LanguageToggle({
+  persist = false,
+  compact = false,
+  onDark = false,
+}: {
+  persist?: boolean;
+  compact?: boolean;
+  onDark?: boolean;
+}) {
   const { locale, setLocale } = useI18n();
   const choose = (l: "mr" | "en") => {
     setLocale(l);
@@ -16,14 +24,14 @@ export function LanguageToggle({ persist = false, compact = false }: { persist?:
         onClick={() => choose(other)}
         lang={other}
         aria-label={other === "en" ? "Switch to English" : "मराठीत बदला"}
-        className="inline-flex h-9 items-center rounded-md px-2.5 text-sm font-medium hover:bg-muted"
+        className={`inline-flex h-8 items-center rounded-md px-2.5 text-sm ${onDark ? "bg-white/12 text-white hover:bg-white/20" : "bg-muted hover:bg-border"}`}
       >
         {other === "en" ? "EN" : "मराठी"}
       </button>
     );
   }
   return (
-    <fieldset className="inline-flex rounded-md border border-input bg-card p-0.5 text-sm">
+    <fieldset className="inline-flex gap-1 text-sm">
       <legend className="sr-only">Language</legend>
       {(["mr", "en"] as const).map((l) => (
         <button
@@ -31,7 +39,7 @@ export function LanguageToggle({ persist = false, compact = false }: { persist?:
           key={l}
           onClick={() => choose(l)}
           aria-pressed={locale === l}
-          className={`h-8 rounded-[4px] px-3 font-medium ${locale === l ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          className={`h-9 rounded-lg border px-3 ${locale === l ? "border-border bg-card text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
         >
           {l === "mr" ? "मराठी" : "English"}
         </button>

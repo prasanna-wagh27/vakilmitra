@@ -8,7 +8,7 @@ export function HearingRow({ h }: { h: HearingWithCase }) {
   return (
     <Link to="/cases/$caseId" params={{ caseId: h.case.id }} className="list-row">
       <span className="min-w-0 flex-1">
-        <span className="line-clamp-2 block font-medium break-words">{h.case.title}</span>
+        <span className="line-clamp-2 block break-words">{h.case.title}</span>
         {meta && <span className="mt-0.5 line-clamp-1 block text-sm text-muted-foreground">{meta}</span>}
       </span>
       {h.purpose && <span className="max-w-[40%] shrink-0 truncate text-sm text-muted-foreground">{h.purpose}</span>}

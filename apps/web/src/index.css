@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 /*
- * VakilMitra visual system: a crisp, quiet working tool.
- * Neutral greys, white surfaces with 1px borders, small corners, no decorative gradients or
- * glows. One typeface: HK Grotesk (Hanken Grotesk); Marathi letters come from IBM Plex Sans
- * Devanagari, since HK Grotesk has no Devanagari. Light only, by design.
+ * VakilMitra visual system, after the Libra (libratech.ai) style: warm-neutral greys, white
+ * surfaces with #e9eaea hairlines, 6px controls, 8px cards, near-black #161a1b actions, regular-
+ * weight text with tight headings, and Geist Mono for small labels. No gradients or shadows.
+ * Type: HK Grotesk (Hanken Grotesk) stands in for Libra's Fakt Pro, which is a paid font;
+ * Marathi letters come from IBM Plex Sans Devanagari. Light only, by design.
  *
  * Spacing rhythm (use only these): 4, 8, 12, 16, 24, 32 px.
  * Page gutter 16px; between sections 32px; heading to content 12px; list rows 12px x 16px.
@@ -12,23 +13,26 @@
 :root {
   color-scheme: light;
   --background: #fafafa;
-  --foreground: #18181b;
+  --foreground: #161a1b;
   --card: #ffffff;
-  --muted: #f4f4f5;
-  --muted-foreground: #63636e;
-  --border: #e4e4e7;
-  --input: #d4d4d8;
-  --primary: #18181b;
+  --muted: #f4f4f4;
+  --muted-foreground: #57514b;
+  --subtle-foreground: #888989;
+  --border: #e9eaea;
+  --input: #dadcdc;
+  --primary: #161a1b;
   --primary-foreground: #ffffff;
-  --accent: #1d4ed8;
-  --accent-soft: #eff4ff;
-  --destructive: #b42318;
-  --destructive-soft: #fef3f2;
-  --warning: #93540b;
-  --warning-soft: #fffaeb;
-  --success: #067647;
-  --success-soft: #ecfdf3;
-  --ring: #1d4ed8;
+  --ink: #1e2324;
+  --accent: #5266ba;
+  --accent-soft: #eef2fb;
+  /* Libra's palette has no red; this muted red is ours, for errors and high-risk flags only. */
+  --destructive: #a3301f;
+  --destructive-soft: #fbefed;
+  --warning: #7a4500;
+  --warning-soft: #fbf8df;
+  --success: #197644;
+  --success-soft: #eff6f2;
+  --ring: #5266ba;
 }
 
 @theme inline {
@@ -37,6 +41,8 @@
   --color-card: var(--card);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-ink: var(--ink);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-primary: var(--primary);
@@ -59,6 +65,7 @@
   --radius-3xl: 12px;
   --font-sans: "Hanken Grotesk", "IBM Plex Sans Devanagari", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: var(--font-sans);
+  --font-mono: "Geist Mono", "IBM Plex Sans Devanagari", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 @layer base {
@@ -73,7 +80,7 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 1.45;
     -webkit-font-smoothing: antialiased;
     font-variant-numeric: tabular-nums;
   }
@@ -89,9 +96,18 @@
 }
 
 @layer components {
+  /* Headings: medium weight, tight tracking (Libra sets large type at -2px). */
   .font-display {
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+  /* Small mono label, e.g. a date or a group heading ("Trusted by 12.000+ legal teams"). */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.45;
+    letter-spacing: -0.25px;
+    color: var(--muted-foreground);
   }
   /* A bordered white surface. */
   .panel {

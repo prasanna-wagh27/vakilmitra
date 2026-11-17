@@ -17,7 +17,7 @@ export function PageHeader({ title, back, action, eyebrow }: { title: string; ba
         </Link>
       )}
       <div className="min-w-0 flex-1">
-        {eyebrow && <div className="mb-1 text-sm text-muted-foreground">{eyebrow}</div>}
+        {eyebrow && <div className="label-mono mb-1">{eyebrow}</div>}
         <h1 className="font-display line-clamp-2 text-2xl leading-8 break-words">{title}</h1>
       </div>
       {action}
@@ -29,7 +29,7 @@ export function Section({ title, action, children }: { title: string; action?: R
   return (
     <section className="mt-8">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="text-base font-semibold">{title}</h2>
+        <h2 className="font-display text-lg leading-6">{title}</h2>
         {action}
       </div>
       {children}
@@ -124,7 +124,7 @@ export function Chip({ active, onClick, children }: { active: boolean; onClick: 
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`h-9 shrink-0 rounded-md border px-3 text-sm font-medium transition-colors ${active ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card text-foreground hover:bg-muted"}`}
+      className={`h-9 shrink-0 rounded-lg border px-3 text-sm transition-colors ${active ? "border-border bg-card text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
     >
       {children}
     </button>

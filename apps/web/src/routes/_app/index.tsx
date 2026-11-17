@@ -35,7 +35,7 @@ function TodayPage() {
     <>
       <header className="mb-6 flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm text-muted-foreground">{fmtDay(today, locale)}</p>
+          <p className="label-mono">{fmtDay(today, locale)}</p>
           <h1 className="font-display mt-1 line-clamp-2 text-2xl leading-8">{tf("today.greeting", { name: advocate.name })}</h1>
         </div>
         <Button asChild size="sm" className="shrink-0">
@@ -55,7 +55,7 @@ function TodayPage() {
         />
         <Stat
           to="/fees"
-          label={t("today.outstanding")}
+          label={t("today.statFees")}
           value={fees.data ? rupees(fees.data.totals.outstandingPaise, locale) : "–"}
           tone={fees.data && fees.data.totals.overduePaise > 0 ? "text-destructive" : undefined}
         />
@@ -66,7 +66,7 @@ function TodayPage() {
       <Section
         title={t("today.byCourt")}
         action={
-          <fieldset className="inline-flex rounded-md border border-input bg-card p-0.5 text-sm">
+          <fieldset className="inline-flex gap-1 text-sm">
             <legend className="sr-only">{t("today.title")}</legend>
             {[
               { d: today, label: t("today.today") },
@@ -78,8 +78,8 @@ function TodayPage() {
                 aria-pressed={day === o.d}
                 onClick={() => setDay(o.d)}
                 className={cn(
-                  "h-8 rounded-[4px] px-3 font-medium transition-colors",
-                  day === o.d ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+                  "h-8 rounded-lg border px-3 transition-colors",
+                  day === o.d ? "border-border bg-card text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
                 {o.label}
@@ -96,7 +96,7 @@ function TodayPage() {
           <div className="space-y-3">
             {[...byCourt].map(([court, hs]) => (
               <div key={court} className="list">
-                <h3 className="flex items-center gap-2 bg-muted/60 px-4 py-2 text-[13px] font-medium text-muted-foreground">
+                <h3 className="flex items-center gap-2 bg-muted/60 px-4 py-2 text-[13px] text-muted-foreground">
                   <span className="truncate">{court}</span>
                   <span className="ml-auto tabular-nums">{fmtNumber(hs.length, locale)}</span>
                 </h3>
@@ -116,7 +116,7 @@ function TodayPage() {
             {missing.map((c) => (
               <Link key={c.id} to="/cases/$caseId" params={{ caseId: c.id }} className="list-row">
                 <span className="min-w-0 flex-1">
-                  <span className="line-clamp-2 block font-medium break-words">{c.title}</span>
+                  <span className="line-clamp-2 block break-words">{c.title}</span>
                   {c.lastHearing && (
                     <span className="mt-0.5 line-clamp-1 block text-sm text-muted-foreground">
                       {t("today.lastHearing")}: {fmtDate(c.lastHearing.date, locale)}
@@ -137,8 +137,8 @@ function TodayPage() {
 function Stat({ to, label, value, tone }: { to: string; label: string; value: ReactNode; tone?: string }) {
   return (
     <Link to={to} className="min-w-0 px-3 py-3 hover:bg-background sm:px-4">
-      <span className="line-clamp-1 block text-xs text-muted-foreground">{label}</span>
-      <span className={cn("mt-1 block truncate text-lg leading-7 font-semibold", tone)}>{value}</span>
+      <span className="label-mono block truncate text-xs">{label}</span>
+      <span className={cn("font-display mt-1 block truncate text-xl leading-7", tone)}>{value}</span>
     </Link>
   );
 }
