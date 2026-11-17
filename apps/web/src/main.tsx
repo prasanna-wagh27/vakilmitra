@@ -5,14 +5,13 @@ import { createRoot } from "react-dom/client";
 import { ApiError } from "./lib/api";
 import { routeTree } from "./routeTree.gen";
 // Fonts are bundled and served from our own origin: no third-party requests (DPDP, offline).
-import "@fontsource/ibm-plex-sans/latin-400.css";
-import "@fontsource/ibm-plex-sans/latin-500.css";
-import "@fontsource/ibm-plex-sans/latin-600.css";
+import "@fontsource/hanken-grotesk/latin-400.css";
+import "@fontsource/hanken-grotesk/latin-500.css";
+import "@fontsource/hanken-grotesk/latin-600.css";
+import "@fontsource/hanken-grotesk/latin-700.css";
 import "@fontsource/ibm-plex-sans-devanagari/devanagari-400.css";
 import "@fontsource/ibm-plex-sans-devanagari/devanagari-500.css";
 import "@fontsource/ibm-plex-sans-devanagari/devanagari-600.css";
-import "@fontsource/tiro-devanagari-marathi/devanagari-400.css";
-import "@fontsource/tiro-devanagari-marathi/latin-400.css";
 import "./index.css";
 
 const queryClient = new QueryClient({
