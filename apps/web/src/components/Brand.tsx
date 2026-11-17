@@ -2,21 +2,21 @@ import { Scale } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-/** Brand: a scales mark on an ink tile, with the Marathi-first serif wordmark. */
+/** Brand: a scales mark with the wordmark. On the dark bar, a bare mark (the wordmark shows from sm up). */
 export function Brand({ compact = false, onDark = false }: { compact?: boolean; onDark?: boolean }) {
   const { t } = useI18n();
-  return (
-    <span className="flex items-center gap-2.5">
-      <span
-        aria-hidden
-        className={cn(
-          "flex size-9 items-center justify-center rounded-xl",
-          onDark ? "bg-white text-black" : "bg-primary text-primary-foreground shadow-[0_6px_14px_-8px_rgb(17_17_20/0.7)]",
-        )}
-      >
-        <Scale className="size-[18px]" strokeWidth={2.2} />
+  if (onDark) {
+    return (
+      <span className="flex items-center gap-2 text-white">
+        <Scale className="size-6" strokeWidth={1.6} aria-hidden />
+        {!compact && <span className="hidden text-[17px] leading-none sm:inline">{t("app.name")}</span>}
       </span>
-      {!compact && <span className="font-display text-[1.35rem] leading-none">{t("app.name")}</span>}
+    );
+  }
+  return (
+    <span className="flex items-center gap-2">
+      <Scale className={cn("size-6 text-foreground")} strokeWidth={1.6} aria-hidden />
+      {!compact && <span className="text-[19px] leading-none tracking-tight">{t("app.name")}</span>}
     </span>
   );
 }

@@ -1,93 +1,122 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarDays, FolderOpen, IndianRupee, Search, Settings, Sun, Users } from "lucide-react";
-import type { ReactNode } from "react";
+import { Menu, Plus, X } from "lucide-react";
+import { type ReactNode, useEffect, useState } from "react";
 import { type MessageKey, useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { Brand } from "./Brand";
 import { LanguageToggle } from "./LanguageToggle";
 
-const NAV: { to: string; key: MessageKey; icon: typeof Sun }[] = [
-  { to: "/", key: "nav.today", icon: Sun },
-  { to: "/cases", key: "nav.cases", icon: FolderOpen },
-  { to: "/diary", key: "nav.diary", icon: CalendarDays },
-  { to: "/clients", key: "nav.clients", icon: Users },
-  { to: "/fees", key: "nav.fees", icon: IndianRupee },
+const GROUPS: { label: MessageKey; items: { to: string; key: MessageKey }[] }[] = [
+  {
+    label: "nav.groupWork",
+    items: [
+      { to: "/", key: "nav.today" },
+      { to: "/cases", key: "nav.cases" },
+      { to: "/diary", key: "nav.diary" },
+    ],
+  },
+  {
+    label: "nav.groupPractice",
+    items: [
+      { to: "/clients", key: "nav.clients" },
+      { to: "/fees", key: "nav.fees" },
+    ],
+  },
+  {
+    label: "nav.groupAccount",
+    items: [
+      { to: "/search", key: "nav.search" },
+      { to: "/settings", key: "nav.settings" },
+    ],
+  },
 ];
+const INLINE = GROUPS.slice(0, 2).flatMap((g) => g.items);
 
+/** A floating, see-through bar (after Libra's), with a full-screen menu on phones. */
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const active = (to: string) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
+  const [open, setOpen] = useState(false);
+
+  // Close the menu on navigation; stop the page scrolling under it.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs when the path changes
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+  }, [open]);
+
+  const bar = (
+    <div className="mx-auto flex h-12 max-w-4xl items-center gap-2 rounded-xl bg-[rgb(22_26_27/0.72)] pr-2 pl-4 text-white backdrop-blur-xl">
+      <Link to="/" aria-label={t("app.name")} className="mr-2">
+        <Brand onDark />
+      </Link>
+      <nav className="hidden items-center md:flex" aria-label="Main">
+        {INLINE.map((n) => (
+          <Link
+            key={n.to}
+            to={n.to}
+            aria-current={active(n.to) ? "page" : undefined}
+            className={cn("rounded-md px-3 py-1.5 text-[15px]", active(n.to) ? "text-white" : "text-white/65 hover:text-white")}
+          >
+            {t(n.key)}
+          </Link>
+        ))}
+      </nav>
+      <div className="ml-auto flex items-center gap-2">
+        <LanguageToggle persist compact onDark />
+        <Link
+          to="/cases/new"
+          className="inline-flex h-8 items-center gap-1.5 rounded-md bg-white px-3 text-[15px] text-foreground hover:bg-white/90"
+        >
+          <Plus className="size-4" aria-hidden /> {t("case.new")}
+        </Link>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-label={open ? t("nav.close") : t("nav.menu")}
+          className="inline-flex size-9 items-center justify-center rounded-md text-white/85 hover:bg-white/10 hover:text-white"
+        >
+          {open ? <X className="size-5" /> : <Menu className="size-5" />}
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <>
-      <header className="no-print sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-2.5">
-          <Link to="/" aria-label={t("app.name")}>
-            <Brand />
-          </Link>
-          <nav className="ml-6 hidden rounded-full border bg-card p-1 shadow-[0_1px_2px_rgb(17_17_20/0.05)] md:flex" aria-label="Main">
-            {NAV.map((n) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                aria-current={active(n.to) ? "page" : undefined}
-                className={cn(
-                  "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                  active(n.to) ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {t(n.key)}
-              </Link>
+      <header className="no-print sticky top-0 z-40 px-4 pt-3">{bar}</header>
+
+      {open && (
+        <div className="no-print fixed inset-0 z-30 overflow-y-auto bg-[rgb(22_26_27/0.86)] px-4 pt-20 pb-8 text-white backdrop-blur-xl">
+          <nav className="mx-auto max-w-4xl" aria-label="Main">
+            {GROUPS.map((g) => (
+              <div key={g.label} className="border-b border-white/12 py-4 first:pt-0">
+                <p className="label-mono mb-1 !text-white/55">{t(g.label)}</p>
+                <ul>
+                  {g.items.map((n) => (
+                    <li key={n.to}>
+                      <Link
+                        to={n.to}
+                        aria-current={active(n.to) ? "page" : undefined}
+                        className={cn(
+                          "block py-1.5 text-[22px] leading-snug",
+                          active(n.to) ? "text-white" : "text-white/80 hover:text-white",
+                        )}
+                      >
+                        {t(n.key)}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-2">
-            <LanguageToggle persist compact />
-            <Link to="/search" aria-label={t("nav.search")} className="icon-ring size-10 hover:bg-muted">
-              <Search className="size-[18px]" />
-            </Link>
-            <Link to="/settings" aria-label={t("nav.settings")} className="icon-ring size-10 hover:bg-muted">
-              <Settings className="size-[18px]" />
-            </Link>
-          </div>
         </div>
-      </header>
+      )}
 
-      <main className="mx-auto max-w-4xl px-4 pt-5 pb-32 md:pb-12">{children}</main>
-
-      {/* Phone: a floating dock, easy to reach one-handed. */}
-      <nav
-        className="no-print fixed inset-x-0 bottom-0 z-30 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden"
-        aria-label="Main"
-      >
-        <ul className="panel grid grid-cols-5 gap-1 rounded-[1.75rem] p-1.5 shadow-[var(--shadow-float)]">
-          {NAV.map((n) => {
-            const on = active(n.to);
-            return (
-              <li key={n.to}>
-                <Link
-                  to={n.to}
-                  aria-current={on ? "page" : undefined}
-                  className={cn(
-                    "flex min-h-14 flex-col items-center justify-center gap-1 rounded-[1.4rem] text-[11px] font-medium",
-                    on ? "text-foreground" : "text-muted-foreground",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "flex h-8 w-12 items-center justify-center rounded-full transition-colors",
-                      on && "bg-primary text-primary-foreground",
-                    )}
-                  >
-                    <n.icon className="size-[18px]" aria-hidden />
-                  </span>
-                  {t(n.key)}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+      <main className="mx-auto max-w-4xl px-6 pt-8 pb-16">{children}</main>
     </>
   );
 }

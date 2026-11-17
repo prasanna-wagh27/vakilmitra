@@ -10,15 +10,15 @@ import { Label } from "./ui/label";
 export function PageHeader({ title, back, action, eyebrow }: { title: string; back?: string; action?: ReactNode; eyebrow?: ReactNode }) {
   const { t } = useI18n();
   return (
-    <div className="mb-5 flex items-center gap-3">
+    <div className="mb-8 flex items-center gap-3">
       {back && (
-        <Link to={back} aria-label={t("common.back")} className="icon-ring size-11 shrink-0 hover:bg-muted">
-          <ArrowLeft className="size-5" />
+        <Link to={back} aria-label={t("common.back")} className="icon-btn size-9 shrink-0">
+          <ArrowLeft className="size-[18px]" />
         </Link>
       )}
       <div className="min-w-0 flex-1">
-        {eyebrow && <div className="mb-0.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{eyebrow}</div>}
-        <h1 className="font-display line-clamp-2 text-[1.6rem] leading-tight break-words sm:text-[2rem]">{title}</h1>
+        {eyebrow && <div className="label-mono mb-1">{eyebrow}</div>}
+        <h1 className="font-display line-clamp-3 text-[2rem] leading-[1.1] break-words">{title}</h1>
       </div>
       {action}
     </div>
@@ -27,9 +27,9 @@ export function PageHeader({ title, back, action, eyebrow }: { title: string; ba
 
 export function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <section className="mt-8">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="font-display text-xl">{title}</h2>
+    <section className="mt-12">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="font-display text-2xl leading-[1.25]">{title}</h2>
         {action}
       </div>
       {children}
@@ -40,7 +40,7 @@ export function Section({ title, action, children }: { title: string; action?: R
 export function Empty({ children }: { children?: ReactNode }) {
   const { t } = useI18n();
   return (
-    <p className="rounded-3xl border border-dashed border-input bg-card/60 px-6 py-8 text-center text-sm text-muted-foreground">
+    <p className="rounded-lg border border-dashed border-input px-4 py-8 text-center text-sm text-muted-foreground">
       {children ?? t("common.none")}
     </p>
   );
@@ -57,7 +57,7 @@ export function ErrorBox({ error, onRetry }: { error: unknown; onRetry?: () => v
   const message = error instanceof Error ? error.message : t("common.error");
   const details = error instanceof ApiError ? error.details : undefined;
   return (
-    <div role="alert" className="rounded-2xl border border-destructive/30 bg-destructive-soft px-4 py-3 text-sm text-destructive">
+    <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive-soft px-4 py-3 text-sm text-destructive">
       <p>{message}</p>
       {details?.map((d) => (
         <p key={d.path}>
@@ -124,7 +124,7 @@ export function Chip({ active, onClick, children }: { active: boolean; onClick: 
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`min-h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors ${active ? "border-primary bg-primary text-primary-foreground shadow-[0_6px_16px_-8px_rgb(17_17_20/0.6)]" : "bg-card text-foreground hover:bg-muted"}`}
+      className={`h-9 shrink-0 rounded-lg border px-3 text-sm transition-colors ${active ? "border-border bg-card text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
     >
       {children}
     </button>

@@ -11,3 +11,4 @@ dist
 # Real labelled pages for OCR evals: client data, never commit
 /eval-data
 packages/ocr/eval/out
+shots/

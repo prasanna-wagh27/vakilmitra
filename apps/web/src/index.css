@@ -1,34 +1,38 @@
 @import "tailwindcss";
 
 /*
- * VakilMitra visual system: a quiet, trustworthy workspace.
- * Soft grey canvas, large rounded white panels, near-black pill actions, a Marathi-first serif
- * for headings (Tiro Devanagari Marathi) and IBM Plex for reading. Light only, by design.
+ * VakilMitra visual system, after the Libra (libratech.ai) style: warm-neutral greys, white
+ * surfaces with #e9eaea hairlines, 6px controls, 8px cards, near-black #161a1b actions, regular-
+ * weight text with tight headings, and Geist Mono for small labels. No gradients or shadows.
+ * Type: HK Grotesk (Hanken Grotesk) stands in for Libra's Fakt Pro, which is a paid font;
+ * Marathi letters come from IBM Plex Sans Devanagari. Light only, by design.
+ *
+ * Spacing rhythm (use only these): 4, 8, 12, 16, 24, 32, 48 px.
+ * Page gutter 24px; between sections 48px; heading to content 16px; list rows 16px tall padding.
  */
 :root {
   color-scheme: light;
-  --background: #f3f3f5;
-  --foreground: #111114;
+  --background: #fafafa;
+  --foreground: #161a1b;
   --card: #ffffff;
-  --muted: #ececf0;
-  --muted-foreground: #5f5f6b;
-  --border: #e3e3e8;
-  --input: #d9d9e0;
-  /* Primary actions are ink: black pills, white text. */
-  --primary: #111114;
+  --muted: #f4f4f4;
+  --muted-foreground: #57514b;
+  --subtle-foreground: #888989;
+  --border: #e9eaea;
+  --input: #dadcdc;
+  --primary: #161a1b;
   --primary-foreground: #ffffff;
-  /* Accent for links, focus and information. */
-  --accent: #3045b5;
-  --accent-soft: #e8ebfb;
-  --destructive: #c0262d;
-  --destructive-soft: #fcebec;
-  --warning-soft: #fcf1d9;
-  --warning: #8a5500;
-  --success-soft: #e2f3e8;
-  --success: #1c6b3a;
-  --ring: #3045b5;
-  --hero: #111114;
-  --hero-foreground: #f4f4f6;
+  --ink: #1e2324;
+  --accent: #5266ba;
+  --accent-soft: #eef2fb;
+  /* Libra's palette has no red; this muted red is ours, for errors and high-risk flags only. */
+  --destructive: #a3301f;
+  --destructive-soft: #fbefed;
+  --warning: #7a4500;
+  --warning-soft: #fbf8df;
+  --success: #197644;
+  --success-soft: #eff6f2;
+  --ring: #5266ba;
 }
 
 @theme inline {
@@ -37,6 +41,8 @@
   --color-card: var(--card);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-ink: var(--ink);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-primary: var(--primary);
@@ -50,17 +56,16 @@
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-ring: var(--ring);
-  --color-hero: var(--hero);
-  --color-hero-foreground: var(--hero-foreground);
-  /* Larger, softer corners everywhere (existing rounded-* classes pick these up). */
-  --radius-lg: 0.875rem;
-  --radius-xl: 1.125rem;
-  --radius-2xl: 1.5rem;
-  --radius-3xl: 2rem;
-  --font-sans: "IBM Plex Sans", "IBM Plex Sans Devanagari", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Tiro Devanagari Marathi", "Noto Serif Devanagari", Georgia, "Times New Roman", serif;
-  --shadow-card: 0 1px 2px rgb(17 17 20 / 0.04), 0 10px 28px -14px rgb(17 17 20 / 0.12);
-  --shadow-float: 0 2px 6px rgb(17 17 20 / 0.06), 0 18px 40px -18px rgb(17 17 20 / 0.28);
+  /* Small, consistent corners: controls 6px, containers 8px, sheets 12px. */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
+  --radius-3xl: 12px;
+  --font-sans: "Hanken Grotesk", "IBM Plex Sans Devanagari", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-sans);
+  --font-mono: "Geist Mono", "IBM Plex Sans Devanagari", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 @layer base {
@@ -75,7 +80,7 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     font-size: 16px;
-    line-height: 1.55;
+    line-height: 1.45;
     -webkit-font-smoothing: antialiased;
     font-variant-numeric: tabular-nums;
   }
@@ -91,54 +96,79 @@
 }
 
 @layer components {
-  /* Display headings: the serif that carries the brand. */
-  /* Tailwind's font-display utility sets the family (from --font-display); this adds weight and tracking. */
+  /* Headings: medium weight, tight tracking (Libra sets large type at -2px). */
   .font-display {
     font-weight: 400;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
-  /* Large rounded panel on the grey canvas (ailawyer-style section). */
+  /* Small mono label, e.g. a date or a group heading ("Trusted by 12.000+ legal teams"). */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.45;
+    letter-spacing: -0.25px;
+    color: var(--muted-foreground);
+  }
+  /* A bordered white surface. */
   .panel {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: var(--radius-3xl);
-    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-lg);
   }
-  /* A row inside a panel: a soft pill with a hairline, like a file chip. */
+  /* A list in the Libra manner: no box, rows separated by full-width hairlines. */
+  .list {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .list > * + * {
+    border-top: 1px solid var(--border);
+  }
+  .list-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    min-height: 64px;
+  }
+  a.list-row:hover,
+  button.list-row:hover {
+    background: linear-gradient(var(--muted), var(--muted)) no-repeat center / calc(100% + 32px) 100%;
+  }
+  /* Grey status chip, like Libra's "Included". */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: var(--radius-md);
+    background: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  /* A standalone bordered row (when rows are not grouped in a .list). */
   .row-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: var(--radius-2xl);
-    box-shadow: 0 1px 0 rgb(17 17 20 / 0.02);
-    transition:
-      border-color 0.15s,
-      box-shadow 0.15s;
+    border-radius: var(--radius-lg);
+    transition: border-color 0.15s;
   }
   a.row-card:hover,
   button.row-card:hover {
-    border-color: #cfcfd8;
-    box-shadow: var(--shadow-card);
+    border-color: var(--input);
   }
-  /* Ink hero card with a faint lit texture (Harvey-style), for the day's summary. */
-  .hero-ink {
-    background:
-      radial-gradient(120% 90% at 100% 0%, rgb(255 255 255 / 0.1), transparent 55%),
-      radial-gradient(80% 70% at 0% 100%, rgb(70 90 200 / 0.18), transparent 60%), var(--hero);
-    color: var(--hero-foreground);
-    border-radius: var(--radius-3xl);
-    box-shadow: var(--shadow-float);
-  }
-  /* Circular icon button with a soft ring (ailawyer-style). */
-  .icon-ring {
+  /* Square-cornered icon button with a hairline. */
+  .icon-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 9999px;
-    background: var(--card);
+    border-radius: var(--radius-md);
     border: 1px solid var(--border);
-    box-shadow:
-      0 0 0 4px rgb(17 17 20 / 0.03),
-      0 1px 2px rgb(17 17 20 / 0.05);
+    background: var(--card);
+    color: var(--foreground);
+  }
+  .icon-btn:hover {
+    background: var(--muted);
   }
 }
 
