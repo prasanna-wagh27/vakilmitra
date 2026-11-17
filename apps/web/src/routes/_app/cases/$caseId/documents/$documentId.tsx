@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Empty, ErrorBox, Field, FormActions, Loading, PageHeader } from "@/components/common";
+import { FactsPanel } from "@/components/FactsPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Input, NativeSelect } from "@/components/ui/input";
@@ -230,8 +231,10 @@ function DocumentPage() {
         )}
       </div>
 
+      <FactsPanel doc={doc} caseId={caseId} canEdit={canEdit} />
+
       {doc.pages.length > 0 && (
-        <label className="mb-3 flex min-h-11 items-start gap-2 text-sm">
+        <label className="mt-8 mb-3 flex min-h-11 items-start gap-2 text-sm">
           <Checkbox checked={outline} onChange={(e) => setOutline(e.target.checked)} className="mt-0.5" />
           <span>
             <span className="font-medium">{t("doc.lowConfidence")}</span>

@@ -43,6 +43,13 @@
       "when": 1794861352310,
       "tag": "0005_backfill_flag_rule_key",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794863260959,
+      "tag": "0006_land_extraction",
+      "breakpoints": true
     }
   ]
 }

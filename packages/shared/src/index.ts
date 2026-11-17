@@ -187,6 +187,83 @@ export type EventInput = z.input<typeof eventInput>;
 
 export const checkQuery = z.object({ lang: z.enum(LOCALES).optional() });
 
+// ---------- Land-record extraction (facts) ----------
+
+/** Records the extractor can read. A document of another type is extracted only if its text says which it is. */
+export const RECORD_KINDS = ["SEVEN_TWELVE", "FERFAR", "INDEX_II"] as const;
+export type RecordKind = (typeof RECORD_KINDS)[number];
+
+export const FACT_FIELDS = [
+  "village",
+  "taluka",
+  "district",
+  "survey_no",
+  "gat_no",
+  "hissa_no",
+  "owner",
+  "area",
+  "land_class",
+  "other_right",
+  "ferfar_no",
+  "date",
+  "mutation_type",
+  "deed_type",
+  "section_155",
+  "deed_reg_no",
+  "from_party",
+  "to_party",
+] as const;
+export type FactField = (typeof FACT_FIELDS)[number];
+export const MUTATION_TYPES = ["SALE", "HEIRSHIP", "GIFT", "PARTITION", "MORTGAGE", "WILL", "RELEASE", "CORRECTION"] as const;
+/** Deeds registered under Index-II. */
+export const DEED_TYPES = ["SALE", "GIFT", "MORTGAGE", "PARTITION", "RELEASE", "EXCHANGE", "WILL"] as const;
+
+/** "YYYY-MM-DD" naming a real calendar day (no 31 February rolling over into March). */
+export function isRealDate(v: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const t = new Date(Date.UTC(y, mo - 1, d));
+  return t.getUTCFullYear() === y && t.getUTCMonth() === mo - 1 && t.getUTCDate() === d;
+}
+
+/**
+ * Format check for a fact's value, shared by the API and the review screen.
+ * Returns a message key, or null when the value is usable.
+ */
+export function factValueProblem(
+  field: FactField,
+  value: string,
+): "fact.badArea" | "fact.badDate" | "fact.badClass" | "fact.badType" | "fact.badYesNo" | null {
+  const v = value.trim();
+  switch (field) {
+    case "area":
+      return /^\d{1,9}$/.test(v) ? null : "fact.badArea";
+    case "date":
+      return isRealDate(v) ? null : "fact.badDate";
+    case "land_class":
+      return v === "Class-I" || v === "Class-II" ? null : "fact.badClass";
+    case "mutation_type":
+      return (MUTATION_TYPES as readonly string[]).includes(v) ? null : "fact.badType";
+    case "deed_type":
+      return (DEED_TYPES as readonly string[]).includes(v) ? null : "fact.badType";
+    case "section_155":
+      return v === "true" || v === "false" ? null : "fact.badYesNo";
+    default:
+      return null;
+  }
+}
+
+export const factCreateInput = z.object({ field: z.enum(FACT_FIELDS), value: z.string().trim().min(1).max(500) });
+export const factUpdateInput = z
+  .object({ value: z.string().trim().min(1).max(500).optional(), reviewed: z.boolean().optional() })
+  .refine((v) => v.value !== undefined || v.reviewed !== undefined, { message: "Nothing to update" });
+export const eventFromDocumentInput = z.object({
+  documentId: z.string(),
+  /** The record's date when the document carries none (a 7/12 extract is dated by its year). */
+  date: isoDate.optional(),
+});
+
 export const flagUpdateInput = z.object({ resolved: z.boolean(), resolution: optText(2000) });
 
 export const feeAgreementInput = z.object({
@@ -406,6 +483,28 @@ export interface DocumentSummary {
 }
 export interface DocumentDetail extends DocumentSummary {
   pages: PageDetail[];
+}
+export interface Fact {
+  id: string;
+  documentId: string | null;
+  pageId: string | null;
+  field: FactField;
+  value: string;
+  /** What the extractor read, when the advocate has corrected it. */
+  originalValue: string | null;
+  position: number;
+  confidence: number;
+  /** Source crop on the page, as fractions of the page. Null for facts read from the whole page or added by hand. */
+  crop: { x: number; y: number; w: number; h: number } | null;
+  reviewed: boolean;
+  reviewedAt: string | null;
+}
+export interface Extraction {
+  /** The record kind used, or null when the document could not be identified. */
+  kind: RecordKind | null;
+  facts: Fact[];
+  /** Events already built from this document, by property. */
+  events: { id: string; propertyId: string }[];
 }
 export interface SearchHit {
   pageId: string;
