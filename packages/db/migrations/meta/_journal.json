@@ -57,6 +57,13 @@
       "when": 1794891346616,
       "tag": "0007_title_report",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794943195165,
+      "tag": "0008_hearing_details",
+      "breakpoints": true
     }
   ]
 }

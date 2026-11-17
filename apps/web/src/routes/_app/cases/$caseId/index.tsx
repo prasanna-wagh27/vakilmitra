@@ -83,6 +83,7 @@ function CasePage() {
         <div className="mb-2 flex flex-wrap gap-2">
           <Badge>{t(`kind.${c.kind}`)}</Badge>
           <Badge tone={c.status === "ACTIVE" ? "green" : "neutral"}>{t(`status.${c.status}`)}</Badge>
+          {c.stage && <Badge variant="outline">{t(`stage.${c.stage}`)}</Badge>}
           {!isOwner && <Badge tone="blue">{t("case.shared")}</Badge>}
         </div>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
@@ -205,8 +206,14 @@ function CasePage() {
                     <div>
                       <p className="font-semibold">
                         {fmtDate(h.date, locale, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                        {h.time ? ` · ${h.time}` : ""}
                       </p>
-                      {h.purpose && <p className="text-sm">{h.purpose}</p>}
+                      {(h.purpose || h.courtHall) && (
+                        <p className="text-sm">
+                          {[h.purpose, h.courtHall && `${t("hearing.hall")} ${h.courtHall}`].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                      {h.prepNotes && !h.outcome && <p className="mt-1 text-sm text-muted-foreground">{h.prepNotes}</p>}
                     </div>
                     {canEdit && (isPast || isToday) && (
                       <Button variant={h.outcome ? "ghost" : "outline"} size="sm" onClick={() => setSheet({ kind: "outcome", hearing: h })}>

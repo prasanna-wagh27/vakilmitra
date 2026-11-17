@@ -172,6 +172,7 @@ export const cases = pgTable(
     court: text("court"),
     cnrNumber: text("cnr_number"), // eCourts CNR, for status fetch where reliable
     status: caseStatusEnum("status").notNull().default("ACTIVE"),
+    stage: text("stage"), // one of CASE_STAGES; validated by the API
     filedOn: ts("filed_on"),
     notes: text("notes"),
     createdAt: createdAt(),
@@ -395,8 +396,11 @@ export const hearings = pgTable(
       .notNull()
       .references(() => cases.id, { onDelete: "cascade" }),
     date: ts("date").notNull(),
+    time: text("time"), // "HH:MM" court time (IST); null when not known
     court: text("court"),
+    courtHall: text("court_hall"),
     purpose: text("purpose"),
+    prepNotes: text("prep_notes"),
     nextStep: text("next_step"),
     outcome: text("outcome"),
     reminderSentAt: ts("reminder_sent_at"),

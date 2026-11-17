@@ -11,6 +11,9 @@ export * from "./time.js";
 export const LOCALES = ["mr", "en"] as const;
 export const CASE_KINDS = ["CIVIL", "LAND_PROPERTY", "TITLE_SEARCH", "CRIMINAL", "FAMILY", "REVENUE", "OTHER"] as const;
 export const CASE_STATUSES = ["ACTIVE", "DISPOSED", "ON_HOLD", "CLOSED"] as const;
+/** Where a suit stands, in the usual order of a civil trial. */
+export const CASE_STAGES = ["FILED", "SUMMONS", "WRITTEN_STATEMENT", "ISSUES", "EVIDENCE", "ARGUMENTS", "ORDER"] as const;
+export type CaseStage = (typeof CASE_STAGES)[number];
 export const PARTY_ROLES = ["PETITIONER", "RESPONDENT", "PLAINTIFF", "DEFENDANT", "APPLICANT", "OPPONENT", "APPELLANT", "OTHER"] as const;
 export const CASE_ROLES = ["EDITOR", "VIEWER"] as const;
 export const EVENT_KINDS = ["RECORD_SNAPSHOT", "DEED", "MUTATION"] as const;
@@ -101,6 +104,7 @@ export const caseInput = z.object({
   court: optText(200),
   cnrNumber: optText(32),
   status: z.enum(CASE_STATUSES).optional(),
+  stage: z.enum(CASE_STAGES).nullable().optional(),
   filedOn: isoDate.nullable().optional(),
   notes: optText(20000),
 });
@@ -125,17 +129,27 @@ export const grantInput = z.object({
   role: z.enum(CASE_ROLES).default("VIEWER"),
 });
 
+/** Hearing time of day, 24-hour "HH:MM" (court time, IST). */
+const hearingTime = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM")
+  .nullable()
+  .optional();
+
 export const hearingInput = z.object({
   date: isoDate,
+  time: hearingTime,
   court: optText(200),
+  courtHall: optText(40),
   purpose: optText(200),
+  prepNotes: optText(2000),
   nextStep: optText(2000),
   outcome: optText(2000),
 });
 
 /** Recording what happened usually means setting the next date too: `next` creates it in the same call. */
 export const hearingUpdateInput = hearingInput.partial().extend({
-  next: z.object({ date: isoDate, purpose: optText(200) }).optional(),
+  next: z.object({ date: isoDate, time: hearingTime, purpose: optText(200) }).optional(),
 });
 
 export const dayQuery = z.object({ date: z.iso.date().optional() });
@@ -339,8 +353,12 @@ export interface Hearing {
   id: string;
   caseId: string;
   date: string;
+  /** "HH:MM", court time. */
+  time: string | null;
   court: string | null;
+  courtHall: string | null;
   purpose: string | null;
+  prepNotes: string | null;
   nextStep: string | null;
   outcome: string | null;
 }
@@ -431,6 +449,7 @@ export interface CaseListItem extends CaseRef {
 }
 export interface CaseDetail extends CaseRef {
   kind: CaseKind;
+  stage: CaseStage | null;
   clientId: string | null;
   cnrNumber: string | null;
   filedOn: string | null;
