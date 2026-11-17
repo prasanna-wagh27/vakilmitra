@@ -35,29 +35,29 @@ function SearchPage() {
       />
       <ErrorBox error={error} onRetry={() => refetch()} />
       {term.length < 2 ? (
-        <p className="text-sm text-muted-foreground">{t("search.min")}</p>
+        <p className="text-[15px] text-muted-foreground">{t("search.min")}</p>
       ) : isFetching && !data ? (
         <Loading />
       ) : data?.length === 0 ? (
         <Empty>{t("search.none")}</Empty>
       ) : (
-        <ul className="space-y-2">
+        <ul className="list">
           {data?.map((h) => (
             <li key={h.pageId}>
               <Link
                 to="/cases/$caseId/documents/$documentId"
                 params={{ caseId: h.caseId, documentId: h.documentId }}
                 search={{ page: h.pageNo }}
-                className="row-card block p-4"
+                className="list-item"
               >
-                <div className="mb-1 flex flex-wrap items-center gap-2 text-sm">
-                  <span className="font-semibold">{h.caseTitle}</span>
+                <div className="mb-2 flex flex-wrap items-center gap-2 text-[15px]">
+                  <span className="text-[17px]">{h.caseTitle}</span>
                   <Badge>{h.documentTitle || t(`doctype.${h.documentType}`)}</Badge>
-                  <span className="text-muted-foreground">
+                  <span className="num text-[13px] text-muted-foreground">
                     {t("doc.page")} {h.pageNo}
                   </span>
                 </div>
-                <p lang="mr" className="text-sm">
+                <p lang="mr" className="text-[15px] text-muted-foreground">
                   {h.snippet.slice(0, h.matchStart)}
                   <mark className="rounded bg-warning-soft px-0.5 text-foreground">{h.snippet.slice(h.matchStart, h.matchEnd)}</mark>
                   {h.snippet.slice(h.matchEnd)}

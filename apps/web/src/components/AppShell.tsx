@@ -116,7 +116,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <main className="mx-auto max-w-4xl px-6 pt-8 pb-16">{children}</main>
+      <main key={pathname} className="page-enter mx-auto max-w-4xl px-6 pt-8 pb-16">
+        {children}
+      </main>
     </>
   );
 }

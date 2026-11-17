@@ -32,12 +32,12 @@ function InvoicePage() {
       </div>
       <article className="panel p-6 print:border-0 print:shadow-none print:p-0">
         <header className="mb-4 border-b pb-3">
-          <p className="text-lg font-bold">{advocate.name}</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-lg font-medium">{advocate.name}</p>
+          <p className="text-[15px] text-muted-foreground">
             {[advocate.barCouncilNo, advocate.phone, advocate.email].filter(Boolean).join(" · ")}
           </p>
         </header>
-        <div className="mb-4 flex justify-between gap-4 text-sm">
+        <div className="mb-4 flex justify-between gap-4 text-[15px]">
           <div>
             <p className="text-muted-foreground">{t("fees.billTo")}</p>
             <p className="font-medium">{client.name}</p>
@@ -48,7 +48,7 @@ function InvoicePage() {
             <p>{fmtDate(data.issuedOn, locale)}</p>
           </div>
         </div>
-        <table className="w-full text-sm">
+        <table className="w-full text-[15px]">
           <thead>
             <tr className="border-b text-left">
               <th className="py-2">{t("fees.description")}</th>
@@ -83,7 +83,7 @@ function InvoicePage() {
             ))}
           </tbody>
         </table>
-        <p className="mt-4 text-right text-lg font-bold">
+        <p className="mt-4 text-right text-lg font-medium">
           {t("fees.balance")}: {rupees(totals?.outstandingPaise ?? 0, locale)}
         </p>
       </article>

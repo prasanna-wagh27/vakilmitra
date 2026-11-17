@@ -30,10 +30,10 @@ export function FlagCard({
         </Badge>
         <code className="text-xs text-muted-foreground">{flag.rule}</code>
       </div>
-      <p className={compact ? "text-sm" : ""}>{flag.message}</p>
-      {flag.resolution && <p className="mt-1 text-sm text-muted-foreground">✓ {flag.resolution}</p>}
+      <p className={compact ? "text-[15px]" : ""}>{flag.message}</p>
+      {flag.resolution && <p className="mt-1 text-[15px] text-muted-foreground">✓ {flag.resolution}</p>}
       {onSource && flag.eventIds.length > 0 && (
-        <button type="button" className="mt-1 text-sm text-accent underline underline-offset-4" onClick={() => onSource(flag.eventIds)}>
+        <button type="button" className="mt-1 text-[15px] text-accent underline underline-offset-4" onClick={() => onSource(flag.eventIds)}>
           {t("land.sources")} ({flag.eventIds.length})
         </button>
       )}

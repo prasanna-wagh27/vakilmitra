@@ -29,7 +29,7 @@ export function LanguageToggle({
           className="h-8 cursor-pointer appearance-none bg-transparent pr-7 pl-2.5 text-[15px] outline-none"
         >
           <option value="mr" className="text-foreground">
-            मराठी
+            MR
           </option>
           <option value="en" className="text-foreground">
             EN
@@ -40,7 +40,7 @@ export function LanguageToggle({
     );
   }
   return (
-    <fieldset className="inline-flex gap-1 text-sm">
+    <fieldset className="inline-flex gap-1 text-[15px]">
       <legend className="sr-only">Language</legend>
       {(["mr", "en"] as const).map((l) => (
         <button

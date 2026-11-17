@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lock } from "lucide-react";
 import type { ReactNode } from "react";
 import type { FieldError } from "react-hook-form";
 import { ApiError } from "@/lib/api";
@@ -10,17 +10,23 @@ import { Label } from "./ui/label";
 export function PageHeader({ title, back, action, eyebrow }: { title: string; back?: string; action?: ReactNode; eyebrow?: ReactNode }) {
   const { t } = useI18n();
   return (
-    <div className="mb-8 flex items-center gap-3">
+    <div className="mb-8">
+      {/* With a back link, the back link and actions sit on their own row so the title gets the full width. */}
       {back && (
-        <Link to={back} aria-label={t("common.back")} className="icon-btn size-9 shrink-0">
-          <ArrowLeft className="size-[18px]" />
-        </Link>
+        <div className="mb-5 flex min-h-9 items-center justify-between gap-3">
+          <Link to={back} aria-label={t("common.back")} className="icon-btn size-9 shrink-0">
+            <ArrowLeft className="size-[18px]" />
+          </Link>
+          {action && <div className="flex items-center gap-2">{action}</div>}
+        </div>
       )}
-      <div className="min-w-0 flex-1">
-        {eyebrow && <div className="label-mono mb-1">{eyebrow}</div>}
-        <h1 className="font-display line-clamp-3 text-[2rem] leading-[1.1] break-words">{title}</h1>
+      <div className="flex items-end justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          {eyebrow && <div className="label-mono mb-2">{eyebrow}</div>}
+          <h1 className="font-display line-clamp-3 text-[2rem] leading-[1.1] break-words">{title}</h1>
+        </div>
+        {!back && action}
       </div>
-      {action}
     </div>
   );
 }
@@ -39,16 +45,57 @@ export function Section({ title, action, children }: { title: string; action?: R
 
 export function Empty({ children }: { children?: ReactNode }) {
   const { t } = useI18n();
+  return <p className="border-y py-5 text-[15px] text-muted-foreground">{children ?? t("common.none")}</p>;
+}
+
+/** Loading placeholder: grey bars shaped like a list, instead of a "Loading…" line. */
+export function Loading({ rows = 3 }: { rows?: number }) {
+  const { t } = useI18n();
   return (
-    <p className="rounded-lg border border-dashed border-input px-4 py-8 text-center text-sm text-muted-foreground">
-      {children ?? t("common.none")}
+    <div role="status" aria-label={t("common.loading")} className="list">
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="py-4">
+          <div className="skeleton h-4 w-3/5" />
+          <div className="skeleton mt-2 h-3 w-2/5" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Quiet privacy line, shown where trust matters (home, login). */
+export function TrustLine({ className }: { className?: string }) {
+  const { t } = useI18n();
+  return (
+    <p className={`label-mono flex items-start gap-2 text-[12px] ${className ?? ""}`}>
+      <Lock className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+      <span>{t("trust.line")}</span>
     </p>
   );
 }
 
-export function Loading() {
-  const { t } = useI18n();
-  return <p className="p-6 text-center text-sm text-muted-foreground">{t("common.loading")}</p>;
+const DOC_ABBR: Record<string, string> = {
+  SEVEN_TWELVE: "7/12",
+  FERFAR: "FER",
+  EIGHT_A: "8A",
+  INDEX_II: "IDX",
+  SALE_DEED: "SALE",
+  GIFT_DEED: "GIFT",
+  WILL: "WILL",
+  PARTITION_DEED: "PART",
+  MORTGAGE_DEED: "MORT",
+  COURT_ORDER: "ORD",
+  OTHER: "DOC",
+};
+
+/** Document-type tile: a bordered square with a mono abbreviation. */
+export function DocTile({ type }: { type: string }) {
+  const abbr = DOC_ABBR[type] ?? type.replace(/_/g, " ").slice(0, 4);
+  return (
+    <span className="doc-tile" aria-hidden>
+      {abbr}
+    </span>
+  );
 }
 
 export function ErrorBox({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
@@ -57,7 +104,7 @@ export function ErrorBox({ error, onRetry }: { error: unknown; onRetry?: () => v
   const message = error instanceof Error ? error.message : t("common.error");
   const details = error instanceof ApiError ? error.details : undefined;
   return (
-    <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive-soft px-4 py-3 text-sm text-destructive">
+    <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive-soft px-4 py-3 text-[15px] text-destructive">
       <p>{message}</p>
       {details?.map((d) => (
         <p key={d.path}>
@@ -124,7 +171,7 @@ export function Chip({ active, onClick, children }: { active: boolean; onClick: 
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`h-9 shrink-0 rounded-lg border px-3 text-sm transition-colors ${active ? "border-border bg-card text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+      className={`h-9 shrink-0 rounded-lg border px-3 text-[15px] transition-colors ${active ? "border-border bg-card text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
     >
       {children}
     </button>

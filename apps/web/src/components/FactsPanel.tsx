@@ -135,7 +135,7 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
       )}
     >
       <div className="min-w-0">
-        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{t(`field.${fact.field}`)}</p>
+        <p className="label-mono text-[12px]">{t(`field.${fact.field}`)}</p>
         {editing ? (
           <form
             className="mt-1.5 space-y-2"
@@ -145,7 +145,7 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
             }}
           >
             <ValueInput id={`fact-${fact.id}`} field={fact.field} value={draft} onChange={setDraft} />
-            {problem && <p className="text-sm text-destructive">{t(problem)}</p>}
+            {problem && <p className="text-[15px] text-destructive">{t(problem)}</p>}
             <div className="flex gap-2">
               <Button type="submit" size="sm" disabled={!!problem || !draft.trim() || patch.isPending}>
                 {t("common.save")}
@@ -189,7 +189,7 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
         {page && fact.crop ? (
           <SourceCrop documentId={doc.id} page={page} crop={fact.crop} />
         ) : page ? (
-          <a href={`#page-${page.pageNo}`} className="text-sm text-accent underline underline-offset-4">
+          <a href={`#page-${page.pageNo}`} className="text-[15px] text-accent underline underline-offset-4">
             {t("fact.wholePage")}
           </a>
         ) : null}
@@ -315,7 +315,7 @@ function AddToChain({ doc, caseId, extraction }: { doc: DocumentDetail; caseId: 
           <Check className="size-5 text-success" aria-hidden /> {t("fact.added")}
         </p>
         {result && (
-          <ul className="mt-2 space-y-1 text-sm">
+          <ul className="mt-2 space-y-1 text-[15px]">
             {Object.keys(result.filled).length > 0 && (
               <li className="text-muted-foreground">
                 {tf("fact.filled", {
@@ -345,9 +345,9 @@ function AddToChain({ doc, caseId, extraction }: { doc: DocumentDetail; caseId: 
   return (
     <div className="panel mt-6 p-5">
       <h3 className="font-display text-xl">{t("fact.toChain")}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{t("fact.toChainHint")}</p>
+      <p className="mt-1 text-[15px] text-muted-foreground">{t("fact.toChainHint")}</p>
       {pending > 0 ? (
-        <p className="mt-3 rounded-2xl bg-warning-soft p-3 text-sm text-warning">{tf("fact.needReview", { n: String(pending) })}</p>
+        <p className="mt-3 rounded-2xl bg-warning-soft p-3 text-[15px] text-warning">{tf("fact.needReview", { n: String(pending) })}</p>
       ) : (
         <form
           className="mt-4 grid gap-3 sm:grid-cols-2"
@@ -417,13 +417,13 @@ export function FactsPanel({ doc, caseId, canEdit }: { doc: DocumentDetail; case
         )
       }
     >
-      <p className="mb-3 max-w-prose text-sm text-muted-foreground">
+      <p className="mb-3 max-w-prose text-[15px] text-muted-foreground">
         {t("fact.hint")} {ex.facts.length > 0 && t("fact.readAgainHint")}
       </p>
       <ErrorBox error={extract.error ?? facts.error} />
-      {ocrBusy && <p className="mb-3 rounded-2xl bg-muted p-3 text-sm">{t("fact.waitOcr")}</p>}
-      {tried && !ex.kind && <p className="mb-3 rounded-2xl bg-warning-soft p-3 text-sm text-warning">{t("fact.unknownKind")}</p>}
-      {tried && ex.kind && ex.facts.length === 0 && <p className="mb-3 text-sm text-muted-foreground">{t("fact.none")}</p>}
+      {ocrBusy && <p className="mb-3 rounded-2xl bg-muted p-3 text-[15px]">{t("fact.waitOcr")}</p>}
+      {tried && !ex.kind && <p className="mb-3 rounded-2xl bg-warning-soft p-3 text-[15px] text-warning">{t("fact.unknownKind")}</p>}
+      {tried && ex.kind && ex.facts.length === 0 && <p className="mb-3 text-[15px] text-muted-foreground">{t("fact.none")}</p>}
 
       {ex.facts.length > 0 && (
         <>
@@ -431,7 +431,7 @@ export function FactsPanel({ doc, caseId, canEdit }: { doc: DocumentDetail; case
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
               <div className="h-full rounded-full bg-success transition-all" style={{ width: `${(reviewed / ex.facts.length) * 100}%` }} />
             </div>
-            <span className="text-sm text-muted-foreground tabular-nums">
+            <span className="text-[15px] text-muted-foreground tabular-nums">
               {tf("fact.progress", { n: String(reviewed), total: String(ex.facts.length) })}
             </span>
           </div>
@@ -442,7 +442,7 @@ export function FactsPanel({ doc, caseId, canEdit }: { doc: DocumentDetail; case
           </ul>
         </>
       )}
-      {inChain && <p className="mt-3 text-sm text-muted-foreground">{t("fact.locked")}</p>}
+      {inChain && <p className="mt-3 text-[15px] text-muted-foreground">{t("fact.locked")}</p>}
       {editable && tried && ex.kind && <AddFact documentId={doc.id} />}
       {canEdit && ex.kind && ex.facts.length > 0 && <AddToChain doc={doc} caseId={caseId} extraction={ex} />}
     </Section>

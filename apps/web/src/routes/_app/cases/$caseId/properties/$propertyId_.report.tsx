@@ -51,11 +51,11 @@ function ReportPage() {
         />
         {approved ? (
           <div className="mb-4 space-y-2">
-            <p className="flex items-center gap-2 rounded-xl bg-success-soft p-3 text-sm text-success">
+            <p className="flex items-center gap-2 rounded-xl bg-success-soft p-3 text-[15px] text-success">
               <CircleCheck className="size-4 shrink-0" /> {tf("report.approved", { date: fmtDate(draft.approvedAt!, locale) })}
             </p>
             {data.changedSinceApproval && (
-              <div className="rounded-xl bg-warning-soft p-3 text-sm text-warning">
+              <div className="rounded-xl bg-warning-soft p-3 text-[15px] text-warning">
                 <p className="flex items-start gap-2">
                   <TriangleAlert className="mt-0.5 size-4 shrink-0" /> {t("report.changed")}
                 </p>
@@ -66,7 +66,7 @@ function ReportPage() {
             )}
           </div>
         ) : (
-          <p className="mb-4 rounded-xl bg-warning-soft p-3 text-sm text-warning">{t("report.draftNote")}</p>
+          <p className="mb-4 rounded-xl bg-warning-soft p-3 text-[15px] text-warning">{t("report.draftNote")}</p>
         )}
       </div>
 
@@ -76,7 +76,7 @@ function ReportPage() {
         <label htmlFor="opinion" className="font-display text-xl">
           {t("report.opinion")}
         </label>
-        <p className="mb-2 text-sm text-muted-foreground">{t("report.opinionHint")}</p>
+        <p className="mb-2 text-[15px] text-muted-foreground">{t("report.opinionHint")}</p>
         <Textarea id="opinion" rows={6} value={opinion} onChange={(e) => setOpinion(e.target.value)} />
         <ErrorBox error={save.error ?? approve.error} />
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -89,7 +89,7 @@ function ReportPage() {
           >
             <CircleCheck /> {t("report.approve")}
           </Button>
-          {dirty && <span className="text-sm text-muted-foreground">{t("report.saveFirst")}</span>}
+          {dirty && <span className="text-[15px] text-muted-foreground">{t("report.saveFirst")}</span>}
         </div>
       </section>
     </>
@@ -111,9 +111,9 @@ function ReportBody({ data, report, opinion }: { data: TitleReportResponse; repo
     .join(", ");
 
   return (
-    <article className="panel p-6 text-sm print:border-0 print:p-0 print:shadow-none">
+    <article className="panel p-6 text-[15px] print:border-0 print:p-0 print:shadow-none">
       <header className="mb-4 border-b pb-3">
-        <p className="text-lg font-bold">{data.advocate.name}</p>
+        <p className="text-lg font-medium">{data.advocate.name}</p>
         <p className="text-muted-foreground">
           {[data.advocate.barCouncilNo, data.advocate.phone, data.advocate.email].filter(Boolean).join(" · ")}
         </p>
@@ -170,8 +170,18 @@ function ReportBody({ data, report, opinion }: { data: TitleReportResponse; repo
               <p className="font-medium">
                 {fmtDate(e.date, locale)} · {t(`land.kind.${e.kind}`)}
                 {e.subtype && ` (${e.subtype})`}
-                {e.ferfarNo && ` · ${t("land.ferfarNo")} ${e.ferfarNo}`}
-                {e.deedRegNo && ` · ${t("land.deedRegNo")} ${e.deedRegNo}`}
+                {e.ferfarNo && (
+                  <>
+                    {` · ${t("land.ferfarNo")} `}
+                    <span className="num">{e.ferfarNo}</span>
+                  </>
+                )}
+                {e.deedRegNo && (
+                  <>
+                    {` · ${t("land.deedRegNo")} `}
+                    <span className="num">{e.deedRegNo}</span>
+                  </>
+                )}
                 {e.section155 && ` · ${t("land.section155")}`}
               </p>
               {e.kind === "RECORD_SNAPSHOT" ? (

@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { type Hearing, istDate } from "@vakilmitra/shared";
 import { FileUp, Plus, Scan, X } from "lucide-react";
 import { useState } from "react";
-import { Empty, ErrorBox, Loading, PageHeader, Section } from "@/components/common";
+import { DocTile, Empty, ErrorBox, Loading, PageHeader, Section } from "@/components/common";
 import { FlagCard } from "@/components/FlagCard";
 import { CaseForm, FeeAgreementForm, HearingForm, OutcomeForm, PartyForm, PaymentForm, PropertyForm, ShareForm } from "@/components/forms";
 import { Badge } from "@/components/ui/badge";
@@ -87,7 +87,7 @@ function CasePage() {
           {c.caseNumber && (
             <>
               <dt className="text-muted-foreground">{t("case.number")}</dt>
-              <dd>{c.caseNumber}</dd>
+              <dd className="num">{c.caseNumber}</dd>
             </>
           )}
           {c.court && (
@@ -99,7 +99,7 @@ function CasePage() {
           {c.cnrNumber && (
             <>
               <dt className="text-muted-foreground">{t("case.cnr")}</dt>
-              <dd>{c.cnrNumber}</dd>
+              <dd className="num">{c.cnrNumber}</dd>
             </>
           )}
           {c.client && (
@@ -112,7 +112,9 @@ function CasePage() {
                 {c.client.phone && (
                   <>
                     {" · "}
-                    <a href={`tel:${c.client.phone}`}>{c.client.phone}</a>
+                    <a className="num" href={`tel:${c.client.phone}`}>
+                      {c.client.phone}
+                    </a>
                   </>
                 )}
               </dd>
@@ -161,13 +163,14 @@ function CasePage() {
           <ul className="list">
             {docs.data.map((d) => (
               <li key={d.id}>
-                <Link to="/cases/$caseId/documents/$documentId" params={{ caseId, documentId: d.id }} className="list-row justify-between">
-                  <div className="min-w-0">
+                <Link to="/cases/$caseId/documents/$documentId" params={{ caseId, documentId: d.id }} className="list-row">
+                  <DocTile type={d.type} />
+                  <div className="min-w-0 flex-1">
                     <p className="truncate text-[17px]">
                       {d.title || t(`doctype.${d.type}`)}
                       {d.year ? ` · ${d.year}` : ""}
                     </p>
-                    <p className="mt-0.5 text-[15px] text-muted-foreground">
+                    <p className="num mt-0.5 text-[13px] text-muted-foreground">
                       {d.pageCount} {t("doc.pages")}
                     </p>
                   </div>

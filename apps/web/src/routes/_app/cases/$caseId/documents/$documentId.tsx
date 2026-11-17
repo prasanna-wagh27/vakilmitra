@@ -70,12 +70,12 @@ function PageCard({ documentId, page, outline, canEdit }: { documentId: string; 
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-2 p-3">
-        <span className="font-semibold">
+        <span className="font-medium">
           {t("doc.page")} {page.pageNo}
         </span>
         <OcrBadge status={page.ocrStatus} />
         {page.ocrConfidence != null && (
-          <span className="text-sm text-muted-foreground" title={t("doc.confidence")}>
+          <span className="text-[15px] text-muted-foreground" title={t("doc.confidence")}>
             {Math.round(page.ocrConfidence * 100)}%
           </span>
         )}
@@ -107,15 +107,15 @@ function PageCard({ documentId, page, outline, canEdit }: { documentId: string; 
           </span>
         )}
       </div>
-      {page.ocrError && <p className="px-3 pb-2 text-sm text-destructive">{page.ocrError}</p>}
+      {page.ocrError && <p className="px-3 pb-2 text-[15px] text-destructive">{page.ocrError}</p>}
       <details className="border-t px-3 py-2">
-        <summary className="cursor-pointer text-sm font-medium">{t("doc.text")}</summary>
+        <summary className="cursor-pointer text-[15px] font-medium">{t("doc.text")}</summary>
         {page.ocrText ? (
-          <p lang="mr" className="mt-2 text-sm whitespace-pre-wrap">
+          <p lang="mr" className="mt-2 text-[15px] whitespace-pre-wrap">
             {page.ocrText}
           </p>
         ) : (
-          <p className="mt-2 text-sm text-muted-foreground">{t("doc.noText")}</p>
+          <p className="mt-2 text-[15px] text-muted-foreground">{t("doc.noText")}</p>
         )}
       </details>
     </li>
@@ -219,7 +219,7 @@ function DocumentPage() {
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <Badge>{t(`doctype.${doc.type}`)}</Badge>
         <OcrBadge status={doc.ocrStatus} />
-        <span className="text-sm text-muted-foreground">
+        <span className="text-[15px] text-muted-foreground">
           {doc.pageCount} {t("doc.pages")}
         </span>
         {canEdit && (
@@ -234,7 +234,7 @@ function DocumentPage() {
       <FactsPanel doc={doc} caseId={caseId} canEdit={canEdit} />
 
       {doc.pages.length > 0 && (
-        <label className="mt-8 mb-3 flex min-h-11 items-start gap-2 text-sm">
+        <label className="mt-8 mb-3 flex min-h-11 items-start gap-2 text-[15px]">
           <Checkbox checked={outline} onChange={(e) => setOutline(e.target.checked)} className="mt-0.5" />
           <span>
             <span className="font-medium">{t("doc.lowConfidence")}</span>

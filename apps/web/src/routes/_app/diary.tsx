@@ -43,7 +43,7 @@ function DiaryPage() {
           <ChevronRight />
         </Button>
       </div>
-      <p className="mb-3 text-sm text-muted-foreground">
+      <p className="label-mono mb-8">
         {fmtDay(from, locale)} – {fmtDay(to, locale)}
       </p>
       <ErrorBox error={error} onRetry={() => refetch()} />
@@ -53,13 +53,14 @@ function DiaryPage() {
         <Empty>{t("diary.empty")}</Empty>
       ) : (
         [...byDay].map(([day, hs]) => (
-          <div key={day} className="mb-4">
-            <h3 className={`mb-2 text-sm font-semibold ${day === istDate() ? "text-accent" : "text-muted-foreground"}`}>
-              {fmtDay(day, locale)} · {hs.length}
+          <div key={day} className="mb-8">
+            <h3 className={`label-mono mb-2 flex ${day === istDate() ? "!text-accent" : ""}`}>
+              <span>{fmtDay(day, locale)}</span>
+              <span className="ml-auto">{String(hs.length).padStart(2, "0")}</span>
             </h3>
             <div className="list">
-              {hs.map((h) => (
-                <HearingRow key={h.id} h={h} />
+              {hs.map((h, i) => (
+                <HearingRow key={h.id} h={h} serial={i + 1} />
               ))}
             </div>
           </div>

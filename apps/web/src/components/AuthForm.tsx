@@ -64,11 +64,11 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
       {/* Brand side: what this is and why it can be trusted. */}
       <section className="px-1 py-2 md:py-0">
         <Brand />
-        <h1 className="font-display mt-6 text-2xl leading-8 md:mt-10 md:text-4xl md:leading-[1.15]">{t("auth.hero")}</h1>
+        <h1 className="font-display mt-8 text-[2rem] leading-[1.1] md:mt-10 md:text-5xl">{t("auth.hero")}</h1>
         <p className="mt-3 hidden max-w-md text-muted-foreground sm:block">{t("auth.heroSub")}</p>
         <ul className="mt-8 hidden space-y-3 border-t pt-6 sm:block">
           {trust.map((x) => (
-            <li key={x.text} className="flex items-center gap-3 text-sm">
+            <li key={x.text} className="flex items-center gap-3 text-[15px]">
               <x.icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
               {x.text}
             </li>
@@ -113,7 +113,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
             {mode === "login" ? t("auth.signIn") : t("auth.signUp")}
           </Button>
         </form>
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="mt-6 text-center text-[15px] text-muted-foreground">
           {mode === "login" ? t("auth.noAccount") : t("auth.haveAccount")}{" "}
           <Link
             className="font-medium text-accent underline underline-offset-4"
@@ -123,7 +123,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
             {mode === "login" ? t("auth.signUp") : t("auth.signIn")}
           </Link>
         </p>
-        <ul className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2 border-t pt-5 text-xs text-muted-foreground sm:hidden">
+        <ul className="label-mono mt-6 space-y-1.5 border-t pt-5 text-[12px] sm:hidden">
           {trust.map((x) => (
             <li key={x.text} className="flex items-center gap-1.5">
               <x.icon className="size-3.5" aria-hidden />

@@ -6,7 +6,6 @@ import { Empty, ErrorBox, Loading, PageHeader, Section } from "@/components/comm
 import { ClientForm, FeeAgreementForm, PaymentForm } from "@/components/forms";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Sheet } from "@/components/ui/sheet";
 import { api } from "@/lib/api";
 import { rupees } from "@/lib/format";
@@ -39,28 +38,28 @@ function ClientPage() {
           </Button>
         }
       />
-      <Card>
-        <div className="flex flex-wrap gap-3 text-sm">
+      <div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[15px]">
           {c.phone && (
-            <a className="text-accent underline underline-offset-4" href={`tel:${c.phone}`}>
+            <a className="num text-accent" href={`tel:${c.phone}`}>
               {c.phone}
             </a>
           )}
           {c.email && (
-            <a className="text-accent underline underline-offset-4" href={`mailto:${c.email}`}>
+            <a className="text-accent" href={`mailto:${c.email}`}>
               {c.email}
             </a>
           )}
           {c.whatsappOptIn && <Badge tone="green">WhatsApp ✓</Badge>}
         </div>
-        {c.address && <p className="mt-1 text-sm">{c.address}</p>}
-        {c.notes && <p className="mt-1 text-sm whitespace-pre-wrap text-muted-foreground">{c.notes}</p>}
-      </Card>
+        {c.address && <p className="mt-3 text-[15px]">{c.address}</p>}
+        {c.notes && <p className="mt-2 text-[15px] whitespace-pre-wrap text-muted-foreground">{c.notes}</p>}
+      </div>
 
       <Section
         title={t("client.cases")}
         action={
-          <Link to="/cases/new" className="text-sm text-accent underline underline-offset-4">
+          <Link to="/cases/new" className="text-[15px] text-accent">
             + {t("case.new")}
           </Link>
         }
@@ -68,12 +67,12 @@ function ClientPage() {
         {c.cases.length === 0 ? (
           <Empty />
         ) : (
-          <ul className="space-y-2">
+          <ul className="list">
             {c.cases.map((k) => (
               <li key={k.id}>
-                <Link to="/cases/$caseId" params={{ caseId: k.id }} className="row-card block p-4">
-                  <p className="font-medium">{k.title}</p>
-                  <p className="text-sm text-muted-foreground">
+                <Link to="/cases/$caseId" params={{ caseId: k.id }} className="list-item">
+                  <p className="text-[17px]">{k.title}</p>
+                  <p className="mt-0.5 text-[15px] text-muted-foreground">
                     {[k.caseNumber, k.court, t(`status.${k.status}`)].filter(Boolean).join(" · ")}
                   </p>
                 </Link>
@@ -91,42 +90,36 @@ function ClientPage() {
           </Button>
         }
       >
-        <Card className="mb-2 grid grid-cols-3 text-center text-sm">
-          <div>
-            <p className="text-muted-foreground">{t("fees.total")}</p>
-            <p className="font-semibold">{rupees(data.totals.totalPaise, locale)}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">{t("fees.paid")}</p>
-            <p className="font-semibold">{rupees(data.totals.paidPaise, locale)}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">{t("fees.outstanding")}</p>
-            <p className="font-semibold">{rupees(data.totals.outstandingPaise, locale)}</p>
-          </div>
-        </Card>
+        <div className="band mb-4 grid grid-cols-3 overflow-hidden">
+          {[
+            [t("fees.total"), data.totals.totalPaise],
+            [t("fees.paid"), data.totals.paidPaise],
+            [t("fees.outstanding"), data.totals.outstandingPaise],
+          ].map(([label, v]) => (
+            <div key={label as string} className="min-w-0 px-4 pt-4 pb-5 [&+&]:border-l [&+&]:border-white/12">
+              <p className="label-mono truncate text-[12px] !text-white/60">{label}</p>
+              <p className="font-display mt-5 truncate text-2xl leading-none">{rupees(v as number, locale)}</p>
+            </div>
+          ))}
+        </div>
         {c.feeAgreements.map((a) => {
           const paid = a.payments.reduce((s, p) => s + p.amountPaise, 0);
           return (
-            <div key={a.id} className="row-card mb-2 p-4">
-              <div className="flex justify-between gap-2">
-                <p className="font-medium">{a.description}</p>
-                <p className="text-sm">
+            <div key={a.id} className="border-b py-4 first-of-type:border-t">
+              <div className="flex justify-between gap-3">
+                <p className="text-[17px]">{a.description}</p>
+                <p className="num shrink-0 text-[14px]">
                   {rupees(paid, locale)} / {rupees(a.totalPaise, locale)}
                 </p>
               </div>
-              <Button variant="outline" size="sm" className="mt-2" onClick={() => setSheet({ payment: a.id })}>
+              <Button variant="outline" size="sm" className="mt-3" onClick={() => setSheet({ payment: a.id })}>
                 {t("fees.recordPayment")}
               </Button>
             </div>
           );
         })}
         {c.feeAgreements.length > 0 && (
-          <Link
-            to="/fees/invoice/$clientId"
-            params={{ clientId }}
-            className="mt-1 inline-block text-sm text-accent underline underline-offset-4"
-          >
+          <Link to="/fees/invoice/$clientId" params={{ clientId }} className="mt-4 inline-block text-[15px] text-accent">
             {t("fees.invoice")} →
           </Link>
         )}

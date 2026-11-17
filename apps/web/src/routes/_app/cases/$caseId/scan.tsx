@@ -260,7 +260,7 @@ function ScanPage() {
         <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" aria-label={t("common.cancel")} onClick={close}>
           <X className="size-6!" />
         </Button>
-        <p className="flex-1 truncate text-sm" aria-live="polite">
+        <p className="flex-1 truncate text-[15px]" aria-live="polite">
           {pdfProgress
             ? tf("doc.renderingPdf", pdfProgress)
             : (statusLine ?? (cvState === "loading" && phase !== "setup" ? t("doc.preparing") : ""))}
@@ -316,7 +316,7 @@ function ScanPage() {
               <Field id="title" label={`${t("doc.name")} (${t("common.optional")})`}>
                 <Input id="title" {...f.register("title")} />
               </Field>
-              <p className="rounded-xl bg-accent-soft p-3 text-sm text-accent">{t("doc.privacyNote")}</p>
+              <p className="rounded-xl bg-accent-soft p-3 text-[15px] text-accent">{t("doc.privacyNote")}</p>
               <ErrorBox error={error} />
               <Button type="submit" className="w-full" disabled={f.formState.isSubmitting}>
                 {mode === "camera" ? <Scan /> : <FileUp />} {mode === "camera" ? t("doc.start") : t("doc.upload")}
@@ -327,7 +327,7 @@ function ScanPage() {
 
         {phase === "capture" && (mode === "upload" || camError) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
-            {camError && <p className="max-w-sm text-sm text-white/80">{t("doc.cameraDenied")}</p>}
+            {camError && <p className="max-w-sm text-[15px] text-white/80">{t("doc.cameraDenied")}</p>}
             <Button
               className="bg-white text-black hover:bg-white/90"
               onClick={() => fileInput.current?.click()}
@@ -341,7 +341,7 @@ function ScanPage() {
 
         {phase === "review" && review && (
           <div className="absolute inset-0 flex flex-col p-2">
-            <p className="pb-2 text-center text-sm text-white/80">{t("doc.adjustHint")}</p>
+            <p className="pb-2 text-center text-[15px] text-white/80">{t("doc.adjustHint")}</p>
             <div className="min-h-0 flex-1">
               <CornerEditor
                 label={t("doc.adjustHint")}
@@ -402,7 +402,7 @@ function ScanPage() {
                     <Loader2 className="size-3 animate-spin" />
                   )}
                 </span>
-                <span className="absolute top-0.5 left-1 text-[10px] font-bold drop-shadow">{i.pageNo}</span>
+                <span className="absolute top-0.5 left-1 text-[10px] font-medium drop-shadow">{i.pageNo}</span>
               </button>
             </li>
           ))}

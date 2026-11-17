@@ -369,7 +369,7 @@ export function ShareForm({ caseId, onDone, onCancel }: { caseId: string } & Don
   const m = useApiMutation((v: z.infer<typeof shareForm>) => api(`/cases/${caseId}/grants`, { body: v }), { onSuccess: onDone });
   return (
     <form onSubmit={f.handleSubmit((v) => m.mutate(v))} className="space-y-3" noValidate>
-      <p className="text-sm text-muted-foreground">{t("case.shareHint")}</p>
+      <p className="text-[15px] text-muted-foreground">{t("case.shareHint")}</p>
       <Field id="email" label={t("common.email")} error={f.formState.errors.email}>
         <Input id="email" type="email" {...f.register("email")} />
       </Field>
@@ -423,7 +423,7 @@ export function FeeAgreementForm({ clientId, caseId, onDone, onCancel }: { clien
         <Input id="total" type="number" inputMode="decimal" min="1" step="0.01" {...f.register("total")} />
       </Field>
       <div>
-        <p className="mb-1 text-sm font-medium">
+        <p className="mb-1 text-[15px] font-medium">
           {t("fees.installments")} ({t("common.optional")})
         </p>
         {inst.fields.map((row, n) => (
@@ -584,7 +584,7 @@ export function EventForm({ base, onDone, onCancel }: { base: string } & Done) {
             role="radio"
             aria-checked={kind === k}
             onClick={() => setKind(k)}
-            className={`min-h-11 rounded-lg px-1 text-sm ${kind === k ? "bg-primary text-primary-foreground" : ""}`}
+            className={`min-h-11 rounded-lg px-1 text-[15px] ${kind === k ? "bg-primary text-primary-foreground" : ""}`}
           >
             {t(`land.kind.${k}`)}
           </button>

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { addDays, istDate } from "@vakilmitra/shared";
 import { useState } from "react";
-import { Empty, ErrorBox, Loading, Section } from "@/components/common";
+import { Empty, ErrorBox, Loading, Section, TrustLine } from "@/components/common";
 import { HearingRow } from "@/components/HearingRow";
 import { fmtDate, fmtDay, fmtNumber, rupees } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -48,19 +48,19 @@ function TodayPage() {
         {summary && <p className="mt-4 text-[17px] text-muted-foreground">{summary}</p>}
       </header>
 
-      <div className="mt-8 grid grid-cols-3 border-y">
+      <div className="band mt-8 grid grid-cols-3 overflow-hidden">
         <Stat to="/diary" label={t("today.statHearings")} value={todays.data ? num(n) : "–"} />
         <Stat
           to="/cases"
           label={t("today.statMissing")}
           value={todays.data ? num(missing.length) : "–"}
-          tone={missing.length > 0 ? "text-warning" : undefined}
+          tone={missing.length > 0 ? "text-[#ffdb3d]" : undefined}
         />
         <Stat
           to="/fees"
           label={t("today.statFees")}
           value={fees.data ? rupees(fees.data.totals.outstandingPaise, locale) : "–"}
-          tone={fees.data && fees.data.totals.overduePaise > 0 ? "text-destructive" : undefined}
+          tone={fees.data && fees.data.totals.overduePaise > 0 ? "text-[#ff9b8f]" : undefined}
         />
       </div>
 
@@ -97,19 +97,22 @@ function TodayPage() {
           <Empty>{t("today.noHearings")}</Empty>
         ) : (
           <div className="space-y-8">
-            {[...byCourt].map(([court, hs]) => (
-              <div key={court}>
-                <p className="mb-2 flex gap-2 text-[15px] text-muted-foreground">
-                  <span className="truncate">{court}</span>
-                  <span className="ml-auto tabular-nums">{num(hs.length)}</span>
-                </p>
-                <div className="list">
-                  {hs.map((h) => (
-                    <HearingRow key={h.id} h={h} />
-                  ))}
+            {[...byCourt].map(([court, hs], gi) => {
+              const offset = [...byCourt.values()].slice(0, gi).reduce((sum, g) => sum + g.length, 0);
+              return (
+                <div key={court}>
+                  <p className="mb-2 flex items-baseline gap-2 text-[15px] text-muted-foreground">
+                    <span className="truncate">{court}</span>
+                    <span className="num ml-auto text-[13px]">{String(hs.length).padStart(2, "0")}</span>
+                  </p>
+                  <div className="list">
+                    {hs.map((h, i) => (
+                      <HearingRow key={h.id} h={h} serial={offset + i + 1} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Section>
@@ -135,15 +138,17 @@ function TodayPage() {
           </div>
         </Section>
       )}
+
+      <TrustLine className="mt-16 border-t pt-6" />
     </>
   );
 }
 
 function Stat({ to, label, value, tone }: { to: string; label: string; value: string; tone?: string }) {
   return (
-    <Link to={to} className="min-w-0 py-4 pr-3 [&+&]:border-l [&+&]:pl-4">
-      <span className="label-mono block truncate text-[12px]">{label}</span>
-      <span className={cn("font-display mt-2 block truncate text-[28px] leading-none", tone)}>{value}</span>
+    <Link to={to} className="min-w-0 px-4 pt-4 pb-5 hover:bg-white/5 [&+&]:border-l [&+&]:border-white/12">
+      <span className="label-mono block truncate text-[12px] !text-white/60">{label}</span>
+      <span className={cn("font-display mt-6 block truncate text-[32px] leading-none", tone)}>{value}</span>
     </Link>
   );
 }

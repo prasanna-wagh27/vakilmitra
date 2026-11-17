@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CASE_STATUSES, type CaseStatus } from "@vakilmitra/shared";
-import { Flag, Plus } from "lucide-react";
+import { Flag } from "lucide-react";
 import { useState } from "react";
 import { Chip, Empty, ErrorBox, Loading, PageHeader } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fmtDate } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -22,16 +21,7 @@ function CasesPage() {
 
   return (
     <>
-      <PageHeader
-        title={t("nav.cases")}
-        action={
-          <Button asChild>
-            <Link to="/cases/new">
-              <Plus /> {t("case.new")}
-            </Link>
-          </Button>
-        }
-      />
+      <PageHeader title={t("nav.cases")} />
       <Input
         className="mb-3"
         type="search"
@@ -66,7 +56,8 @@ function CasesPage() {
                   )}
                 </div>
                 <p className="mt-1 text-[15px] text-muted-foreground">
-                  {[c.caseNumber, c.court, c.client?.name].filter(Boolean).join(" · ")}
+                  {c.caseNumber && <span className="num mr-2 text-foreground">{c.caseNumber}</span>}
+                  {[c.court, c.client?.name].filter(Boolean).join(" · ")}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-[15px]">
                   <Badge>{t(`kind.${c.kind}`)}</Badge>

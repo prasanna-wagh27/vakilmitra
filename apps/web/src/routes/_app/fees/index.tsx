@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Empty, ErrorBox, Loading, PageHeader } from "@/components/common";
-import { Card } from "@/components/ui/card";
 import { fmtDate, rupees } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { feeSummaryQuery } from "@/lib/queries";
@@ -23,35 +22,33 @@ function FeesPage() {
       ) : (
         data && (
           <>
-            <Card className="mb-4 grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-sm text-muted-foreground">{t("fees.outstanding")}</p>
-                <p className="font-display text-3xl">{rupees(data.totals.outstandingPaise, locale)}</p>
+            <div className="band mb-12 overflow-hidden">
+              <div className="grid grid-cols-2">
+                <div className="min-w-0 px-4 pt-4 pb-5">
+                  <p className="label-mono truncate text-[12px] !text-white/60">{t("fees.outstanding")}</p>
+                  <p className="font-display mt-6 truncate text-[32px] leading-none">{rupees(data.totals.outstandingPaise, locale)}</p>
+                </div>
+                <div className="min-w-0 border-l border-white/12 px-4 pt-4 pb-5">
+                  <p className="label-mono truncate text-[12px] !text-white/60">{t("fees.overdue")}</p>
+                  <p className={`font-display mt-6 truncate text-[32px] leading-none ${data.totals.overduePaise ? "text-[#ff9b8f]" : ""}`}>
+                    {rupees(data.totals.overduePaise, locale)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t("fees.overdue")}</p>
-                <p className={`font-display text-3xl ${data.totals.overduePaise ? "text-destructive" : ""}`}>
-                  {rupees(data.totals.overduePaise, locale)}
-                </p>
-              </div>
-              <p className="col-span-2 text-sm text-muted-foreground">
+              <p className="label-mono border-t border-white/12 px-4 py-3 text-[12px] !text-white/60">
                 {t("fees.total")} {rupees(data.totals.totalPaise, locale)} · {t("fees.paid")} {rupees(data.totals.paidPaise, locale)}
               </p>
-            </Card>
+            </div>
             {owing.length === 0 ? (
               <Empty>{t("fees.allClear")}</Empty>
             ) : (
-              <ul className="panel divide-y overflow-hidden">
+              <ul className="list">
                 {owing.map((c) => (
                   <li key={c.clientId}>
-                    <Link
-                      to="/clients/$clientId"
-                      params={{ clientId: c.clientId }}
-                      className="flex min-h-14 items-center justify-between gap-3 p-3 hover:bg-muted"
-                    >
+                    <Link to="/clients/$clientId" params={{ clientId: c.clientId }} className="list-row justify-between">
                       <div className="min-w-0">
-                        <p className="truncate font-medium">{c.clientName}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="truncate text-[17px]">{c.clientName}</p>
+                        <p className="mt-0.5 text-[15px] text-muted-foreground">
                           {c.overduePaise > 0 && (
                             <span className="text-destructive">
                               {t("fees.overdue")} {rupees(c.overduePaise, locale)} ·{" "}
@@ -60,7 +57,7 @@ function FeesPage() {
                           {c.nextDue && `${t("fees.nextDue")} ${fmtDate(c.nextDue.date, locale, { day: "numeric", month: "short" })}`}
                         </p>
                       </div>
-                      <span className="shrink-0 font-semibold">{rupees(c.outstandingPaise, locale)}</span>
+                      <span className="font-display shrink-0 text-lg">{rupees(c.outstandingPaise, locale)}</span>
                     </Link>
                   </li>
                 ))}

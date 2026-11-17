@@ -67,11 +67,11 @@ function PropertyPage() {
     ]
       .filter(Boolean)
       .join(", ") || t("land.property");
-  const row = (label: MessageKey, value: string | null | undefined) =>
+  const row = (label: MessageKey, value: string | null | undefined, mono = false) =>
     value ? (
       <>
         <dt className="text-muted-foreground">{t(label)}</dt>
-        <dd>{value}</dd>
+        <dd className={mono ? "num" : undefined}>{value}</dd>
       </>
     ) : null;
 
@@ -88,8 +88,8 @@ function PropertyPage() {
           </Button>
         }
       />
-      <p className="-mt-3 mb-3 text-sm text-muted-foreground">{[p.village, p.taluka, p.district].filter(Boolean).join(", ")}</p>
-      <p className="mb-4 rounded-xl bg-warning-soft p-3 text-sm text-warning">{t("land.manualNote")}</p>
+      <p className="-mt-3 mb-3 text-[15px] text-muted-foreground">{[p.village, p.taluka, p.district].filter(Boolean).join(", ")}</p>
+      <p className="mb-4 rounded-xl bg-warning-soft p-3 text-[15px] text-warning">{t("land.manualNote")}</p>
 
       <Section
         title={t("land.flags")}
@@ -99,7 +99,7 @@ function PropertyPage() {
           </Button>
         }
       >
-        <p className="mb-2 text-sm text-muted-foreground">{t("land.checkHint")}</p>
+        <p className="mb-2 text-[15px] text-muted-foreground">{t("land.checkHint")}</p>
         <ErrorBox error={check.error} />
         {p.flags.length === 0 ? (
           <Empty>{ranAt ? t("land.noFlags") : t("land.notRunYet")}</Empty>
@@ -148,16 +148,16 @@ function PropertyPage() {
               >
                 <span aria-hidden className="absolute top-4 -left-[1.45rem] size-3 rounded-full border-2 border-background bg-primary" />
                 <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <span className="font-semibold">{fmtDate(e.date, locale)}</span>
+                  <span className="font-medium">{fmtDate(e.date, locale)}</span>
                   <Badge tone={kindTone[e.kind]}>{t(`land.kind.${e.kind}`)}</Badge>
                   {e.subtype && <Badge>{t(`sub.${e.subtype}` as MessageKey)}</Badge>}
                   {e.section155 && <Badge tone="red">{t("land.section155")}</Badge>}
                   {flaggedEvents.has(e.id) && <FlagIcon className="size-4 text-destructive" aria-label={t("land.flags")} />}
                 </div>
-                <dl className="grid grid-cols-[auto_1fr] gap-x-3 text-sm">
-                  {row("land.ferfarNo", e.ferfarNo)}
-                  {row("land.deedRegNo", e.deedRegNo)}
-                  {row("land.refDeed", e.refDeedRegNo)}
+                <dl className="grid grid-cols-[auto_1fr] gap-x-3 text-[15px]">
+                  {row("land.ferfarNo", e.ferfarNo, true)}
+                  {row("land.deedRegNo", e.deedRegNo, true)}
+                  {row("land.refDeed", e.refDeedRegNo, true)}
                   {row("land.from", e.fromParties.join(", "))}
                   {row("land.to", e.toParties.join(", "))}
                   {row("land.owners", e.owners.join(", "))}
@@ -165,11 +165,11 @@ function PropertyPage() {
                   {row("land.landClass", e.landClass)}
                   {row("land.otherRights", e.otherRights.join("; "))}
                 </dl>
-                {e.notes && <p className="mt-1 text-sm text-muted-foreground">{e.notes}</p>}
+                {e.notes && <p className="mt-1 text-[15px] text-muted-foreground">{e.notes}</p>}
                 <div className="mt-1 text-right">
                   <button
                     type="button"
-                    className="text-sm text-muted-foreground underline"
+                    className="text-[15px] text-muted-foreground underline"
                     onClick={() => confirm(t("common.confirmDelete")) && removeEvent.mutate(e.id)}
                   >
                     {t("common.delete")}

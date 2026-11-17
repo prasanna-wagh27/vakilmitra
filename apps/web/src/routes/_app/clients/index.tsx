@@ -45,21 +45,17 @@ function ClientsPage() {
       ) : data?.length === 0 ? (
         <Empty />
       ) : (
-        <ul className="panel divide-y overflow-hidden">
+        <ul className="list">
           {data?.map((c) => (
             <li key={c.id}>
-              <Link
-                to="/clients/$clientId"
-                params={{ clientId: c.id }}
-                className="flex min-h-14 items-center justify-between gap-2 p-3 hover:bg-muted"
-              >
+              <Link to="/clients/$clientId" params={{ clientId: c.id }} className="list-row justify-between">
                 <div>
-                  <p className="font-medium">{c.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-[17px]">{c.name}</p>
+                  <p className="num mt-0.5 text-[14px] text-muted-foreground">
                     {[c.phone, `${t("client.cases")}: ${c.caseCount}`].filter(Boolean).join(" · ")}
                   </p>
                 </div>
-                {c.outstandingPaise > 0 && <span className="text-sm font-semibold">{rupees(c.outstandingPaise, locale)}</span>}
+                {c.outstandingPaise > 0 && <span className="font-display shrink-0 text-lg">{rupees(c.outstandingPaise, locale)}</span>}
               </Link>
             </li>
           ))}

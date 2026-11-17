@@ -61,7 +61,7 @@ function SettingsPage() {
 
       <Section title={t("settings.profile")}>
         <form onSubmit={f.handleSubmit((v) => save.mutate(v))} className="space-y-3" noValidate>
-          <p className="text-sm text-muted-foreground">{advocate.email}</p>
+          <p className="text-[15px] text-muted-foreground">{advocate.email}</p>
           <Field id="name" label={t("auth.name")} error={f.formState.errors.name}>
             <Input id="name" {...f.register("name")} />
           </Field>
@@ -84,7 +84,7 @@ function SettingsPage() {
 
       <Section title={t("settings.privacy")}>
         <Card>
-          <p className="text-sm">{t("settings.privacyText")}</p>
+          <p className="text-[15px]">{t("settings.privacyText")}</p>
         </Card>
       </Section>
 
@@ -102,7 +102,7 @@ function SettingsPage() {
           }}
           className="space-y-3"
         >
-          <p className="text-sm text-muted-foreground">{t("settings.deleteAccountHint")}</p>
+          <p className="text-[15px] text-muted-foreground">{t("settings.deleteAccountHint")}</p>
           <Field id="delete-password" label={t("auth.password")}>
             <Input
               id="delete-password"
@@ -144,7 +144,7 @@ function CloudOcrConsent() {
       <Card>
         <label className="flex min-h-11 items-start gap-3">
           <Checkbox className="mt-1" checked={on} disabled={toggle.isPending || !me.data} onChange={(e) => change(e.target.checked)} />
-          <span className="text-sm">
+          <span className="text-[15px]">
             <span className="block font-medium">{t("settings.cloudOcr")}</span>
             <span className="block text-muted-foreground">{t("settings.cloudOcrText")}</span>
             {on && me.data?.cloudOcrConsentAt && (
