@@ -1,7 +1,8 @@
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { addDays, type HearingWithCase, istDate } from "@vakilmitra/shared";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Empty, ErrorBox, Loading, PageHeader } from "@/components/common";
 import { HearingRow } from "@/components/HearingRow";
@@ -30,7 +31,7 @@ function DiaryPage() {
       <PageHeader title={t("diary.title")} />
       <div className="mb-3 flex items-center gap-2">
         <Button variant="outline" size="icon" aria-label="previous" onClick={() => setFrom(addDays(from, -14))}>
-          <ChevronLeft />
+          <HugeiconsIcon icon={ArrowLeft01Icon} />
         </Button>
         <Input
           className="flex-1"
@@ -40,7 +41,7 @@ function DiaryPage() {
           aria-label={t("common.date")}
         />
         <Button variant="outline" size="icon" aria-label="next" onClick={() => setFrom(addDays(from, 14))}>
-          <ChevronRight />
+          <HugeiconsIcon icon={ArrowRight01Icon} />
         </Button>
       </div>
       <p className="mb-3 text-sm text-muted-foreground">
@@ -54,7 +55,7 @@ function DiaryPage() {
       ) : (
         [...byDay].map(([day, hs]) => (
           <div key={day} className="mb-4">
-            <h3 className={`mb-2 text-sm font-semibold ${day === istDate() ? "text-accent" : "text-muted-foreground"}`}>
+            <h3 className={`mb-2 text-sm font-semibold ${day === istDate() ? "text-primary" : "text-muted-foreground"}`}>
               {fmtDay(day, locale)} · {hs.length}
             </h3>
             <div className="list">

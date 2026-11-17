@@ -83,7 +83,7 @@ function SettingsPage() {
       <CloudOcrConsent />
 
       <Section title={t("settings.privacy")}>
-        <Card>
+        <Card className="gap-3 px-(--card-spacing)">
           <p className="text-sm">{t("settings.privacyText")}</p>
         </Card>
       </Section>
@@ -141,14 +141,14 @@ function CloudOcrConsent() {
   };
   return (
     <Section title={t("settings.cloudOcr")}>
-      <Card>
+      <Card className="gap-3 px-(--card-spacing)">
         <label className="flex min-h-11 items-start gap-3">
           <Checkbox className="mt-1" checked={on} disabled={toggle.isPending || !me.data} onChange={(e) => change(e.target.checked)} />
           <span className="text-sm">
             <span className="block font-medium">{t("settings.cloudOcr")}</span>
             <span className="block text-muted-foreground">{t("settings.cloudOcrText")}</span>
             {on && me.data?.cloudOcrConsentAt && (
-              <span className="mt-1 block text-accent">
+              <span className="mt-1 block text-primary">
                 {tf("settings.cloudOcrOn", { date: fmtDate(me.data.cloudOcrConsentAt, locale) })}
               </span>
             )}

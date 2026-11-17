@@ -1,7 +1,8 @@
+import { Add01Icon, File01Icon, Flag02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { Flag } from "@vakilmitra/shared";
-import { FileText, Flag as FlagIcon, Plus } from "lucide-react";
 import { useState } from "react";
 import { Empty, ErrorBox, Field, Loading, PageHeader, Section } from "@/components/common";
 import { FlagCard } from "@/components/FlagCard";
@@ -83,7 +84,7 @@ function PropertyPage() {
         action={
           <Button asChild variant="outline">
             <Link to="/cases/$caseId/properties/$propertyId/report" params={{ caseId, propertyId }}>
-              <FileText /> {t("report.open")}
+              <HugeiconsIcon icon={File01Icon} /> {t("report.open")}
             </Link>
           </Button>
         }
@@ -128,7 +129,7 @@ function PropertyPage() {
         title={t("land.chain")}
         action={
           <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
-            <Plus /> {t("land.addEntry")}
+            <HugeiconsIcon icon={Add01Icon} /> {t("land.addEntry")}
           </Button>
         }
       >
@@ -142,7 +143,7 @@ function PropertyPage() {
                 id={`ev-${e.id}`}
                 className={cn(
                   "row-card relative p-4",
-                  highlight.includes(e.id) && "border-accent ring-2 ring-accent/25",
+                  highlight.includes(e.id) && "border-primary ring-2 ring-ring/40",
                   flaggedEvents.has(e.id) && "border-destructive/40",
                 )}
               >
@@ -152,7 +153,9 @@ function PropertyPage() {
                   <Badge tone={kindTone[e.kind]}>{t(`land.kind.${e.kind}`)}</Badge>
                   {e.subtype && <Badge>{t(`sub.${e.subtype}` as MessageKey)}</Badge>}
                   {e.section155 && <Badge tone="red">{t("land.section155")}</Badge>}
-                  {flaggedEvents.has(e.id) && <FlagIcon className="size-4 text-destructive" aria-label={t("land.flags")} />}
+                  {flaggedEvents.has(e.id) && (
+                    <HugeiconsIcon icon={Flag02Icon} className="size-4 text-destructive" aria-label={t("land.flags")} />
+                  )}
                 </div>
                 <dl className="grid grid-cols-[auto_1fr] gap-x-3 text-sm">
                   {row("land.ferfarNo", e.ferfarNo)}

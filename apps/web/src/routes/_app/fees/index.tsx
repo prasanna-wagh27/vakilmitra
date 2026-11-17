@@ -23,7 +23,7 @@ function FeesPage() {
       ) : (
         data && (
           <>
-            <Card className="mb-4 grid grid-cols-2 gap-3">
+            <Card className="px-(--card-spacing) mb-4 grid grid-cols-2 gap-3">
               <div>
                 <p className="text-sm text-muted-foreground">{t("fees.outstanding")}</p>
                 <p className="font-display text-3xl">{rupees(data.totals.outstandingPaise, locale)}</p>

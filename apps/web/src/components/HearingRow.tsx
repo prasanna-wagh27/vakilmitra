@@ -1,16 +1,29 @@
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "@tanstack/react-router";
 import type { HearingWithCase } from "@vakilmitra/shared";
+import { Badge } from "./ui/badge";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "./ui/item";
 
-/** One hearing, as a row inside a .list. */
-export function HearingRow({ h }: { h: HearingWithCase }) {
+/** One hearing: case, number and client, with the stage on the right. */
+export function HearingRow({ h }: { h: HearingWithCase; serial?: number }) {
   const meta = [h.case.caseNumber, h.case.client?.name].filter(Boolean).join(" · ");
   return (
-    <Link to="/cases/$caseId" params={{ caseId: h.case.id }} className="list-row">
-      <span className="min-w-0 flex-1">
-        <span className="line-clamp-2 block text-[17px] leading-snug break-words">{h.case.title}</span>
-        {meta && <span className="mt-1 line-clamp-1 block text-[15px] text-muted-foreground">{meta}</span>}
-      </span>
-      {h.purpose && <span className="chip max-w-[45%] shrink-0 truncate">{h.purpose}</span>}
-    </Link>
+    <Item asChild size="sm" className="rounded-none px-4">
+      <Link to="/cases/$caseId" params={{ caseId: h.case.id }}>
+        <ItemContent className="min-w-0">
+          <ItemTitle className="line-clamp-2 text-[15px]">{h.case.title}</ItemTitle>
+          {meta && <ItemDescription className="line-clamp-1">{meta}</ItemDescription>}
+        </ItemContent>
+        <ItemActions>
+          {h.purpose && (
+            <Badge variant="outline" className="max-w-32 truncate">
+              {h.purpose}
+            </Badge>
+          )}
+          <HugeiconsIcon icon={ArrowRight01Icon} className="size-4 text-muted-foreground" />
+        </ItemActions>
+      </Link>
+    </Item>
   );
 }

@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Link01Icon, ShieldKeyIcon, SquareLock02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Link2, LockKeyhole, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -55,9 +56,9 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
 
   const e = f.formState.errors;
   const trust = [
-    { icon: LockKeyhole, text: t("auth.trust1") },
-    { icon: Link2, text: t("auth.trust2") },
-    { icon: ShieldCheck, text: t("auth.trust3") },
+    { icon: SquareLock02Icon, text: t("auth.trust1") },
+    { icon: Link01Icon, text: t("auth.trust2") },
+    { icon: ShieldKeyIcon, text: t("auth.trust3") },
   ];
   return (
     <main className="mx-auto grid min-h-dvh max-w-5xl content-start items-center gap-4 px-4 py-4 md:content-center md:grid-cols-[1.05fr_1fr] md:gap-10 md:py-10">
@@ -69,7 +70,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
         <ul className="mt-8 hidden space-y-3 border-t pt-6 sm:block">
           {trust.map((x) => (
             <li key={x.text} className="flex items-center gap-3 text-sm">
-              <x.icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+              <HugeiconsIcon icon={x.icon} className="size-4 shrink-0 text-muted-foreground" aria-hidden />
               {x.text}
             </li>
           ))}
@@ -116,7 +117,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {mode === "login" ? t("auth.noAccount") : t("auth.haveAccount")}{" "}
           <Link
-            className="font-medium text-accent underline underline-offset-4"
+            className="font-medium text-primary underline underline-offset-4"
             to={mode === "login" ? "/register" : "/login"}
             search={{ next }}
           >
@@ -126,7 +127,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
         <ul className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2 border-t pt-5 text-xs text-muted-foreground sm:hidden">
           {trust.map((x) => (
             <li key={x.text} className="flex items-center gap-1.5">
-              <x.icon className="size-3.5" aria-hidden />
+              <HugeiconsIcon icon={x.icon} className="size-3.5" aria-hidden />
               {x.text}
             </li>
           ))}

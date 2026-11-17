@@ -1,7 +1,8 @@
+import { Add01Icon, Cancel01Icon, FileUploadIcon, ScanIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { type Hearing, istDate } from "@vakilmitra/shared";
-import { FileUp, Plus, Scan, X } from "lucide-react";
 import { useState } from "react";
 import { Empty, ErrorBox, Loading, PageHeader, Section } from "@/components/common";
 import { FlagCard } from "@/components/FlagCard";
@@ -29,7 +30,7 @@ function AddButton({ onClick }: { onClick: () => void }) {
   const { t } = useI18n();
   return (
     <Button variant="outline" size="sm" onClick={onClick}>
-      <Plus /> {t("common.add")}
+      <HugeiconsIcon icon={Add01Icon} /> {t("common.add")}
     </Button>
   );
 }
@@ -78,7 +79,7 @@ function CasePage() {
         }
       />
 
-      <Card>
+      <Card className="px-(--card-spacing) gap-3 px-(--card-spacing)">
         <div className="mb-2 flex flex-wrap gap-2">
           <Badge>{t(`kind.${c.kind}`)}</Badge>
           <Badge tone={c.status === "ACTIVE" ? "green" : "neutral"}>{t(`status.${c.status}`)}</Badge>
@@ -107,7 +108,7 @@ function CasePage() {
             <>
               <dt className="text-muted-foreground">{t("case.client")}</dt>
               <dd>
-                <Link className="text-accent underline underline-offset-4" to="/clients/$clientId" params={{ clientId: c.client.id }}>
+                <Link className="text-primary underline underline-offset-4" to="/clients/$clientId" params={{ clientId: c.client.id }}>
                   {c.client.name}
                 </Link>
                 {c.client.phone && (
@@ -146,12 +147,12 @@ function CasePage() {
             <div className="flex gap-2">
               <Button variant="outline" size="sm" asChild>
                 <Link to="/cases/$caseId/scan" params={{ caseId }} search={{ mode: "upload" }}>
-                  <FileUp /> {t("doc.upload")}
+                  <HugeiconsIcon icon={FileUploadIcon} /> {t("doc.upload")}
                 </Link>
               </Button>
               <Button size="sm" asChild>
                 <Link to="/cases/$caseId/scan" params={{ caseId }}>
-                  <Scan /> {t("doc.scan")}
+                  <HugeiconsIcon icon={ScanIcon} /> {t("doc.scan")}
                 </Link>
               </Button>
             </div>
@@ -198,7 +199,7 @@ function CasePage() {
               return (
                 <li
                   key={h.id}
-                  className={cn("row-card p-4", isToday && "border-accent ring-2 ring-accent/20", isPast && h.outcome && "opacity-75")}
+                  className={cn("row-card p-4", isToday && "border-primary ring-2 ring-ring/40", isPast && h.outcome && "opacity-75")}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -322,7 +323,7 @@ function CasePage() {
                     </p>
                   </div>
                   <Button variant="ghost" size="icon" aria-label={t("common.delete")} onClick={() => unshare.mutate(g.id)}>
-                    <X />
+                    <HugeiconsIcon icon={Cancel01Icon} />
                   </Button>
                 </li>
               ))}

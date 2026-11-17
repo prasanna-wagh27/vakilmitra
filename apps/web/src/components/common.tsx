@@ -1,35 +1,60 @@
+import { AlertCircleIcon, ArrowLeft01Icon, InboxIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import type { FieldError } from "react-hook-form";
 import { ApiError } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
+import { EmptyDescription, EmptyHeader, EmptyMedia, Empty as EmptyRoot } from "./ui/empty";
 import { Label } from "./ui/label";
+import { Skeleton } from "./ui/skeleton";
 
-export function PageHeader({ title, back, action, eyebrow }: { title: string; back?: string; action?: ReactNode; eyebrow?: ReactNode }) {
+/** Page title with an optional back link, description and actions. */
+export function PageHeader({
+  title,
+  back,
+  action,
+  eyebrow,
+  description,
+}: {
+  title: string;
+  back?: string;
+  action?: ReactNode;
+  eyebrow?: ReactNode;
+  description?: ReactNode;
+}) {
   const { t } = useI18n();
   return (
-    <div className="mb-8 flex items-center gap-3">
+    <div className="mb-6">
       {back && (
-        <Link to={back} aria-label={t("common.back")} className="icon-btn size-9 shrink-0">
-          <ArrowLeft className="size-[18px]" />
-        </Link>
+        <Button asChild variant="ghost" size="sm" className="-ml-2 mb-3 text-muted-foreground">
+          <Link to={back}>
+            <HugeiconsIcon icon={ArrowLeft01Icon} data-icon="inline-start" />
+            {t("common.back")}
+          </Link>
+        </Button>
       )}
-      <div className="min-w-0 flex-1">
-        {eyebrow && <div className="label-mono mb-1">{eyebrow}</div>}
-        <h1 className="font-display line-clamp-3 text-[2rem] leading-[1.1] break-words">{title}</h1>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          {eyebrow && <div className="mb-1 text-sm text-muted-foreground">{eyebrow}</div>}
+          <h1 className="font-heading text-2xl leading-tight font-semibold tracking-tight break-words">{title}</h1>
+          {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+        </div>
+        {action && <div className="flex shrink-0 items-center gap-2">{action}</div>}
       </div>
-      {action}
     </div>
   );
 }
 
+/** A titled block of a page. */
 export function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <section className="mt-12">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="font-display text-2xl leading-[1.25]">{title}</h2>
+    <section className="mt-8">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h2 className="font-heading text-base font-semibold">{title}</h2>
         {action}
       </div>
       {children}
@@ -37,18 +62,37 @@ export function Section({ title, action, children }: { title: string; action?: R
   );
 }
 
+/** Empty state: dashed box with an icon and a short line. */
 export function Empty({ children }: { children?: ReactNode }) {
   const { t } = useI18n();
   return (
-    <p className="rounded-lg border border-dashed border-input px-4 py-8 text-center text-sm text-muted-foreground">
-      {children ?? t("common.none")}
-    </p>
+    <EmptyRoot className="rounded-xl border border-dashed py-8">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <HugeiconsIcon icon={InboxIcon} />
+        </EmptyMedia>
+        <EmptyDescription>{children ?? t("common.none")}</EmptyDescription>
+      </EmptyHeader>
+    </EmptyRoot>
   );
 }
 
-export function Loading() {
+/** Loading placeholder shaped like a list. */
+export function Loading({ rows = 3 }: { rows?: number }) {
   const { t } = useI18n();
-  return <p className="p-6 text-center text-sm text-muted-foreground">{t("common.loading")}</p>;
+  return (
+    <div role="status" aria-label={t("common.loading")} className="flex flex-col gap-3 rounded-xl p-4 ring-1 ring-foreground/10">
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={`s${i}`} className="flex items-center gap-3">
+          <Skeleton className="size-9 rounded-md" />
+          <div className="flex flex-1 flex-col gap-2">
+            <Skeleton className="h-4 w-3/5" />
+            <Skeleton className="h-3 w-2/5" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function ErrorBox({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
@@ -57,19 +101,22 @@ export function ErrorBox({ error, onRetry }: { error: unknown; onRetry?: () => v
   const message = error instanceof Error ? error.message : t("common.error");
   const details = error instanceof ApiError ? error.details : undefined;
   return (
-    <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive-soft px-4 py-3 text-sm text-destructive">
-      <p>{message}</p>
-      {details?.map((d) => (
-        <p key={d.path}>
-          {d.path}: {d.message}
-        </p>
-      ))}
-      {onRetry && (
-        <button type="button" className="mt-1 underline" onClick={onRetry}>
-          {t("common.retry")}
-        </button>
-      )}
-    </div>
+    <Alert variant="destructive" className="my-3">
+      <HugeiconsIcon icon={AlertCircleIcon} />
+      <AlertDescription>
+        <p>{message}</p>
+        {details?.map((d) => (
+          <p key={d.path}>
+            {d.path}: {d.message}
+          </p>
+        ))}
+        {onRetry && (
+          <button type="button" className="mt-1 underline underline-offset-4" onClick={onRetry}>
+            {t("common.retry")}
+          </button>
+        )}
+      </AlertDescription>
+    </Alert>
   );
 }
 
@@ -89,13 +136,13 @@ export function Field({
 }) {
   const { t } = useI18n();
   return (
-    <div>
+    <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
       {children}
       {error ? (
-        <p className="mt-1 text-xs text-destructive">{error.message || t("common.required")}</p>
+        <p className="text-xs text-destructive">{error.message || t("common.required")}</p>
       ) : (
-        hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+        hint && <p className="text-xs text-muted-foreground">{hint}</p>
       )}
     </div>
   );
@@ -104,29 +151,31 @@ export function Field({
 export function FormActions({ busy, onCancel, submitLabel }: { busy?: boolean; onCancel?: () => void; submitLabel?: string }) {
   const { t } = useI18n();
   return (
-    <div className="mt-4 flex gap-2">
+    <div className="mt-6 flex gap-2">
       {onCancel && (
-        <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
+        <Button type="button" variant="outline" size="lg" className="flex-1" onClick={onCancel}>
           {t("common.cancel")}
         </Button>
       )}
-      <Button type="submit" className="flex-1" disabled={busy}>
+      <Button type="submit" size="lg" className="flex-1" disabled={busy}>
         {submitLabel ?? t("common.save")}
       </Button>
     </div>
   );
 }
 
-/** Chip-style toggle used for filters and day pickers. */
+/** Toggle chip for filters and day pickers. */
 export function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
   return (
-    <button
+    <Button
       type="button"
+      size="sm"
+      variant={active ? "secondary" : "ghost"}
       onClick={onClick}
       aria-pressed={active}
-      className={`h-9 shrink-0 rounded-lg border px-3 text-sm transition-colors ${active ? "border-border bg-card text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+      className={cn("shrink-0", !active && "text-muted-foreground")}
     >
       {children}
-    </button>
+    </Button>
   );
 }

@@ -1,6 +1,7 @@
+import { Add01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Empty, ErrorBox, Loading, PageHeader } from "@/components/common";
 import { ClientForm } from "@/components/forms";
@@ -27,7 +28,7 @@ function ClientsPage() {
         title={t("nav.clients")}
         action={
           <Button onClick={() => setAdding(true)}>
-            <Plus /> {t("client.new")}
+            <HugeiconsIcon icon={Add01Icon} /> {t("client.new")}
           </Button>
         }
       />

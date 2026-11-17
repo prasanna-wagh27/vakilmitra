@@ -1,6 +1,7 @@
+import { Add01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Empty, ErrorBox, Loading, PageHeader, Section } from "@/components/common";
 import { ClientForm, FeeAgreementForm, PaymentForm } from "@/components/forms";
@@ -39,15 +40,15 @@ function ClientPage() {
           </Button>
         }
       />
-      <Card>
+      <Card className="px-(--card-spacing) gap-3 px-(--card-spacing)">
         <div className="flex flex-wrap gap-3 text-sm">
           {c.phone && (
-            <a className="text-accent underline underline-offset-4" href={`tel:${c.phone}`}>
+            <a className="text-primary underline underline-offset-4" href={`tel:${c.phone}`}>
               {c.phone}
             </a>
           )}
           {c.email && (
-            <a className="text-accent underline underline-offset-4" href={`mailto:${c.email}`}>
+            <a className="text-primary underline underline-offset-4" href={`mailto:${c.email}`}>
               {c.email}
             </a>
           )}
@@ -60,7 +61,7 @@ function ClientPage() {
       <Section
         title={t("client.cases")}
         action={
-          <Link to="/cases/new" className="text-sm text-accent underline underline-offset-4">
+          <Link to="/cases/new" className="text-sm text-primary underline underline-offset-4">
             + {t("case.new")}
           </Link>
         }
@@ -87,11 +88,11 @@ function ClientPage() {
         title={t("case.fees")}
         action={
           <Button variant="outline" size="sm" onClick={() => setSheet("fee")}>
-            <Plus /> {t("common.add")}
+            <HugeiconsIcon icon={Add01Icon} /> {t("common.add")}
           </Button>
         }
       >
-        <Card className="mb-2 grid grid-cols-3 text-center text-sm">
+        <Card className="px-(--card-spacing) mb-2 grid grid-cols-3 text-center text-sm">
           <div>
             <p className="text-muted-foreground">{t("fees.total")}</p>
             <p className="font-semibold">{rupees(data.totals.totalPaise, locale)}</p>
@@ -125,7 +126,7 @@ function ClientPage() {
           <Link
             to="/fees/invoice/$clientId"
             params={{ clientId }}
-            className="mt-1 inline-block text-sm text-accent underline underline-offset-4"
+            className="mt-1 inline-block text-sm text-primary underline underline-offset-4"
           >
             {t("fees.invoice")} →
           </Link>

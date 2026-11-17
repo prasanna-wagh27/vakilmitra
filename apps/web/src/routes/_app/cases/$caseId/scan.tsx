@@ -1,8 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  AlertCircleIcon,
+  Camera01Icon,
+  Cancel01Icon,
+  FileUploadIcon,
+  Image02Icon,
+  Loading03Icon,
+  RotateLeft01Icon,
+  ScanIcon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { DOC_TYPES, type DocumentSummary } from "@vakilmitra/shared";
-import { Camera, Check, CircleAlert, FileUp, Images, Loader2, RotateCcw, Scan, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -258,7 +269,7 @@ function ScanPage() {
     <div className="fixed inset-0 z-50 flex flex-col bg-black text-white">
       <div className="flex items-center gap-2 px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2">
         <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" aria-label={t("common.cancel")} onClick={close}>
-          <X className="size-6!" />
+          <HugeiconsIcon icon={Cancel01Icon} className="size-6!" />
         </Button>
         <p className="flex-1 truncate text-sm" aria-live="polite">
           {pdfProgress
@@ -267,7 +278,7 @@ function ScanPage() {
         </p>
         {phase !== "setup" && phase !== "finishing" && items.length > 0 && (
           <Button className="bg-white text-black hover:bg-white/90" onClick={() => setPhase("finishing")} disabled={busy}>
-            <Check /> {t("doc.done")}
+            <HugeiconsIcon icon={Tick02Icon} /> {t("doc.done")}
           </Button>
         )}
       </div>
@@ -316,10 +327,11 @@ function ScanPage() {
               <Field id="title" label={`${t("doc.name")} (${t("common.optional")})`}>
                 <Input id="title" {...f.register("title")} />
               </Field>
-              <p className="rounded-xl bg-accent-soft p-3 text-sm text-accent">{t("doc.privacyNote")}</p>
+              <p className="rounded-xl bg-muted p-3 text-sm text-primary">{t("doc.privacyNote")}</p>
               <ErrorBox error={error} />
               <Button type="submit" className="w-full" disabled={f.formState.isSubmitting}>
-                {mode === "camera" ? <Scan /> : <FileUp />} {mode === "camera" ? t("doc.start") : t("doc.upload")}
+                {mode === "camera" ? <HugeiconsIcon icon={ScanIcon} /> : <HugeiconsIcon icon={FileUploadIcon} />}{" "}
+                {mode === "camera" ? t("doc.start") : t("doc.upload")}
               </Button>
             </form>
           </div>
@@ -333,9 +345,9 @@ function ScanPage() {
               onClick={() => fileInput.current?.click()}
               disabled={busy || !numberingReady}
             >
-              <FileUp /> {mode === "upload" ? t("doc.upload") : t("doc.choosePhotos")}
+              <HugeiconsIcon icon={FileUploadIcon} /> {mode === "upload" ? t("doc.upload") : t("doc.choosePhotos")}
             </Button>
-            {busy && <Loader2 className="size-6 animate-spin" />}
+            {busy && <HugeiconsIcon icon={Loading03Icon} className="size-6 animate-spin" />}
           </div>
         )}
 
@@ -355,7 +367,11 @@ function ScanPage() {
 
         {phase === "finishing" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
-            {failed.length ? <CircleAlert className="size-10 text-destructive" /> : <Loader2 className="size-10 animate-spin" />}
+            {failed.length ? (
+              <HugeiconsIcon icon={AlertCircleIcon} className="size-10 text-destructive" />
+            ) : (
+              <HugeiconsIcon icon={Loading03Icon} className="size-10 animate-spin" />
+            )}
             <p aria-live="polite">{statusLine}</p>
             {failed.length > 0 && (
               <Button
@@ -364,7 +380,7 @@ function ScanPage() {
                   for (const i of failed) queue.retry(i.key);
                 }}
               >
-                <RotateCcw /> {t("common.retry")}
+                <HugeiconsIcon icon={RotateLeft01Icon} /> {t("common.retry")}
               </Button>
             )}
           </div>
@@ -395,11 +411,11 @@ function ScanPage() {
                 />
                 <span className="absolute right-0.5 bottom-0.5 rounded-full bg-black/70 p-0.5">
                   {i.status === "done" ? (
-                    <Check className="size-3 text-green-400" />
+                    <HugeiconsIcon icon={Tick02Icon} className="size-3 text-green-400" />
                   ) : i.status === "failed" ? (
-                    <RotateCcw className="size-3 text-red-400" />
+                    <HugeiconsIcon icon={RotateLeft01Icon} className="size-3 text-red-400" />
                   ) : (
-                    <Loader2 className="size-3 animate-spin" />
+                    <HugeiconsIcon icon={Loading03Icon} className="size-3 animate-spin" />
                   )}
                 </span>
                 <span className="absolute top-0.5 left-1 text-[10px] font-bold drop-shadow">{i.pageNo}</span>
@@ -419,7 +435,7 @@ function ScanPage() {
             onClick={() => fileInput.current?.click()}
             disabled={busy || !numberingReady}
           >
-            <Images className="size-7!" />
+            <HugeiconsIcon icon={Image02Icon} className="size-7!" />
           </Button>
           <button
             type="button"
@@ -428,7 +444,11 @@ function ScanPage() {
             aria-label={t("doc.capture")}
             className="flex size-20 items-center justify-center rounded-full border-4 border-white bg-white/20 active:scale-95 disabled:opacity-50"
           >
-            {busy ? <Loader2 className="size-8 animate-spin" /> : <Camera className="size-8" />}
+            {busy ? (
+              <HugeiconsIcon icon={Loading03Icon} className="size-8 animate-spin" />
+            ) : (
+              <HugeiconsIcon icon={Camera01Icon} className="size-8" />
+            )}
           </button>
           <span className="size-14" />
         </div>
@@ -437,13 +457,13 @@ function ScanPage() {
       {phase === "review" && (
         <div className="grid grid-cols-3 gap-2 px-3 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <Button variant="ghost" className="text-white hover:bg-white/10" onClick={nextOrCapture} disabled={busy}>
-            <RotateCcw /> {t("doc.retake")}
+            <HugeiconsIcon icon={RotateLeft01Icon} /> {t("doc.retake")}
           </Button>
           <Button variant="ghost" className="text-white hover:bg-white/10" onClick={() => keep(true)} disabled={busy}>
             {t("doc.wholePage")}
           </Button>
           <Button className="bg-white text-black hover:bg-white/90" onClick={() => keep(false)} disabled={busy}>
-            {busy ? <Loader2 className="animate-spin" /> : <Check />} {t("doc.keep")}
+            {busy ? <HugeiconsIcon icon={Loading03Icon} className="animate-spin" /> : <HugeiconsIcon icon={Tick02Icon} />} {t("doc.keep")}
           </Button>
         </div>
       )}

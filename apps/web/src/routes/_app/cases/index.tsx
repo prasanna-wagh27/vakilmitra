@@ -1,7 +1,8 @@
+import { Add01Icon, Flag02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CASE_STATUSES, type CaseStatus } from "@vakilmitra/shared";
-import { Flag, Plus } from "lucide-react";
 import { useState } from "react";
 import { Chip, Empty, ErrorBox, Loading, PageHeader } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +28,7 @@ function CasesPage() {
         action={
           <Button asChild>
             <Link to="/cases/new">
-              <Plus /> {t("case.new")}
+              <HugeiconsIcon icon={Add01Icon} /> {t("case.new")}
             </Link>
           </Button>
         }
@@ -61,7 +62,7 @@ function CasesPage() {
                   <p className="font-semibold">{c.title}</p>
                   {c.openFlags > 0 && (
                     <Badge tone="red">
-                      <Flag /> {c.openFlags}
+                      <HugeiconsIcon icon={Flag02Icon} /> {c.openFlags}
                     </Badge>
                   )}
                 </div>
