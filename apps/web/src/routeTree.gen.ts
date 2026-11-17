@@ -26,6 +26,7 @@ import { Route as AppCasesCaseIdScanRouteImport } from './routes/_app/cases/$cas
 import { Route as AppFeesInvoiceClientIdRouteImport } from './routes/_app/fees/invoice/$clientId'
 import { Route as AppCasesCaseIdDocumentsDocumentIdRouteImport } from './routes/_app/cases/$caseId/documents/$documentId'
 import { Route as AppCasesCaseIdPropertiesPropertyIdRouteImport } from './routes/_app/cases/$caseId/properties/$propertyId'
+import { Route as AppCasesCaseIdPropertiesPropertyIdReportRouteImport } from './routes/_app/cases/$caseId/properties/$propertyId_.report'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -113,6 +114,12 @@ const AppCasesCaseIdPropertiesPropertyIdRoute =
     path: '/cases/$caseId/properties/$propertyId',
     getParentRoute: () => AppRoute,
   } as any)
+const AppCasesCaseIdPropertiesPropertyIdReportRoute =
+  AppCasesCaseIdPropertiesPropertyIdReportRouteImport.update({
+    id: '/cases/$caseId/properties/$propertyId_/report',
+    path: '/cases/$caseId/properties/$propertyId/report',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/cases/$caseId/': typeof AppCasesCaseIdIndexRoute
   '/cases/$caseId/documents/$documentId': typeof AppCasesCaseIdDocumentsDocumentIdRoute
   '/cases/$caseId/properties/$propertyId': typeof AppCasesCaseIdPropertiesPropertyIdRoute
+  '/cases/$caseId/properties/$propertyId/report': typeof AppCasesCaseIdPropertiesPropertyIdReportRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -149,6 +157,7 @@ export interface FileRoutesByTo {
   '/cases/$caseId': typeof AppCasesCaseIdIndexRoute
   '/cases/$caseId/documents/$documentId': typeof AppCasesCaseIdDocumentsDocumentIdRoute
   '/cases/$caseId/properties/$propertyId': typeof AppCasesCaseIdPropertiesPropertyIdRoute
+  '/cases/$caseId/properties/$propertyId/report': typeof AppCasesCaseIdPropertiesPropertyIdReportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -169,6 +178,7 @@ export interface FileRoutesById {
   '/_app/cases/$caseId/': typeof AppCasesCaseIdIndexRoute
   '/_app/cases/$caseId/documents/$documentId': typeof AppCasesCaseIdDocumentsDocumentIdRoute
   '/_app/cases/$caseId/properties/$propertyId': typeof AppCasesCaseIdPropertiesPropertyIdRoute
+  '/_app/cases/$caseId/properties/$propertyId_/report': typeof AppCasesCaseIdPropertiesPropertyIdReportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/cases/$caseId/'
     | '/cases/$caseId/documents/$documentId'
     | '/cases/$caseId/properties/$propertyId'
+    | '/cases/$caseId/properties/$propertyId/report'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/cases/$caseId'
     | '/cases/$caseId/documents/$documentId'
     | '/cases/$caseId/properties/$propertyId'
+    | '/cases/$caseId/properties/$propertyId/report'
   id:
     | '__root__'
     | '/_app'
@@ -226,6 +238,7 @@ export interface FileRouteTypes {
     | '/_app/cases/$caseId/'
     | '/_app/cases/$caseId/documents/$documentId'
     | '/_app/cases/$caseId/properties/$propertyId'
+    | '/_app/cases/$caseId/properties/$propertyId_/report'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -355,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCasesCaseIdPropertiesPropertyIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/cases/$caseId/properties/$propertyId_/report': {
+      id: '/_app/cases/$caseId/properties/$propertyId_/report'
+      path: '/cases/$caseId/properties/$propertyId/report'
+      fullPath: '/cases/$caseId/properties/$propertyId/report'
+      preLoaderRoute: typeof AppCasesCaseIdPropertiesPropertyIdReportRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -373,6 +393,7 @@ interface AppRouteChildren {
   AppCasesCaseIdIndexRoute: typeof AppCasesCaseIdIndexRoute
   AppCasesCaseIdDocumentsDocumentIdRoute: typeof AppCasesCaseIdDocumentsDocumentIdRoute
   AppCasesCaseIdPropertiesPropertyIdRoute: typeof AppCasesCaseIdPropertiesPropertyIdRoute
+  AppCasesCaseIdPropertiesPropertyIdReportRoute: typeof AppCasesCaseIdPropertiesPropertyIdReportRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -392,6 +413,8 @@ const AppRouteChildren: AppRouteChildren = {
     AppCasesCaseIdDocumentsDocumentIdRoute,
   AppCasesCaseIdPropertiesPropertyIdRoute:
     AppCasesCaseIdPropertiesPropertyIdRoute,
+  AppCasesCaseIdPropertiesPropertyIdReportRoute:
+    AppCasesCaseIdPropertiesPropertyIdReportRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

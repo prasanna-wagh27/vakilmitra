@@ -304,10 +304,7 @@ export function checkChainCoverage(events: ChainEvent[], opts: RuleOptions): Rul
     });
     return out;
   }
-  // Same date: transfers first, then the 7/12 that reflects them; ties by id. Keeps the result
-  // independent of the order rows come back from the database.
-  const rank: Record<EventKind, number> = { DEED: 0, MUTATION: 1, RECORD_SNAPSHOT: 2 };
-  const sorted = [...events].sort((a, b) => a.date.getTime() - b.date.getTime() || rank[a.kind] - rank[b.kind] || a.id.localeCompare(b.id));
+  const sorted = chronological(events);
   const first = sorted[0];
   // Allow a year of slack: a 7/12 from early in the start year covers it.
   if (differenceInDays(first.date, start) > 365) {
@@ -332,10 +329,7 @@ export function checkChainCoverage(events: ChainEvent[], opts: RuleOptions): Rul
       lastOwnerEvent = e;
       continue;
     }
-    const isTransfer =
-      (e.kind === "MUTATION" && DEED_BACKED_MUTATIONS.has(sub(e)) && sub(e) !== "MORTGAGE") ||
-      (e.kind === "MUTATION" && sub(e) === "HEIRSHIP");
-    if (!isTransfer || !e.fromParties?.length || !e.toParties?.length) continue;
+    if (!isOwnershipTransfer(e)) continue;
     if (owners && lastOwnerEvent && !namesOverlap(owners, e.fromParties)) {
       out.push({
         rule: "CHAIN_BREAK",
@@ -354,6 +348,41 @@ export function checkChainCoverage(events: ChainEvent[], opts: RuleOptions): Rul
     lastOwnerEvent = e;
   }
   return out;
+}
+
+/**
+ * Events in the order the chain is read. Same date: transfers first, then the 7/12 that reflects
+ * them; ties by id, so the result does not depend on the order rows come back from the database.
+ */
+export function chronological<T extends ChainEvent>(events: T[]): T[] {
+  const rank: Record<EventKind, number> = { DEED: 0, MUTATION: 1, RECORD_SNAPSHOT: 2 };
+  return [...events].sort((a, b) => a.date.getTime() - b.date.getTime() || rank[a.kind] - rank[b.kind] || a.id.localeCompare(b.id));
+}
+
+/** A mutation that moves ownership (not a mortgage), with both sides named. */
+function isOwnershipTransfer(e: ChainEvent): e is ChainEvent & { fromParties: string[]; toParties: string[] } {
+  const moves = e.kind === "MUTATION" && ((DEED_BACKED_MUTATIONS.has(sub(e)) && sub(e) !== "MORTGAGE") || sub(e) === "HEIRSHIP");
+  return moves && !!e.fromParties?.length && !!e.toParties?.length;
+}
+
+/**
+ * Owners at the end of the chain: the latest 7/12's owners, with later recorded transfers applied
+ * (the same reading the chain-break rule uses). Null when no 7/12 names owners.
+ */
+export function currentOwners(events: ChainEvent[]): { owners: string[]; asPer: ChainEvent } | null {
+  let owners: string[] | null = null;
+  let asPer: ChainEvent | null = null;
+  for (const e of chronological(events)) {
+    if (e.kind === "RECORD_SNAPSHOT" && e.owners?.length) {
+      owners = e.owners;
+      asPer = e;
+    } else if (owners && isOwnershipTransfer(e)) {
+      const removed = new Set(e.fromParties.map(normaliseName));
+      owners = [...owners.filter((o) => !removed.has(normaliseName(o))), ...e.toParties];
+      asPer = e;
+    }
+  }
+  return owners && asPer ? { owners, asPer } : null;
 }
 
 const SEVERITY_ORDER: Record<Severity, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };

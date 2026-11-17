@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import type { Flag } from "@vakilmitra/shared";
-import { Flag as FlagIcon, Plus } from "lucide-react";
+import { FileText, Flag as FlagIcon, Plus } from "lucide-react";
 import { useState } from "react";
 import { Empty, ErrorBox, Field, Loading, PageHeader, Section } from "@/components/common";
 import { FlagCard } from "@/components/FlagCard";
@@ -77,7 +77,17 @@ function PropertyPage() {
 
   return (
     <>
-      <PageHeader title={title} back={`/cases/${caseId}`} />
+      <PageHeader
+        title={title}
+        back={`/cases/${caseId}`}
+        action={
+          <Button asChild variant="outline">
+            <Link to="/cases/$caseId/properties/$propertyId/report" params={{ caseId, propertyId }}>
+              <FileText /> {t("report.open")}
+            </Link>
+          </Button>
+        }
+      />
       <p className="-mt-3 mb-3 text-sm text-muted-foreground">{[p.village, p.taluka, p.district].filter(Boolean).join(", ")}</p>
       <p className="mb-4 rounded-xl bg-warning-soft p-3 text-sm text-warning">{t("land.manualNote")}</p>
 
