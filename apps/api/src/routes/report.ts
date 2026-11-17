@@ -4,11 +4,12 @@
  * signed version never changes; if the chain or flags change later, the response says so.
  */
 import { and, asc, cases, documents, drafts, eq, flags, inArray, or, ownershipEvents, properties } from "@vakilmitra/db";
-import { type ReportDraft, reportDraftInput, type TitleReport, type TitleReportResponse } from "@vakilmitra/shared";
+import { LOCALES, type ReportDraft, reportDraftInput, type TitleReport, type TitleReportResponse } from "@vakilmitra/shared";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { db } from "../db.js";
 import { buildTitleReport } from "../land/report.js";
+import { reportDocx } from "../land/report-docx.js";
 import type { ChainEvent } from "../land/rules.js";
 import { logAccess, requireCaseAccess, requireCaseOwner } from "../lib/access.js";
 import { HttpError, notFound } from "../lib/http.js";
@@ -85,39 +86,65 @@ function reportTitle(p: TitleReport["property"]) {
   return ["Title search report", [p.village, no].filter(Boolean).join(" ")].filter(Boolean).join(" · ");
 }
 
+/** Everything the report page and the Word export show. */
+async function loadReport(caseId: string, propertyId: string): Promise<TitleReportResponse> {
+  const report = await currentReport(caseId, propertyId, today());
+  const row = await findDraft(propertyId);
+  const draft = row ? toDraft(row) : null;
+
+  // Compare the approved snapshot with the chain as it is now, on the same report date.
+  let changedSinceApproval = false;
+  if (draft?.approved) {
+    const now = await currentReport(caseId, propertyId, day(draft.approved.period.to));
+    changedSinceApproval = canonical(now) !== canonical(draft.approved);
+  }
+
+  const c = await db.query.cases.findFirst({
+    where: eq(cases.id, caseId),
+    columns: { title: true },
+    with: {
+      advocate: { columns: { name: true, barCouncilNo: true, phone: true, email: true } },
+      client: { columns: { name: true } },
+    },
+  });
+  return {
+    report,
+    draft,
+    changedSinceApproval,
+    advocate: c!.advocate,
+    client: c!.client ? { name: c!.client.name } : null,
+    caseTitle: c!.title,
+  };
+}
+
 export const reportRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/cases/:caseId/properties/:propertyId/report", { schema: { params } }, async (req): Promise<TitleReportResponse> => {
     const { caseId, propertyId } = req.params;
     await requireCaseAccess(req.advocateId, caseId);
-    const report = await currentReport(caseId, propertyId, today());
-    const row = await findDraft(propertyId);
-    const draft = row ? toDraft(row) : null;
-
-    // Compare the approved snapshot with the chain as it is now, on the same report date.
-    let changedSinceApproval = false;
-    if (draft?.approved) {
-      const now = await currentReport(caseId, propertyId, day(draft.approved.period.to));
-      changedSinceApproval = canonical(now) !== canonical(draft.approved);
-    }
-
-    const c = await db.query.cases.findFirst({
-      where: eq(cases.id, caseId),
-      columns: { title: true },
-      with: {
-        advocate: { columns: { name: true, barCouncilNo: true, phone: true, email: true } },
-        client: { columns: { name: true } },
-      },
-    });
+    const data = await loadReport(caseId, propertyId);
     await logAccess(req, "report.view", "property", propertyId);
-    return {
-      report,
-      draft,
-      changedSinceApproval,
-      advocate: c!.advocate,
-      client: c!.client ? { name: c!.client.name } : null,
-      caseTitle: c!.title,
-    };
+    return data;
   });
+
+  /** The report as a Word file: the signed snapshot once approved, otherwise the report as it is now. */
+  app.get(
+    "/cases/:caseId/properties/:propertyId/report.docx",
+    { schema: { params, querystring: z.object({ lang: z.enum(LOCALES).optional() }) } },
+    async (req, reply) => {
+      const { caseId, propertyId } = req.params;
+      await requireCaseAccess(req.advocateId, caseId);
+      const data = await loadReport(caseId, propertyId);
+      const locale = req.query.lang ?? data.draft?.language ?? "mr";
+      const file = await reportDocx(data, locale);
+      await logAccess(req, "report.export", "property", propertyId);
+      const name = `title-report-${(data.report.property.gatNo ?? data.report.property.surveyNo ?? propertyId).replace(/[^\w-]+/g, "-")}.docx`;
+      return reply
+        .header("content-type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        .header("content-disposition", `attachment; filename="${name}"`)
+        .header("cache-control", "no-store")
+        .send(file);
+    },
+  );
 
   /** Save the opinion. Editing an approved report takes it back to draft: it must be signed again. */
   app.put("/cases/:caseId/properties/:propertyId/report", { schema: { params, body: reportDraftInput } }, async (req) => {
