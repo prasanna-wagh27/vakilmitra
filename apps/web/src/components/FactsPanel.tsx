@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
+  DEED_TYPES,
   type DocumentDetail,
   type Extraction,
   FACT_FIELDS,
@@ -27,6 +28,7 @@ const UNSURE = 0.8;
 const CHOICES: Partial<Record<FactField, readonly string[]>> = {
   land_class: ["Class-I", "Class-II"],
   mutation_type: MUTATION_TYPES,
+  deed_type: DEED_TYPES,
   section_155: ["true", "false"],
 };
 
@@ -74,7 +76,7 @@ function useFieldText() {
       return `${n(sqm)} ${t("fact.sqm")} (${n(sqm / 10_000, 4)} ${t("fact.ha")})`;
     }
     if (field === "date" && /^\d{4}-\d{2}-\d{2}$/.test(value)) return fmtDate(value, locale);
-    if (field === "mutation_type") return t(`sub.${value}` as never) || value;
+    if (field === "mutation_type" || field === "deed_type") return t(`sub.${value}` as never) || value;
     if (field === "section_155") return value === "true" ? t("common.yes") : t("common.no");
     return value;
   };
@@ -89,7 +91,7 @@ function ValueInput({ field, value, onChange, id }: { field: FactField; value: s
         <option value="" />
         {choices.map((c) => (
           <option key={c} value={c}>
-            {field === "mutation_type"
+            {field === "mutation_type" || field === "deed_type"
               ? t(`sub.${c}` as never)
               : field === "section_155"
                 ? c === "true"
@@ -273,6 +275,7 @@ function AddFact({ documentId }: { documentId: string }) {
 
 interface AddResult {
   event: { id: string };
+  propertyId: string;
   filled: Record<string, string>;
   mismatches: { field: FactField; property: string; document: string }[];
   flags: { resolved: boolean }[];
@@ -283,21 +286,20 @@ function AddToChain({ doc, caseId, extraction }: { doc: DocumentDetail; caseId: 
   const caseData = useQuery(caseQuery(caseId));
   const properties = caseData.data?.case.properties ?? [];
   const factDate = extraction.facts.find((f) => f.field === "date")?.value;
-  const [propertyId, setPropertyId] = useState(doc.propertyId ?? properties[0]?.id ?? "new");
-  const [date, setDate] = useState(factDate ?? (doc.year ? `${doc.year}-01-01` : ""));
-  const [result, setResult] = useState<(AddResult & { propertyId: string }) | null>(null);
+  // Chosen by the advocate, else the document's property, else the first one; "new" creates it with the event.
+  const [chosen, setPropertyId] = useState<string | null>(null);
+  const propertyId = chosen ?? doc.propertyId ?? properties[0]?.id ?? "new";
+  // Typed by the advocate; until then the (reviewed) date fact is used as it stands now, so a
+  // correction to it is never overridden by a stale copy.
+  const [typed, setDate] = useState<string | null>(null);
+  const date = typed ?? factDate ?? (doc.year ? `${doc.year}-01-01` : "");
+  const [result, setResult] = useState<AddResult | null>(null);
   const add = useApiMutation(
-    async () => {
-      let pid = propertyId;
-      if (pid === "new") {
-        pid = (await api<{ property: { id: string } }>(`/cases/${caseId}/properties`, { method: "POST", body: {} })).property.id;
-      }
-      const r = await api<AddResult>(`/cases/${caseId}/properties/${pid}/events/from-document?lang=${locale}`, {
+    () =>
+      api<AddResult>(`/cases/${caseId}/properties/${propertyId}/events/from-document?lang=${locale}`, {
         method: "POST",
-        body: { documentId: doc.id, ...(date ? { date } : {}) },
-      });
-      return { ...r, propertyId: pid };
-    },
+        body: { documentId: doc.id, ...(typed !== null || !factDate ? { date } : {}) },
+      }),
     { onSuccess: setResult },
   );
   const pending = extraction.facts.filter((f) => !f.reviewed).length;
@@ -369,7 +371,7 @@ function AddToChain({ doc, caseId, extraction }: { doc: DocumentDetail; caseId: 
           </Field>
           <div className="sm:col-span-2">
             <ErrorBox error={add.error} />
-            <Button type="submit" disabled={add.isPending || (!date && !factDate)}>
+            <Button type="submit" disabled={add.isPending || !caseData.data || !date}>
               {t("fact.addToChain")}
             </Button>
           </div>
@@ -393,6 +395,9 @@ export function FactsPanel({ doc, caseId, canEdit }: { doc: DocumentDetail; case
   if (!isRecord && doc.type !== "OTHER" && !ex.facts.length) return null;
 
   const reviewed = ex.facts.filter((f) => f.reviewed).length;
+  // In a property's timeline, the facts are what the event was built from: read-only until it is removed there.
+  const inChain = ex.events.length > 0;
+  const editable = canEdit && !inChain;
   const ordered = [...ex.facts].sort((a, b) => FACT_FIELDS.indexOf(a.field) - FACT_FIELDS.indexOf(b.field) || a.position - b.position);
   const tried = extract.isSuccess || ex.facts.length > 0;
 
@@ -400,7 +405,7 @@ export function FactsPanel({ doc, caseId, canEdit }: { doc: DocumentDetail; case
     <Section
       title={t("fact.title")}
       action={
-        canEdit && (
+        editable && (
           <Button
             size="sm"
             variant={ex.facts.length ? "outline" : "default"}
@@ -432,12 +437,13 @@ export function FactsPanel({ doc, caseId, canEdit }: { doc: DocumentDetail; case
           </div>
           <ul className="space-y-2">
             {ordered.map((f) => (
-              <FactRow key={`${f.id}-${f.value}-${f.reviewed}`} fact={f} doc={doc} canEdit={canEdit} />
+              <FactRow key={`${f.id}-${f.value}-${f.reviewed}`} fact={f} doc={doc} canEdit={editable} />
             ))}
           </ul>
         </>
       )}
-      {canEdit && tried && ex.kind && <AddFact documentId={doc.id} />}
+      {inChain && <p className="mt-3 text-sm text-muted-foreground">{t("fact.locked")}</p>}
+      {editable && tried && ex.kind && <AddFact documentId={doc.id} />}
       {canEdit && ex.kind && ex.facts.length > 0 && <AddToChain doc={doc} caseId={caseId} extraction={ex} />}
     </Section>
   );

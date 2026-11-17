@@ -142,6 +142,61 @@ describe("Ferfar and Index-II", () => {
   });
 });
 
+describe("after review fixes", () => {
+  it("freezes a document's facts once it is in a timeline", async () => {
+    const docId = await readDocument(caseId, "satbara-03", "SEVEN_TWELVE");
+    const ex = (await owner.post(`/api/documents/${docId}/extract`)).body.extraction;
+    for (const f of ex.facts) await owner.patch(`/api/facts/${f.id}`).send({ reviewed: true });
+    const p2 = (await owner.post(`/api/cases/${caseId}/properties`).send({})).body.property.id;
+    expect(
+      (await owner.post(`/api/cases/${caseId}/properties/${p2}/events/from-document`).send({ documentId: docId, date: "2024-01-01" }))
+        .status,
+    ).toBe(201);
+    expect((await owner.patch(`/api/facts/${ex.facts[0].id}`).send({ value: "x" })).status).toBe(409);
+    expect((await owner.delete(`/api/facts/${ex.facts[0].id}`)).status).toBe(409);
+    expect((await owner.post(`/api/documents/${docId}/extract`)).status).toBe(409);
+    expect((await owner.post(`/api/documents/${docId}/facts`).send({ field: "hissa_no", value: "1" })).status).toBe(409);
+  });
+
+  it("creates a new property only together with the event, so a refused request leaves nothing behind", async () => {
+    const docId = await readDocument(caseId, "satbara-04", "SEVEN_TWELVE");
+    const ex = (await owner.post(`/api/documents/${docId}/extract`)).body.extraction;
+    const count = async () => (await owner.get(`/api/cases/${caseId}`)).body.case.properties.length;
+    const before = await count();
+    const url = `/api/cases/${caseId}/properties/new/events/from-document`;
+    expect((await owner.post(url).send({ documentId: docId, date: "2024-01-01" })).status).toBe(409); // not reviewed yet
+    expect(await count()).toBe(before);
+    for (const f of ex.facts) await owner.patch(`/api/facts/${f.id}`).send({ reviewed: true });
+    const r = await owner.post(url).send({ documentId: docId, date: "2024-01-01" });
+    expect(r.status).toBe(201);
+    expect(await count()).toBe(before + 1);
+    const prop = (await owner.get(`/api/cases/${caseId}/properties/${r.body.propertyId}`)).body.property;
+    expect(prop.village).toBeTruthy();
+    expect(prop.events).toHaveLength(1);
+  });
+
+  it("reads details only from land records or untyped documents", async () => {
+    const docId = await readDocument(caseId, "satbara-05", "SALE_DEED");
+    expect((await owner.post(`/api/documents/${docId}/extract`)).status).toBe(409);
+  });
+
+  it("an Index-II deed keeps its own type (a mortgage is not recorded as a sale)", async () => {
+    const docId = await readDocument(caseId, "index2-02", "INDEX_II"); // a mortgage deed in the eval set
+    const ex = (await owner.post(`/api/documents/${docId}/extract`)).body.extraction;
+    expect(ex.facts.find((f: { field: string }) => f.field === "deed_type")?.value).toBe("MORTGAGE");
+    for (const f of ex.facts) await owner.patch(`/api/facts/${f.id}`).send({ reviewed: true });
+    const r = await owner.post(`/api/cases/${caseId}/properties/new/events/from-document`).send({ documentId: docId });
+    expect(r.body.event).toMatchObject({ kind: "DEED", subtype: "MORTGAGE" });
+  });
+
+  it("rejects dates that do not exist", async () => {
+    const docId = await readDocument(caseId, "index2-03", "INDEX_II");
+    const ex = (await owner.post(`/api/documents/${docId}/extract`)).body.extraction;
+    const date = ex.facts.find((f: { field: string }) => f.field === "date");
+    expect((await owner.patch(`/api/facts/${date.id}`).send({ value: "2019-02-31" })).status).toBe(400);
+  });
+});
+
 describe("guards", () => {
   it("waits for OCR to finish, and says so when the record cannot be identified", async () => {
     const pending = await readDocument(caseId, "satbara-01", "OTHER", "PROCESSING");

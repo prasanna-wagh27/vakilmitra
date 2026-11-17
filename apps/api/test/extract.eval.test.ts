@@ -24,7 +24,7 @@ const GROUPS: Record<string, { fields: string[]; target: number }> = {
   location: { fields: ["village", "taluka", "district", "gat_no", "survey_no"], target: 0.98 },
   owners: { fields: ["owner", "from_party", "to_party"], target: 0.95 },
   area: { fields: ["area"], target: 0.97 },
-  ferfar: { fields: ["ferfar_no", "date", "mutation_type", "deed_reg_no", "section_155"], target: 0.95 },
+  ferfar: { fields: ["ferfar_no", "date", "mutation_type", "deed_type", "deed_reg_no", "section_155"], target: 0.95 },
   other: { fields: ["land_class", "other_right"], target: 0.9 },
 };
 

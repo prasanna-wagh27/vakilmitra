@@ -7,7 +7,7 @@
  * reviewed by the advocate before it is used.
  */
 import type { OcrWord } from "@vakilmitra/db";
-import type { FactField, RecordKind } from "@vakilmitra/shared";
+import { type FactField, isRealDate, type RecordKind } from "@vakilmitra/shared";
 
 export type { FactField, RecordKind };
 
@@ -107,7 +107,7 @@ const LABELS: Label[] = [
   L("area", "एकूण क्षेत्र"),
   L("area", "क्षेत्र"),
   L("land_class_raw", "भूधारणा पद्धती"),
-  L("land_class_raw", "भोगवटादार वर्ग"),
+  L("land_class_raw", "भोगवटादार वर्ग", false), // "भोगवटादार वर्ग -2": the class follows with no separator
   L("other_rights", "इतर हक्क"),
   L("ferfar_no", "फेरफार नोंद क्रमांक"),
   L("ferfar_no", "फेरफार क्रमांक"),
@@ -180,12 +180,14 @@ export function parseAreaSqm(raw: string): number | null {
   const n = s.match(/\d+(?:\.\d+)?/);
   if (!n) return null;
   const v = Number(n[0]);
-  const unit = s.slice((n.index ?? 0) + n[0].length);
-  if (/चौ|sq/.test(unit)) return Math.round(v);
-  if (/एकर|acre/.test(unit)) return Math.round(v * 4046.86);
-  if (/गुंठ/.test(unit)) return Math.round(v * 101.17);
-  if (/^\s*आर|^\s*are/.test(unit)) return Math.round(v * 100);
-  return Math.round(v * 10_000); // हेक्टर / हे. / unit-less: 7/12 extracts show hectares
+  // The unit is the first word after the number; "हे.आर.चौ.मी." (a column header) starts with hectares.
+  const unit = s.slice((n.index ?? 0) + n[0].length).trim();
+  if (/^(हे|hect|ha\b)/.test(unit)) return Math.round(v * 10_000);
+  if (/^(चौ|sq)/.test(unit)) return Math.round(v);
+  if (/^(एकर|acre)/.test(unit)) return Math.round(v * 4046.86);
+  if (/^गुंठ/.test(unit)) return Math.round(v * 101.17);
+  if (/^(आर|are)/.test(unit)) return Math.round(v * 100);
+  return Math.round(v * 10_000); // unit-less: 7/12 extracts show hectares
 }
 
 /** "०२/०४/२०१९", "2-4-2019", "02.04.2019" -> "2019-04-02". */
@@ -193,15 +195,20 @@ export function parseDate(raw: string): string | null {
   const m = clean(raw).match(/(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})/);
   if (!m) return null;
   const [d, mo, y] = [Number(m[1]), Number(m[2]), Number(m[3])];
-  if (mo < 1 || mo > 12 || d < 1 || d > 31 || y < 1900 || y > 2100) return null;
-  return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  const iso = `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  return y >= 1900 && y <= 2100 && isRealDate(iso) ? iso : null;
 }
 
 /** "भोगवटादार वर्ग -2", "वर्ग २", "Class II" -> "Class-II". */
 export function parseLandClass(raw: string): string | null {
   const s = clean(raw).toLowerCase();
-  if (/(वर्ग|class)\s*[-–]?\s*(2|ii|दोन)\b/.test(s) || /\b(2|ii)\b/.test(s)) return "Class-II";
-  if (/(वर्ग|class)\s*[-–]?\s*(1|i|एक)\b/.test(s) || /\b(1|i)\b/.test(s)) return "Class-I";
+  // No \b: it is ASCII-only and never matches after Devanagari. The class must follow "वर्ग"/"class",
+  // or be the whole value ("-2" after the label "भोगवटादार वर्ग").
+  const end = "(?![0-9a-zऀ-ॿ])";
+  const two = new RegExp(`(?:(?:वर्ग|class)\\s*[-–]?\\s*|^[-–]?\\s*)(?:2|ii|दोन)${end}`);
+  const one = new RegExp(`(?:(?:वर्ग|class)\\s*[-–]?\\s*|^[-–]?\\s*)(?:1|i|एक)${end}`);
+  if (two.test(s)) return "Class-II";
+  if (one.test(s)) return "Class-I";
   return null;
 }
 
@@ -231,6 +238,17 @@ const MUTATION_TYPES: [RegExp, string][] = [
   [/मृत्युपत्र|will/, "WILL"],
   [/हक्कसोड|release/, "RELEASE"],
   [/कलम\s*155|दुरुस्ती|correction/, "CORRECTION"],
+];
+
+/** Deed type on an Index-II, by keyword ("दस्ताचा प्रकार : खरेदीखत"). */
+const DEED_TYPE_WORDS: [RegExp, string][] = [
+  [/बक्षीस|दानपत्र|gift/, "GIFT"],
+  [/गहाण|mortgage/, "MORTGAGE"],
+  [/वाटणी|वाटप|partition/, "PARTITION"],
+  [/हक्कसोड|release/, "RELEASE"],
+  [/अदलाबदल|exchange/, "EXCHANGE"],
+  [/मृत्युपत्र|will/, "WILL"],
+  [/खरेदीखत|खरेदी|विक्री|sale/, "SALE"],
 ];
 
 // ---------- classification ----------
@@ -324,11 +342,13 @@ export function extractPage(kind: RecordKind, words: OcrWord[]): ExtractedFact[]
     facts.push({ field, value: v, position, confidence: conf, box: unionBox(toks) });
   };
 
-  hits.forEach((h, n) => {
+  hits.forEach((h) => {
     const line = lines[h.line];
     // The value runs to the next label on the same line.
-    const next = hits[n + 1];
-    const end = next && next.line === h.line ? next.start : line.length;
+    // The value runs to the next label on the line, of any kind: a label for a field this record
+    // does not carry (a ferfar no. on an Index-II) still ends the value before it.
+    const next = allHits.find((x) => x.line === h.line && x.start > h.start);
+    const end = next ? next.start : line.length;
     const onLabelLine = line.slice(h.valueStart, end).filter((t) => !isSep(t.k));
     let valueToks = onLabelLine;
     const labelToks = line.slice(h.start, h.valueStart);
@@ -404,9 +424,23 @@ export function extractPage(kind: RecordKind, words: OcrWord[]): ExtractedFact[]
 
   // Facts read from the whole page rather than a labelled field.
   const text = key(lines.map((l) => l.map((t) => t.t).join(" ")).join("\n"));
+  /** A fact inferred from the whole page: no crop (the whole page is its source), and a modest confidence. */
+  const inferred = (field: FactField, value: string) => {
+    const before = facts.length;
+    push(field, value, lines.flat(), 0.7);
+    if (facts.length > before) facts[facts.length - 1].box = null;
+  };
+  if (kind === "INDEX_II") {
+    // Prefer the labelled line; otherwise the first deed word anywhere on the page.
+    const typeLine = lines.find((l) => /(दस्त|दस्तऐवज|करारनाम्या)\S*\s+प्रकार/.test(l.map((t) => t.k).join(" ")));
+    const where = typeLine ? key(typeLine.map((t) => t.t).join(" ")) : text;
+    const type = DEED_TYPE_WORDS.find(([re]) => re.test(where));
+    if (type && typeLine) push("deed_type", type[1], typeLine);
+    else if (type) inferred("deed_type", type[1]);
+  }
   if (kind === "FERFAR") {
     const type = MUTATION_TYPES.find(([re]) => re.test(text));
-    if (type) push("mutation_type", type[1], lines.flat(), 0.7);
+    if (type) inferred("mutation_type", type[1]);
     // Heirship entries are prose: "मयत सुरेश जाधव यांचे वारस अनिल जाधव, सुनील जाधव".
     const li = lines.findIndex((l) => l.some((t) => t.k === "मयत"));
     if (li >= 0 && !facts.some((f) => f.field === "from_party")) {
@@ -425,8 +459,6 @@ export function extractPage(kind: RecordKind, words: OcrWord[]): ExtractedFact[]
       push("section_155", "true", line ?? lines.flat());
     }
   }
-  // Inferred page-wide facts carry no crop (the whole page is their source).
-  for (const f of facts) if (f.field === "mutation_type") f.box = null;
   return facts;
 }
 const MULTI_OUT = new Set<FactField>(["owner", "other_right", "from_party", "to_party"]);

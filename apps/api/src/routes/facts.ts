@@ -68,10 +68,24 @@ async function extraction(doc: { id: string; type: string }, kind?: RecordKind |
   return { kind: kind ?? (isRecordKind(doc.type) ? doc.type : null), facts: rows.map(toFact), events };
 }
 
+/**
+ * Once a document is in a property's timeline, its facts are what the event and its flags were
+ * built from, so they are frozen. To change them, remove the record from the timeline first.
+ */
+async function ensureNotInChain(documentId: string | null) {
+  if (!documentId) return;
+  const ev = await db.query.ownershipEvents.findFirst({ where: eq(ownershipEvents.documentId, documentId), columns: { id: true } });
+  if (ev)
+    throw new HttpError(409, "in_chain", "This document is in a property's timeline; remove it from the timeline to change its details", {
+      eventId: ev.id,
+    });
+}
+
 async function loadFact(advocateId: string, factId: string) {
   const fact = await db.query.facts.findFirst({ where: eq(facts.id, factId) });
   if (!fact) throw notFound("Fact");
   await requireCaseAccess(advocateId, fact.caseId, "write");
+  await ensureNotInChain(fact.documentId);
   return fact;
 }
 
@@ -92,6 +106,11 @@ export const factRoutes: FastifyPluginAsyncZod = async (app) => {
    */
   app.post("/documents/:id/extract", { schema: { params: idParams } }, async (req) => {
     const doc = await loadDocument(req.advocateId, req.params.id, "write");
+    // Only land records are read, or a document not typed yet (its text says which record it is).
+    if (!isRecordKind(doc.type) && doc.type !== "OTHER") {
+      throw new HttpError(409, "not_a_record", "Details are read from a 7/12, Ferfar or Index-II only");
+    }
+    await ensureNotInChain(doc.id);
     const docPages = await db.query.pages.findMany({
       where: eq(pages.documentId, doc.id),
       orderBy: asc(pages.pageNo),
@@ -149,6 +168,7 @@ export const factRoutes: FastifyPluginAsyncZod = async (app) => {
   /** A fact the extractor missed, typed in by the advocate (reviewed by definition). */
   app.post("/documents/:id/facts", { schema: { params: idParams, body: factCreateInput } }, async (req, reply) => {
     const doc = await loadDocument(req.advocateId, req.params.id, "write");
+    await ensureNotInChain(doc.id);
     badValue(req.body.field, req.body.value);
     const same = await db.query.facts.findMany({ where: and(eq(facts.documentId, doc.id), eq(facts.field, req.body.field)) });
     if (same.length && !MULTI.has(req.body.field))
@@ -200,21 +220,25 @@ export const factRoutes: FastifyPluginAsyncZod = async (app) => {
    * Turn a reviewed document into an ownership event on a property: a 7/12 becomes a record
    * snapshot, a Ferfar a mutation, an Index-II a deed. Empty property details (village, gat no …)
    * are filled from the document; details that disagree are reported, never overwritten.
-   * Then the red-flag rules run over the updated chain.
+   * Then the red-flag rules run over the updated chain. propertyId "new" creates the property from
+   * the document's details, in the same transaction (so a refused request leaves nothing behind).
    */
   app.post(
     "/cases/:caseId/properties/:propertyId/events/from-document",
     { schema: { params: z.object({ caseId: z.string(), propertyId: z.string() }), querystring: checkQuery, body: eventFromDocumentInput } },
     async (req, reply) => {
-      const { caseId, propertyId } = req.params;
+      const { caseId } = req.params;
       await requireCaseAccess(req.advocateId, caseId, "write");
-      const property = await propertyInCase(caseId, propertyId);
+      const isNew = req.params.propertyId === "new";
+      const property = isNew ? null : await propertyInCase(caseId, req.params.propertyId);
       const doc = await db.query.documents.findFirst({ where: and(eq(documents.id, req.body.documentId), eq(documents.caseId, caseId)) });
       if (!doc) throw notFound("Document");
       if (!isRecordKind(doc.type)) throw new HttpError(409, "not_a_record", "Only a 7/12, Ferfar or Index-II can be added to the chain");
-      const existing = await db.query.ownershipEvents.findFirst({
-        where: and(eq(ownershipEvents.documentId, doc.id), eq(ownershipEvents.propertyId, propertyId)),
-      });
+      const existing = property
+        ? await db.query.ownershipEvents.findFirst({
+            where: and(eq(ownershipEvents.documentId, doc.id), eq(ownershipEvents.propertyId, property.id)),
+          })
+        : undefined;
       if (existing) throw new HttpError(409, "already_added", "This document is already in the property's chain", { eventId: existing.id });
 
       const rows = await db.query.facts.findMany({ where: eq(facts.documentId, doc.id), orderBy: [asc(facts.field), asc(facts.position)] });
@@ -230,7 +254,7 @@ export const factRoutes: FastifyPluginAsyncZod = async (app) => {
       const date = req.body.date ?? (factDate ? new Date(`${factDate}T00:00:00Z`) : null);
       if (!date) throw new HttpError(400, "need_date", "Give the record's date");
 
-      const base = { propertyId, documentId: doc.id, date, factIds: rows.map((f) => f.id) };
+      const base = { documentId: doc.id, date, factIds: rows.map((f) => f.id) };
       const values =
         doc.type === "SEVEN_TWELVE"
           ? {
@@ -255,7 +279,7 @@ export const factRoutes: FastifyPluginAsyncZod = async (app) => {
             : {
                 ...base,
                 kind: "DEED" as const,
-                subtype: "SALE",
+                subtype: one("deed_type"), // null when the deed type was not read: never assume a sale
                 deedRegNo: one("deed_reg_no"),
                 fromParties: all("from_party"),
                 toParties: all("to_party"),
@@ -275,19 +299,28 @@ export const factRoutes: FastifyPluginAsyncZod = async (app) => {
       for (const [field, col] of PLACE) {
         const v = one(field);
         if (!v) continue;
-        const have = property[col];
+        const have = property?.[col];
         if (!have) fill[col] = v;
         else if (have.normalize("NFC").trim() !== v.normalize("NFC").trim()) mismatches.push({ field, property: have, document: v });
       }
 
-      const event = await db.transaction(async (tx) => {
-        const [ev] = await tx.insert(ownershipEvents).values(values).returning();
-        if (Object.keys(fill).length) await tx.update(properties).set(fill).where(eq(properties.id, propertyId));
-        if (!doc.propertyId) await tx.update(documents).set({ propertyId }).where(eq(documents.id, doc.id));
-        return ev;
+      const { event, propertyId } = await db.transaction(async (tx) => {
+        let pid = property?.id;
+        if (!pid)
+          [{ id: pid }] = await tx
+            .insert(properties)
+            .values({ caseId, ...fill })
+            .returning({ id: properties.id });
+        else if (Object.keys(fill).length) await tx.update(properties).set(fill).where(eq(properties.id, pid));
+        const [ev] = await tx
+          .insert(ownershipEvents)
+          .values({ ...values, propertyId: pid })
+          .returning();
+        if (!doc.propertyId) await tx.update(documents).set({ propertyId: pid }).where(eq(documents.id, doc.id));
+        return { event: ev, propertyId: pid };
       });
       const check = await runPropertyCheck(caseId, propertyId, req.query.lang ?? "mr");
-      return reply.code(201).send({ event, filled: fill, mismatches, flags: check.flags });
+      return reply.code(201).send({ event, propertyId, filled: fill, mismatches, flags: check.flags });
     },
   );
 };

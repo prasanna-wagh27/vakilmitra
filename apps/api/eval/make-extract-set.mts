@@ -129,8 +129,16 @@ function index2(i: number): Case {
   const [a, ...bs] = names(1 + 1 + (i % 2));
   const date = `${String(1 + Math.floor(rnd() * 28)).padStart(2, "0")}/${String(1 + Math.floor(rnd() * 12)).padStart(2, "0")}/${1990 + Math.floor(rnd() * 35)}`;
   const reg = `${100 + Math.floor(rnd() * 5000)}/${date.slice(-4)}`;
+  const [typeWord, deedType] = (
+    [
+      ["खरेदीखत", "SALE"],
+      ["बक्षीसपत्र", "GIFT"],
+      ["गहाणखत", "MORTGAGE"],
+    ] as const
+  )[i % 3];
   const lines = [
     "सूची क्र. २",
+    `दस्ताचा प्रकार : ${typeWord}`,
     `दुय्यम निबंधक : ${pick(TALUKAS)}`,
     `दस्त क्रमांक : ${maybeDev(reg, d)}`,
     `दिनांक : ${maybeDev(date, d)}`,
@@ -143,7 +151,7 @@ function index2(i: number): Case {
     name: `index2-${String(i).padStart(2, "0")}`,
     kind: "INDEX_II",
     lines,
-    truth: { deed_reg_no: reg, date: date.split("/").reverse().join("-"), village: v, from_party: [a], to_party: bs },
+    truth: { deed_reg_no: reg, date: date.split("/").reverse().join("-"), village: v, from_party: [a], to_party: bs, deed_type: deedType },
   };
 }
 

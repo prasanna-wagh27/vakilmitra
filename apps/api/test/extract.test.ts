@@ -30,12 +30,16 @@ describe("value parsers", () => {
     expect(parseAreaSqm("8100 चौ.मी.")).toBe(8100);
     expect(parseAreaSqm("2 एकर")).toBe(8094);
     expect(parseAreaSqm("माहीत नाही")).toBeNull();
+    // The H.R.Sqm column header after a hectare value is hectares, not square metres.
+    expect(parseAreaSqm("0.81 हे.आर.चौ.मी.")).toBe(8100);
   });
 
   it("reads dd/mm/yyyy dates in either digit set, and rejects impossible ones", () => {
     expect(parseDate("०२/०४/२०१९")).toBe("2019-04-02");
     expect(parseDate("2-4-2019")).toBe("2019-04-02");
     expect(parseDate("31/13/2019")).toBeNull();
+    expect(parseDate("31/02/2019")).toBeNull(); // no rolling over into March
+    expect(parseDate("29/02/2020")).toBe("2020-02-29");
   });
 
   it("normalises land class", () => {
@@ -43,6 +47,9 @@ describe("value parsers", () => {
     expect(parseLandClass("भोगवटादार वर्ग -१")).toBe("Class-I");
     expect(parseLandClass("Class II")).toBe("Class-II");
     expect(parseLandClass("शासकीय")).toBeNull();
+    expect(parseLandClass("वर्ग दोन")).toBe("Class-II");
+    expect(parseLandClass("-2")).toBe("Class-II");
+    expect(parseLandClass("भोगवटादार वर्ग 1 खाते 2")).toBe("Class-I"); // a stray number is not the class
   });
 
   it("splits names on commas and 'व', dropping ferfar refs", () => {
@@ -71,6 +78,22 @@ describe("extractPage", () => {
       ["village", "शिरूर"],
       ["taluka", "हवेली"],
     ]);
+  });
+
+  it("reads 'भोगवटादार वर्ग -2', where the class follows the label with no separator", () => {
+    const facts = extractPage("SEVEN_TWELVE", page("भोगवटादार वर्ग -2"));
+    expect(facts.find((f) => f.field === "land_class")?.value).toBe("Class-II");
+  });
+
+  it("ends a value at any label, even one the record kind does not use", () => {
+    const facts = extractPage("INDEX_II", page("लिहून घेणार : श्याम जोशी फेरफार क्र. : 789"));
+    expect(facts.filter((f) => f.field === "to_party").map((f) => f.value)).toEqual(["श्याम जोशी"]);
+  });
+
+  it("reads an Index-II's deed type, and assumes none when it is not stated", () => {
+    const typed = extractPage("INDEX_II", page("दस्ताचा प्रकार : गहाणखत", "दस्त क्रमांक : 1/2001"));
+    expect(typed.find((f) => f.field === "deed_type")?.value).toBe("MORTGAGE");
+    expect(extractPage("INDEX_II", page("दस्त क्रमांक : 1/2001")).find((f) => f.field === "deed_type")).toBeUndefined();
   });
 
   it("gives each owner listed on its own line its own source box", () => {

@@ -207,6 +207,7 @@ export const FACT_FIELDS = [
   "ferfar_no",
   "date",
   "mutation_type",
+  "deed_type",
   "section_155",
   "deed_reg_no",
   "from_party",
@@ -214,6 +215,17 @@ export const FACT_FIELDS = [
 ] as const;
 export type FactField = (typeof FACT_FIELDS)[number];
 export const MUTATION_TYPES = ["SALE", "HEIRSHIP", "GIFT", "PARTITION", "MORTGAGE", "WILL", "RELEASE", "CORRECTION"] as const;
+/** Deeds registered under Index-II. */
+export const DEED_TYPES = ["SALE", "GIFT", "MORTGAGE", "PARTITION", "RELEASE", "EXCHANGE", "WILL"] as const;
+
+/** "YYYY-MM-DD" naming a real calendar day (no 31 February rolling over into March). */
+export function isRealDate(v: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const t = new Date(Date.UTC(y, mo - 1, d));
+  return t.getUTCFullYear() === y && t.getUTCMonth() === mo - 1 && t.getUTCDate() === d;
+}
 
 /**
  * Format check for a fact's value, shared by the API and the review screen.
@@ -228,11 +240,13 @@ export function factValueProblem(
     case "area":
       return /^\d{1,9}$/.test(v) ? null : "fact.badArea";
     case "date":
-      return /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(`${v}T00:00:00Z`)) ? null : "fact.badDate";
+      return isRealDate(v) ? null : "fact.badDate";
     case "land_class":
       return v === "Class-I" || v === "Class-II" ? null : "fact.badClass";
     case "mutation_type":
       return (MUTATION_TYPES as readonly string[]).includes(v) ? null : "fact.badType";
+    case "deed_type":
+      return (DEED_TYPES as readonly string[]).includes(v) ? null : "fact.badType";
     case "section_155":
       return v === "true" || v === "false" ? null : "fact.badYesNo";
     default:
