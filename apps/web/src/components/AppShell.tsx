@@ -21,46 +21,51 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <header className="no-print sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-2.5">
-          <Link to="/" aria-label={t("app.name")}>
+      <header className="no-print sticky top-0 z-30 border-b bg-card">
+        <div className="mx-auto flex h-14 max-w-4xl items-center gap-2 px-4">
+          <Link to="/" aria-label={t("app.name")} className="mr-4">
             <Brand />
           </Link>
-          <nav className="ml-6 hidden rounded-full border bg-card p-1 shadow-[0_1px_2px_rgb(17_17_20/0.05)] md:flex" aria-label="Main">
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
             {NAV.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
                 aria-current={active(n.to) ? "page" : undefined}
                 className={cn(
-                  "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                  active(n.to) ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                  active(n.to) ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {t(n.key)}
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1">
             <LanguageToggle persist compact />
-            <Link to="/search" aria-label={t("nav.search")} className="icon-ring size-10 hover:bg-muted">
+            <Link
+              to="/search"
+              aria-label={t("nav.search")}
+              className="inline-flex size-9 items-center justify-center rounded-md text-foreground hover:bg-muted"
+            >
               <Search className="size-[18px]" />
             </Link>
-            <Link to="/settings" aria-label={t("nav.settings")} className="icon-ring size-10 hover:bg-muted">
+            <Link
+              to="/settings"
+              aria-label={t("nav.settings")}
+              className="inline-flex size-9 items-center justify-center rounded-md text-foreground hover:bg-muted"
+            >
               <Settings className="size-[18px]" />
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 pt-5 pb-32 md:pb-12">{children}</main>
+      <main className="mx-auto max-w-4xl px-4 pt-6 pb-28 md:pb-12">{children}</main>
 
-      {/* Phone: a floating dock, easy to reach one-handed. */}
-      <nav
-        className="no-print fixed inset-x-0 bottom-0 z-30 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden"
-        aria-label="Main"
-      >
-        <ul className="panel grid grid-cols-5 gap-1 rounded-[1.75rem] p-1.5 shadow-[var(--shadow-float)]">
+      {/* Phone: a flat tab bar on the bottom edge, easy to reach one-handed. */}
+      <nav className="no-print fixed inset-x-0 bottom-0 z-30 border-t bg-card pb-[env(safe-area-inset-bottom)] md:hidden" aria-label="Main">
+        <ul className="grid grid-cols-5">
           {NAV.map((n) => {
             const on = active(n.to);
             return (
@@ -69,18 +74,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                   to={n.to}
                   aria-current={on ? "page" : undefined}
                   className={cn(
-                    "flex min-h-14 flex-col items-center justify-center gap-1 rounded-[1.4rem] text-[11px] font-medium",
+                    "relative flex h-14 flex-col items-center justify-center gap-1 text-[11px] font-medium",
                     on ? "text-foreground" : "text-muted-foreground",
                   )}
                 >
-                  <span
-                    className={cn(
-                      "flex h-8 w-12 items-center justify-center rounded-full transition-colors",
-                      on && "bg-primary text-primary-foreground",
-                    )}
-                  >
-                    <n.icon className="size-[18px]" aria-hidden />
-                  </span>
+                  {on && <span aria-hidden className="absolute inset-x-5 top-0 h-0.5 rounded-b bg-primary" />}
+                  <n.icon className="size-5" strokeWidth={on ? 2.2 : 1.8} aria-hidden />
                   {t(n.key)}
                 </Link>
               </li>

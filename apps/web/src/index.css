@@ -1,35 +1,34 @@
 @import "tailwindcss";
 
 /*
- * VakilMitra visual system: a quiet, trustworthy workspace.
- * Soft grey canvas, large rounded white panels, near-black pill actions. One typeface for
- * everything: HK Grotesk (Hanken Grotesk); Marathi letters come from IBM Plex Sans Devanagari,
- * since HK Grotesk has no Devanagari. Light only, by design.
+ * VakilMitra visual system: a crisp, quiet working tool.
+ * Neutral greys, white surfaces with 1px borders, small corners, no decorative gradients or
+ * glows. One typeface: HK Grotesk (Hanken Grotesk); Marathi letters come from IBM Plex Sans
+ * Devanagari, since HK Grotesk has no Devanagari. Light only, by design.
+ *
+ * Spacing rhythm (use only these): 4, 8, 12, 16, 24, 32 px.
+ * Page gutter 16px; between sections 32px; heading to content 12px; list rows 12px x 16px.
  */
 :root {
   color-scheme: light;
-  --background: #f3f3f5;
-  --foreground: #111114;
+  --background: #fafafa;
+  --foreground: #18181b;
   --card: #ffffff;
-  --muted: #ececf0;
-  --muted-foreground: #5f5f6b;
-  --border: #e3e3e8;
-  --input: #d9d9e0;
-  /* Primary actions are ink: black pills, white text. */
-  --primary: #111114;
+  --muted: #f4f4f5;
+  --muted-foreground: #63636e;
+  --border: #e4e4e7;
+  --input: #d4d4d8;
+  --primary: #18181b;
   --primary-foreground: #ffffff;
-  /* Accent for links, focus and information. */
-  --accent: #3045b5;
-  --accent-soft: #e8ebfb;
-  --destructive: #c0262d;
-  --destructive-soft: #fcebec;
-  --warning-soft: #fcf1d9;
-  --warning: #8a5500;
-  --success-soft: #e2f3e8;
-  --success: #1c6b3a;
-  --ring: #3045b5;
-  --hero: #111114;
-  --hero-foreground: #f4f4f6;
+  --accent: #1d4ed8;
+  --accent-soft: #eff4ff;
+  --destructive: #b42318;
+  --destructive-soft: #fef3f2;
+  --warning: #93540b;
+  --warning-soft: #fffaeb;
+  --success: #067647;
+  --success-soft: #ecfdf3;
+  --ring: #1d4ed8;
 }
 
 @theme inline {
@@ -51,17 +50,15 @@
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-ring: var(--ring);
-  --color-hero: var(--hero);
-  --color-hero-foreground: var(--hero-foreground);
-  /* Larger, softer corners everywhere (existing rounded-* classes pick these up). */
-  --radius-lg: 0.875rem;
-  --radius-xl: 1.125rem;
-  --radius-2xl: 1.5rem;
-  --radius-3xl: 2rem;
+  /* Small, consistent corners: controls 6px, containers 8px, sheets 12px. */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
+  --radius-3xl: 12px;
   --font-sans: "Hanken Grotesk", "IBM Plex Sans Devanagari", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: var(--font-sans);
-  --shadow-card: 0 1px 2px rgb(17 17 20 / 0.04), 0 10px 28px -14px rgb(17 17 20 / 0.12);
-  --shadow-float: 0 2px 6px rgb(17 17 20 / 0.06), 0 18px 40px -18px rgb(17 17 20 / 0.28);
 }
 
 @layer base {
@@ -76,7 +73,7 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     font-size: 16px;
-    line-height: 1.55;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     font-variant-numeric: tabular-nums;
   }
@@ -92,53 +89,60 @@
 }
 
 @layer components {
-  /* Display headings: same typeface as the body, set bolder and tighter. */
   .font-display {
     font-weight: 600;
     letter-spacing: -0.02em;
   }
-  /* Large rounded panel on the grey canvas (ailawyer-style section). */
+  /* A bordered white surface. */
   .panel {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: var(--radius-3xl);
-    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-lg);
   }
-  /* A row inside a panel: a soft pill with a hairline, like a file chip. */
+  /* A bordered list: rows separated by hairlines (use .list-row for each row). */
+  .list {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .list > * + * {
+    border-top: 1px solid var(--border);
+  }
+  .list-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    min-height: 56px;
+  }
+  a.list-row:hover,
+  button.list-row:hover {
+    background: var(--background);
+  }
+  /* A standalone bordered row (when rows are not grouped in a .list). */
   .row-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: var(--radius-2xl);
-    box-shadow: 0 1px 0 rgb(17 17 20 / 0.02);
-    transition:
-      border-color 0.15s,
-      box-shadow 0.15s;
+    border-radius: var(--radius-lg);
+    transition: border-color 0.15s;
   }
   a.row-card:hover,
   button.row-card:hover {
-    border-color: #cfcfd8;
-    box-shadow: var(--shadow-card);
+    border-color: var(--input);
   }
-  /* Ink hero card with a faint lit texture (Harvey-style), for the day's summary. */
-  .hero-ink {
-    background:
-      radial-gradient(120% 90% at 100% 0%, rgb(255 255 255 / 0.1), transparent 55%),
-      radial-gradient(80% 70% at 0% 100%, rgb(70 90 200 / 0.18), transparent 60%), var(--hero);
-    color: var(--hero-foreground);
-    border-radius: var(--radius-3xl);
-    box-shadow: var(--shadow-float);
-  }
-  /* Circular icon button with a soft ring (ailawyer-style). */
-  .icon-ring {
+  /* Square-cornered icon button with a hairline. */
+  .icon-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 9999px;
-    background: var(--card);
+    border-radius: var(--radius-md);
     border: 1px solid var(--border);
-    box-shadow:
-      0 0 0 4px rgb(17 17 20 / 0.03),
-      0 1px 2px rgb(17 17 20 / 0.05);
+    background: var(--card);
+    color: var(--foreground);
+  }
+  .icon-btn:hover {
+    background: var(--muted);
   }
 }
 

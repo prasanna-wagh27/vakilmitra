@@ -57,7 +57,7 @@ function DiaryPage() {
             <h3 className={`mb-2 text-sm font-semibold ${day === istDate() ? "text-accent" : "text-muted-foreground"}`}>
               {fmtDay(day, locale)} · {hs.length}
             </h3>
-            <div className="space-y-2">
+            <div className="list">
               {hs.map((h) => (
                 <HearingRow key={h.id} h={h} />
               ))}
