@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 
@@ -16,18 +17,26 @@ export function LanguageToggle({
     if (persist) void api("/me", { method: "PATCH", body: { locale: l } }).catch(() => undefined);
   };
   if (compact) {
-    // One tap switches to the other language; fits a phone header.
-    const other = locale === "mr" ? "en" : "mr";
+    // Libra-style language chip: the current language, with a small chevron.
     return (
-      <button
-        type="button"
-        onClick={() => choose(other)}
-        lang={other}
-        aria-label={other === "en" ? "Switch to English" : "मराठीत बदला"}
-        className={`inline-flex h-8 items-center rounded-md px-2.5 text-sm ${onDark ? "bg-white/12 text-white hover:bg-white/20" : "bg-muted hover:bg-border"}`}
+      <label
+        className={`relative inline-flex h-8 items-center rounded-md ${onDark ? "bg-white/12 text-white" : "bg-muted text-foreground"}`}
       >
-        {other === "en" ? "EN" : "मराठी"}
-      </button>
+        <span className="sr-only">Language</span>
+        <select
+          value={locale}
+          onChange={(e) => choose(e.target.value as "mr" | "en")}
+          className="h-8 cursor-pointer appearance-none bg-transparent pr-7 pl-2.5 text-[15px] outline-none"
+        >
+          <option value="mr" className="text-foreground">
+            मराठी
+          </option>
+          <option value="en" className="text-foreground">
+            EN
+          </option>
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-2 size-3.5 opacity-80" aria-hidden />
+      </label>
     );
   }
   return (

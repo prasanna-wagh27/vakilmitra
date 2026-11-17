@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { addDays, istDate } from "@vakilmitra/shared";
-import { ChevronRight, Plus } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { Empty, ErrorBox, Loading, Section } from "@/components/common";
 import { HearingRow } from "@/components/HearingRow";
-import { Button } from "@/components/ui/button";
 import { fmtDate, fmtDay, fmtNumber, rupees } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { boardQuery, feeSummaryQuery } from "@/lib/queries";
@@ -22,6 +20,7 @@ function TodayPage() {
   const board = useQuery(boardQuery(day));
   const todays = useQuery(boardQuery(today));
   const fees = useQuery(feeSummaryQuery);
+  const num = (n: number) => fmtNumber(n, locale);
 
   // Group the board by court, the way advocates walk the corridor.
   const byCourt = new Map<string, NonNullable<typeof board.data>["hearings"]>();
@@ -30,27 +29,31 @@ function TodayPage() {
     byCourt.set(k, [...(byCourt.get(k) ?? []), h]);
   }
   const missing = todays.data?.needsNextDate ?? [];
+  const n = todays.data?.hearings.length ?? 0;
+  const summary = todays.data
+    ? [
+        n === 0 ? t("today.countNone") : n === 1 ? t("today.countOne") : tf("today.count", { n: num(n) }),
+        missing.length === 0 ? "" : missing.length === 1 ? t("today.missingOne") : tf("today.missing", { n: num(missing.length) }),
+      ]
+        .filter(Boolean)
+        .join(". ")
+        .replace(/\.\./g, ".")
+    : "";
 
   return (
     <>
-      <header className="mb-6 flex items-center justify-between gap-4">
-        <div className="min-w-0">
-          <p className="label-mono">{fmtDay(today, locale)}</p>
-          <h1 className="font-display mt-1 line-clamp-2 text-2xl leading-8">{tf("today.greeting", { name: advocate.name })}</h1>
-        </div>
-        <Button asChild size="sm" className="shrink-0">
-          <Link to="/cases/new">
-            <Plus /> {t("case.new")}
-          </Link>
-        </Button>
+      <header>
+        <p className="label-mono">{fmtDay(today, locale)}</p>
+        <h1 className="font-display mt-3 text-[2rem] leading-[1.1]">{tf("today.greeting", { name: advocate.name })}</h1>
+        {summary && <p className="mt-4 text-[17px] text-muted-foreground">{summary}</p>}
       </header>
 
-      <div className="panel grid grid-cols-3 divide-x overflow-hidden">
-        <Stat to="/diary" label={t("today.statHearings")} value={todays.data ? fmtNumber(todays.data.hearings.length, locale) : "–"} />
+      <div className="mt-8 grid grid-cols-3 border-y">
+        <Stat to="/diary" label={t("today.statHearings")} value={todays.data ? num(n) : "–"} />
         <Stat
           to="/cases"
           label={t("today.statMissing")}
-          value={todays.data ? fmtNumber(missing.length, locale) : "–"}
+          value={todays.data ? num(missing.length) : "–"}
           tone={missing.length > 0 ? "text-warning" : undefined}
         />
         <Stat
@@ -66,7 +69,7 @@ function TodayPage() {
       <Section
         title={t("today.byCourt")}
         action={
-          <fieldset className="inline-flex gap-1 text-sm">
+          <fieldset className="inline-flex gap-1 text-[15px]">
             <legend className="sr-only">{t("today.title")}</legend>
             {[
               { d: today, label: t("today.today") },
@@ -78,7 +81,7 @@ function TodayPage() {
                 aria-pressed={day === o.d}
                 onClick={() => setDay(o.d)}
                 className={cn(
-                  "h-8 rounded-lg border px-3 transition-colors",
+                  "h-9 rounded-lg border px-3 transition-colors",
                   day === o.d ? "border-border bg-card text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -93,16 +96,18 @@ function TodayPage() {
         ) : byCourt.size === 0 ? (
           <Empty>{t("today.noHearings")}</Empty>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-8">
             {[...byCourt].map(([court, hs]) => (
-              <div key={court} className="list">
-                <h3 className="flex items-center gap-2 bg-muted/60 px-4 py-2 text-[13px] text-muted-foreground">
+              <div key={court}>
+                <p className="mb-2 flex gap-2 text-[15px] text-muted-foreground">
                   <span className="truncate">{court}</span>
-                  <span className="ml-auto tabular-nums">{fmtNumber(hs.length, locale)}</span>
-                </h3>
-                {hs.map((h) => (
-                  <HearingRow key={h.id} h={h} />
-                ))}
+                  <span className="ml-auto tabular-nums">{num(hs.length)}</span>
+                </p>
+                <div className="list">
+                  {hs.map((h) => (
+                    <HearingRow key={h.id} h={h} />
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -111,20 +116,20 @@ function TodayPage() {
 
       {missing.length > 0 && (
         <Section title={t("today.needsNextDate")}>
-          <p className="-mt-1 mb-3 text-sm text-muted-foreground">{t("today.needsNextDateHint")}</p>
+          <p className="mb-4 text-[17px] text-muted-foreground">{t("today.needsNextDateHint")}</p>
           <div className="list">
             {missing.map((c) => (
               <Link key={c.id} to="/cases/$caseId" params={{ caseId: c.id }} className="list-row">
                 <span className="min-w-0 flex-1">
-                  <span className="line-clamp-2 block break-words">{c.title}</span>
+                  <span className="line-clamp-2 block text-[17px] leading-snug break-words">{c.title}</span>
                   {c.lastHearing && (
-                    <span className="mt-0.5 line-clamp-1 block text-sm text-muted-foreground">
+                    <span className="mt-1 line-clamp-1 block text-[15px] text-muted-foreground">
                       {t("today.lastHearing")}: {fmtDate(c.lastHearing.date, locale)}
                       {c.lastHearing.purpose ? ` · ${c.lastHearing.purpose}` : ""}
                     </span>
                   )}
                 </span>
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                <span className="shrink-0 text-[15px] text-accent">{t("today.addDate")}</span>
               </Link>
             ))}
           </div>
@@ -134,11 +139,11 @@ function TodayPage() {
   );
 }
 
-function Stat({ to, label, value, tone }: { to: string; label: string; value: ReactNode; tone?: string }) {
+function Stat({ to, label, value, tone }: { to: string; label: string; value: string; tone?: string }) {
   return (
-    <Link to={to} className="min-w-0 px-3 py-3 hover:bg-background sm:px-4">
-      <span className="label-mono block truncate text-xs">{label}</span>
-      <span className={cn("font-display mt-1 block truncate text-xl leading-7", tone)}>{value}</span>
+    <Link to={to} className="min-w-0 py-4 pr-3 [&+&]:border-l [&+&]:pl-4">
+      <span className="label-mono block truncate text-[12px]">{label}</span>
+      <span className={cn("font-display mt-2 block truncate text-[28px] leading-none", tone)}>{value}</span>
     </Link>
   );
 }

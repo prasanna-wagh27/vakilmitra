@@ -10,7 +10,7 @@ import { Label } from "./ui/label";
 export function PageHeader({ title, back, action, eyebrow }: { title: string; back?: string; action?: ReactNode; eyebrow?: ReactNode }) {
   const { t } = useI18n();
   return (
-    <div className="mb-6 flex items-center gap-3">
+    <div className="mb-8 flex items-center gap-3">
       {back && (
         <Link to={back} aria-label={t("common.back")} className="icon-btn size-9 shrink-0">
           <ArrowLeft className="size-[18px]" />
@@ -18,7 +18,7 @@ export function PageHeader({ title, back, action, eyebrow }: { title: string; ba
       )}
       <div className="min-w-0 flex-1">
         {eyebrow && <div className="label-mono mb-1">{eyebrow}</div>}
-        <h1 className="font-display line-clamp-2 text-2xl leading-8 break-words">{title}</h1>
+        <h1 className="font-display line-clamp-3 text-[2rem] leading-[1.1] break-words">{title}</h1>
       </div>
       {action}
     </div>
@@ -27,9 +27,9 @@ export function PageHeader({ title, back, action, eyebrow }: { title: string; ba
 
 export function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <section className="mt-8">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg leading-6">{title}</h2>
+    <section className="mt-12">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="font-display text-2xl leading-[1.25]">{title}</h2>
         {action}
       </div>
       {children}

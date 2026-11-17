@@ -7,8 +7,8 @@
  * Type: HK Grotesk (Hanken Grotesk) stands in for Libra's Fakt Pro, which is a paid font;
  * Marathi letters come from IBM Plex Sans Devanagari. Light only, by design.
  *
- * Spacing rhythm (use only these): 4, 8, 12, 16, 24, 32 px.
- * Page gutter 16px; between sections 32px; heading to content 12px; list rows 12px x 16px.
+ * Spacing rhythm (use only these): 4, 8, 12, 16, 24, 32, 48 px.
+ * Page gutter 24px; between sections 48px; heading to content 16px; list rows 16px tall padding.
  */
 :root {
   color-scheme: light;
@@ -98,13 +98,13 @@
 @layer components {
   /* Headings: medium weight, tight tracking (Libra sets large type at -2px). */
   .font-display {
-    font-weight: 500;
-    letter-spacing: -0.025em;
+    font-weight: 400;
+    letter-spacing: -0.02em;
   }
   /* Small mono label, e.g. a date or a group heading ("Trusted by 12.000+ legal teams"). */
   .label-mono {
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.45;
     letter-spacing: -0.25px;
     color: var(--muted-foreground);
@@ -115,12 +115,10 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
   }
-  /* A bordered list: rows separated by hairlines (use .list-row for each row). */
+  /* A list in the Libra manner: no box, rows separated by full-width hairlines. */
   .list {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
   }
   .list > * + * {
     border-top: 1px solid var(--border);
@@ -129,12 +127,24 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
-    min-height: 56px;
+    padding: 16px 0;
+    min-height: 64px;
   }
   a.list-row:hover,
   button.list-row:hover {
-    background: var(--background);
+    background: linear-gradient(var(--muted), var(--muted)) no-repeat center / calc(100% + 32px) 100%;
+  }
+  /* Grey status chip, like Libra's "Included". */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: var(--radius-md);
+    background: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 14px;
+    white-space: nowrap;
   }
   /* A standalone bordered row (when rows are not grouped in a .list). */
   .row-card {
