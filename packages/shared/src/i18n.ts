@@ -198,6 +198,7 @@ export const en = {
   "report.showApproved": "Show approved version",
   "report.saveFirst": "Save the opinion before approving.",
   "report.signature": "Signature",
+  "report.word": "Word",
 
   "sub.SALE": "Sale",
   "sub.GIFT": "Gift",
@@ -587,6 +588,7 @@ export const mr: Partial<Record<MessageKey, string>> = {
   "report.showApproved": "मंजूर आवृत्ती दाखवा",
   "report.saveFirst": "मंजूर करण्याआधी अभिप्राय जतन करा.",
   "report.signature": "सही",
+  "report.word": "Word फाइल",
 
   "sub.SALE": "खरेदी",
   "sub.GIFT": "बक्षीस",

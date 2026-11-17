@@ -1,4 +1,4 @@
-import { Alert02Icon, CheckmarkCircle02Icon, PrinterIcon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, CheckmarkCircle02Icon, File01Icon, PrinterIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -8,7 +8,7 @@ import { ErrorBox, Loading, PageHeader } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
-import { api } from "@/lib/api";
+import { API_BASE, api } from "@/lib/api";
 import { fmtDate, fmtNumber } from "@/lib/format";
 import { type MessageKey, useI18n } from "@/lib/i18n";
 import { reportQuery, useApiMutation } from "@/lib/queries";
@@ -45,9 +45,16 @@ function ReportPage() {
           title={t("report.title")}
           back={`/cases/${caseId}/properties/${propertyId}`}
           action={
-            <Button variant="outline" onClick={() => window.print()}>
-              <HugeiconsIcon icon={PrinterIcon} /> {t("common.print")}
-            </Button>
+            <>
+              <Button asChild variant="outline">
+                <a href={`${API_BASE}/api${base}.docx?lang=${locale}`} download>
+                  <HugeiconsIcon icon={File01Icon} /> {t("report.word")}
+                </a>
+              </Button>
+              <Button variant="outline" onClick={() => window.print()}>
+                <HugeiconsIcon icon={PrinterIcon} /> {t("common.print")}
+              </Button>
+            </>
           }
         />
         {approved ? (

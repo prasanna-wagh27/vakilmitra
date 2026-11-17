@@ -1,4 +1,5 @@
 /** Title search report: built from the chain, opinion saved, signed off as a snapshot. */
+import JSZip from "jszip";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildApp } from "../src/app.js";
@@ -93,5 +94,30 @@ describe("title search report", () => {
   it("is hidden from other advocates", async () => {
     const stranger = await signup("tsr-stranger");
     expect((await stranger.get(`${base}/report`)).status).toBe(404);
+  });
+  it("exports the report as a Word file, with the signed snapshot once approved", async () => {
+    await owner.put(`${base}/report`).send({ opinion: "Title is clear.\nSubject to release of the bank charge.", language: "en" });
+    await owner.post(`${base}/report/approve`);
+    const r = await owner
+      .get(`${base}/report.docx?lang=en`)
+      .buffer(true)
+      .parse((res, cb) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (c: Buffer) => chunks.push(c));
+        res.on("end", () => cb(null, Buffer.concat(chunks)));
+      });
+    expect(r.status).toBe(200);
+    expect(r.headers["content-type"]).toContain("wordprocessingml");
+    expect(r.headers["content-disposition"]).toContain("title-report-112.docx");
+    const xml = await (await JSZip.loadAsync(r.body as Buffer)).file("word/document.xml")!.async("string");
+    expect(xml).toContain("Title search report");
+    expect(xml).toContain("सुरेश जाधव");
+    expect(xml).toContain("Subject to release of the bank charge.");
+    expect(xml).toContain("Approved on");
+  });
+
+  it("does not export another advocate's report", async () => {
+    const stranger = await signup("tsr-stranger2");
+    expect((await stranger.get(`${base}/report.docx`)).status).toBe(404);
   });
 });
