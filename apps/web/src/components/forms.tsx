@@ -4,6 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import {
   CASE_KINDS,
+  CASE_STAGES,
   CASE_STATUSES,
   type CaseDetail,
   type Client,
@@ -38,6 +39,7 @@ const caseForm = z.object({
   title: req,
   kind: z.enum(CASE_KINDS),
   status: z.enum(CASE_STATUSES),
+  stage: z.union([z.enum(CASE_STAGES), z.literal("")]),
   clientId: z.string(),
   caseNumber: z.string(),
   court: z.string(),
@@ -54,6 +56,7 @@ export function CaseForm({ initial, onSaved, onCancel }: { initial?: CaseDetail;
       title: initial?.title ?? "",
       kind: initial?.kind ?? "CIVIL",
       status: initial?.status ?? "ACTIVE",
+      stage: initial?.stage ?? "",
       clientId: initial?.clientId ?? "",
       caseNumber: initial?.caseNumber ?? "",
       court: initial?.court ?? "",
@@ -66,6 +69,7 @@ export function CaseForm({ initial, onSaved, onCancel }: { initial?: CaseDetail;
       const body = {
         ...v,
         clientId: v.clientId || null,
+        stage: v.stage || null,
         caseNumber: orNull(v.caseNumber),
         court: orNull(v.court),
         cnrNumber: orNull(v.cnrNumber),
@@ -103,6 +107,16 @@ export function CaseForm({ initial, onSaved, onCancel }: { initial?: CaseDetail;
           </NativeSelect>
         </Field>
       </div>
+      <Field id="stage" label={t("case.stage")}>
+        <NativeSelect id="stage" {...f.register("stage")}>
+          <option value="">{t("case.noStage")}</option>
+          {CASE_STAGES.map((s) => (
+            <option key={s} value={s}>
+              {t(`stage.${s}`)}
+            </option>
+          ))}
+        </NativeSelect>
+      </Field>
       <Field id="clientId" label={t("case.client")}>
         <NativeSelect id="clientId" {...f.register("clientId")}>
           <option value="">{t("case.noClient")}</option>
@@ -198,26 +212,56 @@ export function ClientForm({ initial, onSaved, onCancel }: { initial?: Client; o
 
 // ---------- Hearings ----------
 
-const hearingForm = z.object({ date: day, purpose: z.string(), nextStep: z.string() });
+const hhmm = z.union([z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/), z.literal("")]);
+const hearingForm = z.object({
+  date: day,
+  time: hhmm,
+  courtHall: z.string(),
+  purpose: z.string(),
+  prepNotes: z.string(),
+  nextStep: z.string(),
+});
 
 export function HearingForm({ caseId, onDone, onCancel }: { caseId: string } & Done) {
   const { t } = useI18n();
   const f = useForm<z.infer<typeof hearingForm>>({
     resolver: zodResolver(hearingForm),
-    defaultValues: { date: istDate(), purpose: "", nextStep: "" },
+    defaultValues: { date: istDate(), time: "", courtHall: "", purpose: "", prepNotes: "", nextStep: "" },
   });
   const m = useApiMutation(
     (v: z.infer<typeof hearingForm>) =>
-      api(`/cases/${caseId}/hearings`, { body: { date: courtDateIso(v.date), purpose: orNull(v.purpose), nextStep: orNull(v.nextStep) } }),
+      api(`/cases/${caseId}/hearings`, {
+        body: {
+          date: courtDateIso(v.date),
+          time: v.time || null,
+          courtHall: orNull(v.courtHall),
+          purpose: orNull(v.purpose),
+          prepNotes: orNull(v.prepNotes),
+          nextStep: orNull(v.nextStep),
+        },
+      }),
     { onSuccess: onDone },
   );
   return (
     <form onSubmit={f.handleSubmit((v) => m.mutate(v))} className="space-y-3" noValidate>
-      <Field id="date" label={t("common.date")} error={f.formState.errors.date}>
-        <Input id="date" type="date" {...f.register("date")} />
-      </Field>
-      <Field id="purpose" label={t("case.purpose")}>
-        <Input id="purpose" {...f.register("purpose")} />
+      <div className="grid grid-cols-2 gap-3">
+        <Field id="date" label={t("common.date")} error={f.formState.errors.date}>
+          <Input id="date" type="date" {...f.register("date")} />
+        </Field>
+        <Field id="time" label={`${t("hearing.time")} (${t("common.optional")})`} error={f.formState.errors.time}>
+          <Input id="time" type="time" {...f.register("time")} />
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field id="purpose" label={t("case.purpose")}>
+          <Input id="purpose" {...f.register("purpose")} />
+        </Field>
+        <Field id="courtHall" label={`${t("hearing.hall")} (${t("common.optional")})`}>
+          <Input id="courtHall" {...f.register("courtHall")} />
+        </Field>
+      </div>
+      <Field id="prepNotes" label={t("hearing.prep")} hint={t("hearing.prepHint")}>
+        <Textarea id="prepNotes" {...f.register("prepNotes")} />
       </Field>
       <Field id="nextStep" label={t("case.nextStep")}>
         <Textarea id="nextStep" {...f.register("nextStep")} />
@@ -228,14 +272,14 @@ export function HearingForm({ caseId, onDone, onCancel }: { caseId: string } & D
   );
 }
 
-const outcomeForm = z.object({ outcome: z.string(), nextStep: z.string(), nextDate: optDay, nextPurpose: z.string() });
+const outcomeForm = z.object({ outcome: z.string(), nextStep: z.string(), nextDate: optDay, nextTime: hhmm, nextPurpose: z.string() });
 
 /** Record what happened at a hearing and set the next date in one go. */
 export function OutcomeForm({ hearing, onDone, onCancel }: { hearing: Hearing } & Done) {
   const { t } = useI18n();
   const f = useForm<z.infer<typeof outcomeForm>>({
     resolver: zodResolver(outcomeForm),
-    defaultValues: { outcome: hearing.outcome ?? "", nextStep: hearing.nextStep ?? "", nextDate: "", nextPurpose: "" },
+    defaultValues: { outcome: hearing.outcome ?? "", nextStep: hearing.nextStep ?? "", nextDate: "", nextTime: "", nextPurpose: "" },
   });
   const m = useApiMutation(
     (v: z.infer<typeof outcomeForm>) =>
@@ -244,7 +288,7 @@ export function OutcomeForm({ hearing, onDone, onCancel }: { hearing: Hearing } 
         body: {
           outcome: orNull(v.outcome),
           nextStep: orNull(v.nextStep),
-          ...(v.nextDate ? { next: { date: courtDateIso(v.nextDate), purpose: orNull(v.nextPurpose) } } : {}),
+          ...(v.nextDate ? { next: { date: courtDateIso(v.nextDate), time: v.nextTime || null, purpose: orNull(v.nextPurpose) } } : {}),
         },
       }),
     { onSuccess: onDone },
@@ -261,10 +305,13 @@ export function OutcomeForm({ hearing, onDone, onCancel }: { hearing: Hearing } 
         <Field id="nextDate" label={t("case.nextDate")}>
           <Input id="nextDate" type="date" {...f.register("nextDate")} />
         </Field>
-        <Field id="nextPurpose" label={t("case.nextPurpose")}>
-          <Input id="nextPurpose" {...f.register("nextPurpose")} />
+        <Field id="nextTime" label={`${t("hearing.time")} (${t("common.optional")})`}>
+          <Input id="nextTime" type="time" {...f.register("nextTime")} />
         </Field>
       </div>
+      <Field id="nextPurpose" label={t("case.nextPurpose")}>
+        <Input id="nextPurpose" {...f.register("nextPurpose")} />
+      </Field>
       <ErrorBox error={m.error} />
       <FormActions busy={m.isPending} onCancel={onCancel} />
     </form>

@@ -7,7 +7,7 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "./ui
 
 /** One hearing: case, number and client, with the stage on the right. */
 export function HearingRow({ h }: { h: HearingWithCase; serial?: number }) {
-  const meta = [h.case.caseNumber, h.case.client?.name].filter(Boolean).join(" · ");
+  const meta = [h.time, h.courtHall, h.case.caseNumber, h.case.client?.name].filter(Boolean).join(" · ");
   return (
     <Item asChild size="sm" className="rounded-none px-4">
       <Link to="/cases/$caseId" params={{ caseId: h.case.id }}>

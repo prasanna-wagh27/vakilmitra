@@ -1,4 +1,4 @@
-import { and, asc, cases, desc, eq, exists, gte, hearings, inArray, lt, not } from "@vakilmitra/db";
+import { and, asc, cases, desc, eq, exists, gte, hearings, inArray, lt, not, sql } from "@vakilmitra/db";
 import { addDays, dayQuery, hearingInput, hearingUpdateInput, istDate, istDayRange, rangeQuery } from "@vakilmitra/shared";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -19,7 +19,8 @@ function hearingsBetween(advocateId: string, start: Date, end: Date) {
       lt(hearings.date, end),
       inArray(hearings.caseId, db.select({ id: cases.id }).from(cases).where(visibleCase(advocateId))),
     ),
-    orderBy: [asc(hearings.court), asc(hearings.date)],
+    // Per court, by date then time of day; hearings without a time go last.
+    orderBy: [asc(hearings.court), asc(hearings.date), sql`${hearings.time} asc nulls last`],
     with: { case: caseRef },
   });
 }
@@ -66,7 +67,7 @@ export const diaryRoutes: FastifyPluginAsyncZod = async (app) => {
     const from = req.query.from ?? istDate();
     const to = req.query.to ?? addDays(from, 13);
     const list = await hearingsBetween(req.advocateId, istDayRange(from).start, istDayRange(to).end);
-    list.sort((a, b) => a.date.getTime() - b.date.getTime());
+    list.sort((a, b) => a.date.getTime() - b.date.getTime() || (a.time ?? "99:99").localeCompare(b.time ?? "99:99"));
     return { from, to, hearings: list };
   });
 
@@ -97,7 +98,14 @@ export const diaryRoutes: FastifyPluginAsyncZod = async (app) => {
       const [nextHearing] = next
         ? await tx
             .insert(hearings)
-            .values({ caseId: h.caseId, date: next.date, purpose: next.purpose ?? null, court: hearing.court })
+            .values({
+              caseId: h.caseId,
+              date: next.date,
+              time: next.time ?? null,
+              purpose: next.purpose ?? null,
+              court: hearing.court,
+              courtHall: hearing.courtHall,
+            })
             .returning()
         : [null];
       return { hearing, nextHearing };
