@@ -1,7 +1,8 @@
+import { Alert02Icon, CheckmarkCircle02Icon, PrinterIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import type { TitleReport, TitleReportResponse } from "@vakilmitra/shared";
-import { CircleCheck, Printer, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ErrorBox, Loading, PageHeader } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
@@ -45,19 +46,20 @@ function ReportPage() {
           back={`/cases/${caseId}/properties/${propertyId}`}
           action={
             <Button variant="outline" onClick={() => window.print()}>
-              <Printer /> {t("common.print")}
+              <HugeiconsIcon icon={PrinterIcon} /> {t("common.print")}
             </Button>
           }
         />
         {approved ? (
           <div className="mb-4 space-y-2">
             <p className="flex items-center gap-2 rounded-xl bg-success-soft p-3 text-sm text-success">
-              <CircleCheck className="size-4 shrink-0" /> {tf("report.approved", { date: fmtDate(draft.approvedAt!, locale) })}
+              <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4 shrink-0" />{" "}
+              {tf("report.approved", { date: fmtDate(draft.approvedAt!, locale) })}
             </p>
             {data.changedSinceApproval && (
               <div className="rounded-xl bg-warning-soft p-3 text-sm text-warning">
                 <p className="flex items-start gap-2">
-                  <TriangleAlert className="mt-0.5 size-4 shrink-0" /> {t("report.changed")}
+                  <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" /> {t("report.changed")}
                 </p>
                 <Button variant="ghost" size="sm" className="mt-1" onClick={() => setShowCurrent((v) => !v)}>
                   {showCurrent ? t("report.showApproved") : t("report.showCurrent")}
@@ -87,7 +89,7 @@ function ReportPage() {
             onClick={() => approve.mutate(undefined)}
             disabled={dirty || !saved.trim() || approve.isPending || (!!approved && !data.changedSinceApproval)}
           >
-            <CircleCheck /> {t("report.approve")}
+            <HugeiconsIcon icon={CheckmarkCircle02Icon} /> {t("report.approve")}
           </Button>
           {dirty && <span className="text-sm text-muted-foreground">{t("report.saveFirst")}</span>}
         </div>

@@ -1,5 +1,6 @@
+import { CheckmarkCircle02Icon, Flag02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { Flag } from "@vakilmitra/shared";
-import { CircleCheck, Flag as FlagIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -25,7 +26,7 @@ export function FlagCard({
     >
       <div className="mb-1 flex flex-wrap items-center gap-2">
         <Badge tone={flag.resolved ? "green" : tone[flag.severity]}>
-          {flag.resolved ? <CircleCheck /> : <FlagIcon />}
+          {flag.resolved ? <HugeiconsIcon icon={CheckmarkCircle02Icon} /> : <HugeiconsIcon icon={Flag02Icon} />}
           {flag.resolved ? t("land.resolved") : t(`sev.${flag.severity}`)}
         </Badge>
         <code className="text-xs text-muted-foreground">{flag.rule}</code>
@@ -33,7 +34,7 @@ export function FlagCard({
       <p className={compact ? "text-sm" : ""}>{flag.message}</p>
       {flag.resolution && <p className="mt-1 text-sm text-muted-foreground">✓ {flag.resolution}</p>}
       {onSource && flag.eventIds.length > 0 && (
-        <button type="button" className="mt-1 text-sm text-accent underline underline-offset-4" onClick={() => onSource(flag.eventIds)}>
+        <button type="button" className="mt-1 text-sm text-primary underline underline-offset-4" onClick={() => onSource(flag.eventIds)}>
           {t("land.sources")} ({flag.eventIds.length})
         </button>
       )}

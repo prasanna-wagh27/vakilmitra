@@ -1,3 +1,14 @@
+import {
+  Add01Icon,
+  Alert02Icon,
+  Delete02Icon,
+  FileSearchIcon,
+  PencilEdit02Icon,
+  SearchList01Icon,
+  Tick02Icon,
+  Undo02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
@@ -11,7 +22,6 @@ import {
   MUTATION_TYPES,
   RECORD_KINDS,
 } from "@vakilmitra/shared";
-import { Check, FileSearch, Pencil, Plus, ScanSearch, Trash2, TriangleAlert, Undo2 } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { fmtDate } from "@/lib/format";
@@ -169,11 +179,11 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
           {fact.reviewed ? (
             <Badge tone="green">
-              <Check /> {t("fact.checked")}
+              <HugeiconsIcon icon={Tick02Icon} /> {t("fact.checked")}
             </Badge>
           ) : unsure ? (
             <Badge tone="amber">
-              <TriangleAlert /> {t("fact.unsure")}
+              <HugeiconsIcon icon={Alert02Icon} /> {t("fact.unsure")}
             </Badge>
           ) : null}
           {!fact.reviewed && <span className="text-muted-foreground tabular-nums">{Math.round(fact.confidence * 100)}%</span>}
@@ -189,7 +199,7 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
         {page && fact.crop ? (
           <SourceCrop documentId={doc.id} page={page} crop={fact.crop} />
         ) : page ? (
-          <a href={`#page-${page.pageNo}`} className="text-sm text-accent underline underline-offset-4">
+          <a href={`#page-${page.pageNo}`} className="text-sm text-primary underline underline-offset-4">
             {t("fact.wholePage")}
           </a>
         ) : null}
@@ -199,15 +209,15 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
           <div className="flex flex-wrap gap-2">
             {fact.reviewed ? (
               <Button size="sm" variant="ghost" onClick={() => patch.mutate({ reviewed: false })} disabled={patch.isPending}>
-                <Undo2 /> {t("fact.uncheck")}
+                <HugeiconsIcon icon={Undo02Icon} /> {t("fact.uncheck")}
               </Button>
             ) : (
               <Button size="sm" onClick={() => patch.mutate({ reviewed: true })} disabled={patch.isPending}>
-                <Check /> {t("fact.confirm")}
+                <HugeiconsIcon icon={Tick02Icon} /> {t("fact.confirm")}
               </Button>
             )}
             <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
-              <Pencil /> {t("common.edit")}
+              <HugeiconsIcon icon={PencilEdit02Icon} /> {t("common.edit")}
             </Button>
             <Button
               size="sm"
@@ -216,7 +226,7 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
               onClick={() => confirm(t("common.confirmDelete")) && remove.mutate(undefined)}
               disabled={remove.isPending}
             >
-              <Trash2 />
+              <HugeiconsIcon icon={Delete02Icon} />
             </Button>
           </div>
         )}
@@ -236,7 +246,7 @@ function AddFact({ documentId }: { documentId: string }) {
   return (
     <details className="mt-4 rounded-2xl border border-dashed p-4">
       <summary className="cursor-pointer font-medium">
-        <Plus className="mr-1 inline size-4" aria-hidden /> {t("fact.add")}
+        <HugeiconsIcon icon={Add01Icon} className="mr-1 inline size-4" aria-hidden /> {t("fact.add")}
       </summary>
       <form
         className="mt-3 grid gap-3 sm:grid-cols-[12rem_minmax(0,1fr)_auto] sm:items-end"
@@ -312,7 +322,7 @@ function AddToChain({ doc, caseId, extraction }: { doc: DocumentDetail; caseId: 
     return (
       <div className="panel mt-6 p-5">
         <p className="flex items-center gap-2 font-medium">
-          <Check className="size-5 text-success" aria-hidden /> {t("fact.added")}
+          <HugeiconsIcon icon={Tick02Icon} className="size-5 text-success" aria-hidden /> {t("fact.added")}
         </p>
         {result && (
           <ul className="mt-2 space-y-1 text-sm">
@@ -327,7 +337,7 @@ function AddToChain({ doc, caseId, extraction }: { doc: DocumentDetail; caseId: 
             )}
             {result.mismatches.map((m) => (
               <li key={m.field} className="flex items-start gap-1.5 text-warning">
-                <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+                <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" aria-hidden />
                 {tf("fact.mismatch", { field: t(`field.${m.field}`), property: m.property, document: m.document })}
               </li>
             ))}
@@ -412,7 +422,8 @@ export function FactsPanel({ doc, caseId, canEdit }: { doc: DocumentDetail; case
             onClick={() => extract.mutate(undefined)}
             disabled={ocrBusy || extract.isPending}
           >
-            {ex.facts.length ? <ScanSearch /> : <FileSearch />} {ex.facts.length ? t("fact.readAgain") : t("fact.read")}
+            {ex.facts.length ? <HugeiconsIcon icon={SearchList01Icon} /> : <HugeiconsIcon icon={FileSearchIcon} />}{" "}
+            {ex.facts.length ? t("fact.readAgain") : t("fact.read")}
           </Button>
         )
       }

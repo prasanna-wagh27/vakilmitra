@@ -1,4 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import {
   CASE_KINDS,
@@ -13,7 +15,6 @@ import {
   PARTY_ROLES,
   PAYMENT_MODES,
 } from "@vakilmitra/shared";
-import { X } from "lucide-react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -443,7 +444,7 @@ export function FeeAgreementForm({ clientId, caseId, onDone, onCancel }: { clien
               {...f.register(`installments.${n}.amount`)}
             />
             <Button type="button" variant="ghost" size="icon" aria-label={t("common.delete")} onClick={() => inst.remove(n)}>
-              <X />
+              <HugeiconsIcon icon={Cancel01Icon} />
             </Button>
           </div>
         ))}

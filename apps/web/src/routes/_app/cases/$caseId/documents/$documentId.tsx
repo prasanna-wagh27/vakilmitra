@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Add01Icon, Delete02Icon, Loading03Icon, RotateLeft01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { DOC_TYPES, type DocumentDetail, type OcrStatus, type PageDetail } from "@vakilmitra/shared";
-import { Loader2, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -35,7 +36,7 @@ export function OcrBadge({ status }: { status: OcrStatus }) {
   const { t } = useI18n();
   return (
     <Badge tone={statusTone[status]}>
-      {status === "PROCESSING" && <Loader2 className="animate-spin" />}
+      {status === "PROCESSING" && <HugeiconsIcon icon={Loading03Icon} className="animate-spin" />}
       {t(`doc.ocr.${status}`)}
     </Badge>
   );
@@ -92,7 +93,7 @@ function PageCard({ documentId, page, outline, canEdit }: { documentId: string; 
           <span className="ml-auto flex gap-1">
             {(page.ocrStatus === "FAILED" || page.ocrStatus === "DONE") && (
               <Button variant="ghost" size="sm" onClick={() => retry.mutate(undefined)} disabled={retry.isPending}>
-                <RotateCcw /> {t("doc.retryOcr")}
+                <HugeiconsIcon icon={RotateLeft01Icon} /> {t("doc.retryOcr")}
               </Button>
             )}
             <Button
@@ -102,7 +103,7 @@ function PageCard({ documentId, page, outline, canEdit }: { documentId: string; 
               onClick={() => confirm(t("common.confirmDelete")) && remove.mutate(undefined)}
               disabled={remove.isPending}
             >
-              <Trash2 />
+              <HugeiconsIcon icon={Delete02Icon} />
             </Button>
           </span>
         )}
@@ -225,7 +226,7 @@ function DocumentPage() {
         {canEdit && (
           <Button asChild size="sm" className="ml-auto">
             <Link to="/cases/$caseId/scan" params={{ caseId }} search={{ documentId }}>
-              <Plus /> {t("doc.addPages")}
+              <HugeiconsIcon icon={Add01Icon} /> {t("doc.addPages")}
             </Link>
           </Button>
         )}
@@ -261,7 +262,7 @@ function DocumentPage() {
             onClick={() => confirm(t("common.confirmDelete")) && remove.mutate(undefined)}
             disabled={remove.isPending}
           >
-            <Trash2 /> {t("doc.deleteDoc")}
+            <HugeiconsIcon icon={Delete02Icon} /> {t("doc.deleteDoc")}
           </Button>
         </div>
       )}

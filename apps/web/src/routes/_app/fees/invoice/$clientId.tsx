@@ -1,6 +1,7 @@
+import { PrinterIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Printer } from "lucide-react";
 import { ErrorBox, Loading, PageHeader } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { fmtDate, rupees } from "@/lib/format";
@@ -25,7 +26,7 @@ function InvoicePage() {
           back={`/clients/${clientId}`}
           action={
             <Button onClick={() => window.print()}>
-              <Printer /> {t("common.print")}
+              <HugeiconsIcon icon={PrinterIcon} /> {t("common.print")}
             </Button>
           }
         />
