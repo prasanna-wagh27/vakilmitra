@@ -31,7 +31,15 @@ const CHOICES: Partial<Record<FactField, readonly string[]>> = {
 };
 
 /** The fact's source: its crop cut out of the page image, with a little margin. */
-function SourceCrop({ documentId, page, crop }: { documentId: string; page: DocumentDetail["pages"][number]; crop: NonNullable<Fact["crop"]> }) {
+function SourceCrop({
+  documentId,
+  page,
+  crop,
+}: {
+  documentId: string;
+  page: DocumentDetail["pages"][number];
+  crop: NonNullable<Fact["crop"]>;
+}) {
   const m = 0.01;
   const x = Math.max(0, crop.x - m);
   const y = Math.max(0, crop.y - m);
@@ -42,7 +50,8 @@ function SourceCrop({ documentId, page, crop }: { documentId: string; page: Docu
   return (
     <a
       href={`#page-${page.pageNo}`}
-      className="relative block max-h-24 overflow-hidden rounded-xl border bg-muted"
+      // A ring, not a border: percentage offsets resolve against the padding box, so a border would shift the crop.
+      className="relative block overflow-hidden rounded-xl bg-muted ring-1 ring-border"
       style={{ aspectRatio: `${w * W} / ${h * H}` }}
     >
       <img
@@ -80,7 +89,13 @@ function ValueInput({ field, value, onChange, id }: { field: FactField; value: s
         <option value="" />
         {choices.map((c) => (
           <option key={c} value={c}>
-            {field === "mutation_type" ? t(`sub.${c}` as never) : field === "section_155" ? (c === "true" ? t("common.yes") : t("common.no")) : c}
+            {field === "mutation_type"
+              ? t(`sub.${c}` as never)
+              : field === "section_155"
+                ? c === "true"
+                  ? t("common.yes")
+                  : t("common.no")
+                : c}
           </option>
         ))}
       </NativeSelect>
@@ -110,7 +125,13 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
   const problem = editing ? factValueProblem(fact.field, draft) : null;
 
   return (
-    <li className={cn("row-card grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,14rem)]", fact.reviewed && "bg-success-soft/30", unsure && "border-warning/60")}>
+    <li
+      className={cn(
+        "row-card grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] sm:items-start",
+        fact.reviewed && "bg-success-soft/30",
+        unsure && "border-warning/60",
+      )}
+    >
       <div className="min-w-0">
         <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{t(`field.${fact.field}`)}</p>
         {editing ? (
@@ -127,7 +148,15 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
               <Button type="submit" size="sm" disabled={!!problem || !draft.trim() || patch.isPending}>
                 {t("common.save")}
               </Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => (setEditing(false), setDraft(fact.value))}>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setEditing(false);
+                  setDraft(fact.value);
+                }}
+              >
                 {t("common.cancel")}
               </Button>
             </div>
@@ -146,12 +175,26 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
             </Badge>
           ) : null}
           {!fact.reviewed && <span className="text-muted-foreground tabular-nums">{Math.round(fact.confidence * 100)}%</span>}
-          {fact.originalValue && <span className="text-muted-foreground">{tf("fact.readAs", { v: show(fact.field, fact.originalValue) })}</span>}
+          {fact.originalValue && (
+            <span className="text-muted-foreground">{tf("fact.readAs", { v: show(fact.field, fact.originalValue) })}</span>
+          )}
           {!fact.pageId && !fact.crop && fact.confidence === 1 && <span className="text-muted-foreground">{t("fact.manual")}</span>}
         </div>
         <ErrorBox error={patch.error ?? remove.error} />
+      </div>
+      {/* Source next to the value on wide screens, right under it on phones (before the actions). */}
+      <div className="min-w-0 sm:col-start-2 sm:row-span-2 sm:row-start-1">
+        {page && fact.crop ? (
+          <SourceCrop documentId={doc.id} page={page} crop={fact.crop} />
+        ) : page ? (
+          <a href={`#page-${page.pageNo}`} className="text-sm text-accent underline underline-offset-4">
+            {t("fact.wholePage")}
+          </a>
+        ) : null}
+      </div>
+      <div className="min-w-0 sm:col-start-1">
         {canEdit && !editing && (
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {fact.reviewed ? (
               <Button size="sm" variant="ghost" onClick={() => patch.mutate({ reviewed: false })} disabled={patch.isPending}>
                 <Undo2 /> {t("fact.uncheck")}
@@ -175,15 +218,6 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
             </Button>
           </div>
         )}
-      </div>
-      <div className="min-w-0">
-        {page && fact.crop ? (
-          <SourceCrop documentId={doc.id} page={page} crop={fact.crop} />
-        ) : page ? (
-          <a href={`#page-${page.pageNo}`} className="text-sm text-accent underline underline-offset-4">
-            {t("fact.wholePage")}
-          </a>
-        ) : null}
       </div>
     </li>
   );
@@ -210,7 +244,14 @@ function AddFact({ documentId }: { documentId: string }) {
         }}
       >
         <Field id="new-fact-field" label={t("fact.field")}>
-          <NativeSelect id="new-fact-field" value={field} onChange={(e) => (setField(e.target.value as FactField), setValue(""))}>
+          <NativeSelect
+            id="new-fact-field"
+            value={field}
+            onChange={(e) => {
+              setField(e.target.value as FactField);
+              setValue("");
+            }}
+          >
             {FACT_FIELDS.map((f) => (
               <option key={f} value={f}>
                 {t(`field.${f}`)}
@@ -275,7 +316,11 @@ function AddToChain({ doc, caseId, extraction }: { doc: DocumentDetail; caseId: 
           <ul className="mt-2 space-y-1 text-sm">
             {Object.keys(result.filled).length > 0 && (
               <li className="text-muted-foreground">
-                {tf("fact.filled", { fields: Object.keys(result.filled).map((k) => t(`field.${k.replace(/No$/, "_no")}` as never)).join(", ") })}
+                {tf("fact.filled", {
+                  fields: Object.keys(result.filled)
+                    .map((k) => t(`field.${k.replace(/No$/, "_no")}` as never))
+                    .join(", "),
+                })}
               </li>
             )}
             {result.mismatches.map((m) => (
@@ -343,7 +388,9 @@ export function FactsPanel({ doc, caseId, canEdit }: { doc: DocumentDetail; case
   const isRecord = (RECORD_KINDS as readonly string[]).includes(doc.type);
   const ocrBusy = doc.ocrStatus === "PENDING" || doc.ocrStatus === "PROCESSING";
   // Land records, and documents not yet typed (the reader can tell a 7/12, Ferfar or Index-II apart).
-  if (!ex || !doc.pages.length || (!isRecord && doc.type !== "OTHER" && !ex.facts.length)) return null;
+  if (!doc.pages.length) return null;
+  if (!ex) return facts.error ? <ErrorBox error={facts.error} onRetry={() => facts.refetch()} /> : null;
+  if (!isRecord && doc.type !== "OTHER" && !ex.facts.length) return null;
 
   const reviewed = ex.facts.filter((f) => f.reviewed).length;
   const ordered = [...ex.facts].sort((a, b) => FACT_FIELDS.indexOf(a.field) - FACT_FIELDS.indexOf(b.field) || a.position - b.position);
@@ -354,7 +401,12 @@ export function FactsPanel({ doc, caseId, canEdit }: { doc: DocumentDetail; case
       title={t("fact.title")}
       action={
         canEdit && (
-          <Button size="sm" variant={ex.facts.length ? "outline" : "default"} onClick={() => extract.mutate(undefined)} disabled={ocrBusy || extract.isPending}>
+          <Button
+            size="sm"
+            variant={ex.facts.length ? "outline" : "default"}
+            onClick={() => extract.mutate(undefined)}
+            disabled={ocrBusy || extract.isPending}
+          >
             {ex.facts.length ? <ScanSearch /> : <FileSearch />} {ex.facts.length ? t("fact.readAgain") : t("fact.read")}
           </Button>
         )

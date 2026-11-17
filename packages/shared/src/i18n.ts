@@ -310,7 +310,8 @@ export const en = {
   "fact.field": "Detail",
   "fact.value": "Value",
   "fact.toChain": "Add to a property's ownership timeline",
-  "fact.toChainHint": "Check every detail first. Blank property details are filled from this document; differences are shown, never overwritten.",
+  "fact.toChainHint":
+    "Check every detail first. Blank property details are filled from this document; differences are shown, never overwritten.",
   "fact.needReview": "Check the remaining {n} details first.",
   "fact.property": "Property",
   "fact.newProperty": "New property from this document",

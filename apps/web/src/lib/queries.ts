@@ -1,6 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
-  Extraction,
   Advocate,
   CaseAccessLevel,
   CaseDetail,
@@ -11,6 +10,7 @@ import type {
   ClientTotals,
   DocumentDetail,
   DocumentSummary,
+  Extraction,
   FeeAgreement,
   FeeTotals,
   Flag,

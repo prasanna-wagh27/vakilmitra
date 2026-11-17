@@ -34,7 +34,8 @@ function score() {
     const facts = extractPage(s.kind, s.words);
     for (const [field, want] of Object.entries(s.truth)) {
       const group = Object.entries(GROUPS).find(([, g]) => g.fields.includes(field))?.[0] ?? "other";
-      const t = (tally[group] ??= { ok: 0, total: 0, misses: [] });
+      tally[group] ??= { ok: 0, total: 0, misses: [] };
+      const t = tally[group];
       const got = facts.filter((f) => f.field === field).map((f) => clean(f.value));
       const wants = (Array.isArray(want) ? want : [want]).map(clean);
       // Each expected value is one point; each extra value read for the field costs one too.

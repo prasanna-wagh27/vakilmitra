@@ -23,7 +23,10 @@ async function signup(name: string) {
 /** A document with one page already read by OCR (words from the eval fixtures). */
 async function readDocument(caseId: string, sample: string, type = "OTHER", status: "DONE" | "PROCESSING" = "DONE") {
   const s = fixture(sample);
-  const [doc] = await db.insert(documents).values({ caseId, type: type as never, ocrStatus: "DONE" }).returning();
+  const [doc] = await db
+    .insert(documents)
+    .values({ caseId, type: type as never, ocrStatus: "DONE" })
+    .returning();
   await db.insert(pages).values({
     documentId: doc.id,
     pageNo: 1,
@@ -68,7 +71,9 @@ describe("7/12 → facts → record snapshot", () => {
   });
 
   it("will not build an event from unreviewed facts", async () => {
-    const r = await owner.post(`/api/cases/${caseId}/properties/${propertyId}/events/from-document`).send({ documentId: docId, date: "2025-06-01" });
+    const r = await owner
+      .post(`/api/cases/${caseId}/properties/${propertyId}/events/from-document`)
+      .send({ documentId: docId, date: "2025-06-01" });
     expect(r.status).toBe(409);
     expect(r.body.code ?? r.body.error).toBeTruthy();
   });
@@ -93,7 +98,13 @@ describe("7/12 → facts → record snapshot", () => {
     expect((await owner.post(url).send({ documentId: docId })).status).toBe(400); // a 7/12 needs a date
     const r = await owner.post(url).send({ documentId: docId, date: "2025-06-01" });
     expect(r.status).toBe(201);
-    expect(r.body.event).toMatchObject({ kind: "RECORD_SNAPSHOT", owners: ["गणपत मोरे"], areaSqm: 39001, landClass: "Class-I", documentId: docId });
+    expect(r.body.event).toMatchObject({
+      kind: "RECORD_SNAPSHOT",
+      owners: ["गणपत मोरे"],
+      areaSqm: 39001,
+      landClass: "Class-I",
+      documentId: docId,
+    });
     expect(r.body.event.factIds.length).toBeGreaterThan(5);
     expect(r.body.filled).toMatchObject({ village: "निमगाव", taluka: "शिरूर", district: "अहमदनगर" });
     expect(r.body.mismatches).toEqual([]);

@@ -17,7 +17,10 @@ mkdirSync(OUT, { recursive: true });
 
 // Deterministic pseudo-random choices, so the set is reproducible.
 let seed = 7;
-const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31);
+const rnd = () => {
+  seed = (seed * 1103515245 + 12345) % 2 ** 31;
+  return seed / 2 ** 31;
+};
 const pick = <T,>(a: T[]) => a[Math.floor(rnd() * a.length)];
 const DEV = "०१२३४५६७८९";
 const dev = (s: string) => s.replace(/\d/g, (d) => DEV[Number(d)]);
@@ -59,7 +62,10 @@ function satbara(i: number): Case {
   const area = triple ? `${ha}.${String(are).padStart(2, "0")}.00 हे.आर.चौ.मी` : `${ha}.${String(are).padStart(2, "0")} हेक्टर`;
   const cls = i % 4 === 2 ? 2 : 1;
   const right = i % 3 === 0 ? pick(RIGHTS) : null;
-  const ownerLines = i % 2 === 0 ? [`भोगवटादाराचे नाव ${sep}`, ...owners.map((o) => `${o} (${maybeDev(ferfar, d)})`)] : [`भोगवटादाराचे नाव ${sep} ${owners.join(", ")}`];
+  const ownerLines =
+    i % 2 === 0
+      ? [`भोगवटादाराचे नाव ${sep}`, ...owners.map((o) => `${o} (${maybeDev(ferfar, d)})`)]
+      : [`भोगवटादाराचे नाव ${sep} ${owners.join(", ")}`];
   const lines = [
     i % 2 ? "गाव नमुना सात" : "गाव नमुना सात (अधिकार अभिलेख पत्रक)",
     `गाव ${sep} ${v}   तालुका ${sep} ${t}   जिल्हा ${sep} ${z}`,
@@ -147,16 +153,27 @@ async function render(lines: string[], variant: number) {
   const width = 1700;
   const h = 140 + lines.length * size * 2.2;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${h}"><rect width="100%" height="100%" fill="white"/>${lines
-    .map((l, i) => `<text x="80" y="${110 + i * size * 2.2}" font-family="Noto Sans Devanagari" font-size="${size}" fill="black">${esc(l)}</text>`)
+    .map(
+      (l, i) =>
+        `<text x="80" y="${110 + i * size * 2.2}" font-family="Noto Sans Devanagari" font-size="${size}" fill="black">${esc(l)}</text>`,
+    )
     .join("")}</svg>`;
   let img = sharp(Buffer.from(svg)).flatten({ background: "#ffffff" });
   // Degrade like a phone photo on half the set: slight tilt, softness, grey paper, JPEG.
-  if (variant % 2 === 1) img = img.rotate(variant % 4 === 1 ? 0.8 : -0.6, { background: "#f2efe6" }).blur(0.7).linear(0.9, 12);
+  if (variant % 2 === 1)
+    img = img
+      .rotate(variant % 4 === 1 ? 0.8 : -0.6, { background: "#f2efe6" })
+      .blur(0.7)
+      .linear(0.9, 12);
   if (variant % 3 === 2) img = img.resize({ width: Math.round(width * 0.65) });
   return img.jpeg({ quality: variant % 2 ? 62 : 90 }).toBuffer();
 }
 
-const cases = [...Array.from({ length: 10 }, (_, i) => satbara(i)), ...Array.from({ length: 8 }, (_, i) => ferfar(i)), ...Array.from({ length: 6 }, (_, i) => index2(i))];
+const cases = [
+  ...Array.from({ length: 10 }, (_, i) => satbara(i)),
+  ...Array.from({ length: 8 }, (_, i) => ferfar(i)),
+  ...Array.from({ length: 6 }, (_, i) => index2(i)),
+];
 const engine = new TesseractEngine();
 let n = 0;
 for (const c of cases) {

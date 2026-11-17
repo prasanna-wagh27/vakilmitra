@@ -7,8 +7,8 @@
 import { and, asc, documents, eq, facts, ownershipEvents, pages, properties } from "@vakilmitra/db";
 import {
   checkQuery,
-  eventFromDocumentInput,
   type Extraction,
+  eventFromDocumentInput,
   type Fact,
   type FactField,
   factCreateInput,
@@ -40,7 +40,10 @@ function toFact(f: FactRow): Fact {
     originalValue: f.originalValue,
     position: f.position,
     confidence: f.confidence,
-    crop: f.cropX === null || f.cropY === null || f.cropW === null || f.cropH === null ? null : { x: f.cropX, y: f.cropY, w: f.cropW, h: f.cropH },
+    crop:
+      f.cropX === null || f.cropY === null || f.cropW === null || f.cropH === null
+        ? null
+        : { x: f.cropX, y: f.cropY, w: f.cropW, h: f.cropH },
     reviewed: f.reviewed,
     reviewedAt: f.reviewedAt?.toISOString() ?? null,
   };
@@ -117,7 +120,9 @@ export const factRoutes: FastifyPluginAsyncZod = async (app) => {
       const kept = await tx.query.facts.findMany({ where: eq(facts.documentId, doc.id) });
       // A reviewed fact wins: skip fresh readings it already covers.
       const fresh = found.filter((f) =>
-        MULTI.has(f.field) ? !kept.some((k) => k.field === f.field && (k.value === f.value || k.originalValue === f.value)) : !kept.some((k) => k.field === f.field),
+        MULTI.has(f.field)
+          ? !kept.some((k) => k.field === f.field && (k.value === f.value || k.originalValue === f.value))
+          : !kept.some((k) => k.field === f.field),
       );
       if (fresh.length) {
         await tx.insert(facts).values(
@@ -146,7 +151,8 @@ export const factRoutes: FastifyPluginAsyncZod = async (app) => {
     const doc = await loadDocument(req.advocateId, req.params.id, "write");
     badValue(req.body.field, req.body.value);
     const same = await db.query.facts.findMany({ where: and(eq(facts.documentId, doc.id), eq(facts.field, req.body.field)) });
-    if (same.length && !MULTI.has(req.body.field)) throw new HttpError(409, "fact_exists", "This field already has a value; edit it instead");
+    if (same.length && !MULTI.has(req.body.field))
+      throw new HttpError(409, "fact_exists", "This field already has a value; edit it instead");
     const [fact] = await db
       .insert(facts)
       .values({

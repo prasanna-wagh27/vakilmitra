@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { classifyText, extractDocument, extractPage, parseAreaSqm, parseDate, parseLandClass, splitNames, toLines } from "../src/land/extract.js";
+import {
+  classifyText,
+  extractDocument,
+  extractPage,
+  parseAreaSqm,
+  parseDate,
+  parseLandClass,
+  splitNames,
+  toLines,
+} from "../src/land/extract.js";
 
 /** Words for one line of text at row y (fractions), split on spaces. */
 function line(text: string, y: number, c = 0.95) {

@@ -219,7 +219,10 @@ export const MUTATION_TYPES = ["SALE", "HEIRSHIP", "GIFT", "PARTITION", "MORTGAG
  * Format check for a fact's value, shared by the API and the review screen.
  * Returns a message key, or null when the value is usable.
  */
-export function factValueProblem(field: FactField, value: string): "fact.badArea" | "fact.badDate" | "fact.badClass" | "fact.badType" | "fact.badYesNo" | null {
+export function factValueProblem(
+  field: FactField,
+  value: string,
+): "fact.badArea" | "fact.badDate" | "fact.badClass" | "fact.badType" | "fact.badYesNo" | null {
   const v = value.trim();
   switch (field) {
     case "area":

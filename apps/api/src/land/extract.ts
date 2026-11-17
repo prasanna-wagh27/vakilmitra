@@ -215,7 +215,11 @@ export function splitNames(raw: string): string[] {
 }
 
 /** The first token that starts with a digit, whole ("112/1", "45अ"; an OCR slip like "1l2" stays visible, not cut short). */
-const firstNumberish = (raw: string) => clean(raw).replace(/\s*\/\s*/g, "/").match(/\d[^\s,;]*/)?.[0].replace(/[.,:;]+$/, "") ?? null;
+const firstNumberish = (raw: string) =>
+  clean(raw)
+    .replace(/\s*\/\s*/g, "/")
+    .match(/\d[^\s,;]*/)?.[0]
+    .replace(/[.,:;]+$/, "") ?? null;
 
 /** Mutation type from the ferfar text, by keyword. */
 const MUTATION_TYPES: [RegExp, string][] = [
@@ -265,8 +269,33 @@ const KIND_FIELDS: Record<RecordKind, Set<Label["field"]>> = {
     "date",
     "ferfar_no",
   ]),
-  FERFAR: new Set(["village", "taluka", "district", "survey_no", "gat_no", "hissa_no", "ferfar_no", "date", "area", "from_parties", "to_parties", "deed_reg_no"]),
-  INDEX_II: new Set(["village", "taluka", "district", "survey_no", "gat_no", "hissa_no", "deed_reg_no", "date", "area", "from_parties", "to_parties"]),
+  FERFAR: new Set([
+    "village",
+    "taluka",
+    "district",
+    "survey_no",
+    "gat_no",
+    "hissa_no",
+    "ferfar_no",
+    "date",
+    "area",
+    "from_parties",
+    "to_parties",
+    "deed_reg_no",
+  ]),
+  INDEX_II: new Set([
+    "village",
+    "taluka",
+    "district",
+    "survey_no",
+    "gat_no",
+    "hissa_no",
+    "deed_reg_no",
+    "date",
+    "area",
+    "from_parties",
+    "to_parties",
+  ]),
 };
 const MULTI = new Set<Label["field"]>(["owners", "other_rights", "from_parties", "to_parties"]);
 
@@ -279,7 +308,10 @@ export function extractPage(kind: RecordKind, words: OcrWord[]): ExtractedFact[]
   const allHits = findHits(lines);
   const hits = allHits.filter((h) => KIND_FIELDS[kind].has(h.label.field));
   // Lines that start a new labelled entry, of any kind, or carry a "label : value" separator.
-  const labelled = new Set([...allHits.map((x) => x.line), ...lines.flatMap((l, li) => (l.some((t) => isSep(t.k) || /[:：]$/.test(t.k)) ? [li] : []))]);
+  const labelled = new Set([
+    ...allHits.map((x) => x.line),
+    ...lines.flatMap((l, li) => (l.some((t) => isSep(t.k) || /[:：]$/.test(t.k)) ? [li] : [])),
+  ]);
   const facts: ExtractedFact[] = [];
   const count = new Map<FactField, number>();
   const push = (field: FactField, value: string, toks: Tok[], conf = minConf(toks)) => {
@@ -352,10 +384,16 @@ export function extractPage(kind: RecordKind, words: OcrWord[]): ExtractedFact[]
       case "taluka":
       case "district":
         // A place name is the first word or two before any other text ("माळेगाव", "मौजे माळेगाव बु.").
-        push(h.label.field, clean(valueToks.slice(0, valueToks[1]?.k.endsWith(".") ? 2 : 1).map((t) => t.t).join(" ")), [
-          ...labelToks,
-          ...valueToks.slice(0, 2),
-        ]);
+        push(
+          h.label.field,
+          clean(
+            valueToks
+              .slice(0, valueToks[1]?.k.endsWith(".") ? 2 : 1)
+              .map((t) => t.t)
+              .join(" "),
+          ),
+          [...labelToks, ...valueToks.slice(0, 2)],
+        );
         break;
       default: {
         const num = firstNumberish(raw);
@@ -376,7 +414,7 @@ export function extractPage(kind: RecordKind, words: OcrWord[]): ExtractedFact[]
       let toks = lines[li];
       for (let j = li + 1; j < lines.length && !labelled.has(j) && toks.length < 40; j++) toks = [...toks, ...lines[j]];
       const prose = clean(toks.map((t) => t.t).join(" "));
-      const m = prose.match(/मयत\s+(.+?)\s+(?:यांचे|यांच्या|याचे|हिचे)\s+वारस(?:\s+म्हणून)?\s*[:\-]?\s*(.+?)(?:\s+(?:यांची|यांच्या|यांचे)\s+नावे|$)/);
+      const m = prose.match(/मयत\s+(.+?)\s+(?:यांचे|यांच्या|याचे|हिचे)\s+वारस(?:\s+म्हणून)?\s*[:-]?\s*(.+?)(?:\s+(?:यांची|यांच्या|यांचे)\s+नावे|$)/);
       if (m) {
         push("from_party", m[1], toks);
         for (const name of splitNames(m[2])) push("to_party", name, toks);
@@ -394,10 +432,7 @@ export function extractPage(kind: RecordKind, words: OcrWord[]): ExtractedFact[]
 const MULTI_OUT = new Set<FactField>(["owner", "other_right", "from_party", "to_party"]);
 
 /** Extract from a document's pages, in page order; single-valued fields keep their first reading. */
-export function extractDocument(
-  kind: RecordKind,
-  pages: { pageId: string; words: OcrWord[] }[],
-): (ExtractedFact & { pageId: string })[] {
+export function extractDocument(kind: RecordKind, pages: { pageId: string; words: OcrWord[] }[]): (ExtractedFact & { pageId: string })[] {
   const out: (ExtractedFact & { pageId: string })[] = [];
   for (const p of pages) {
     for (const f of extractPage(kind, p.words)) {
