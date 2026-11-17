@@ -8,7 +8,6 @@ import { FlagCard } from "@/components/FlagCard";
 import { CaseForm, FeeAgreementForm, HearingForm, OutcomeForm, PartyForm, PaymentForm, PropertyForm, ShareForm } from "@/components/forms";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Sheet } from "@/components/ui/sheet";
 import { api } from "@/lib/api";
 import { fmtDate, rupees } from "@/lib/format";
@@ -78,13 +77,13 @@ function CasePage() {
         }
       />
 
-      <Card>
-        <div className="mb-2 flex flex-wrap gap-2">
+      <div>
+        <div className="mb-4 flex flex-wrap gap-2">
           <Badge>{t(`kind.${c.kind}`)}</Badge>
           <Badge tone={c.status === "ACTIVE" ? "green" : "neutral"}>{t(`status.${c.status}`)}</Badge>
           {!isOwner && <Badge tone="blue">{t("case.shared")}</Badge>}
         </div>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dl className="grid grid-cols-[auto_1fr] border-t text-[15px] [&>dd]:border-b [&>dd]:py-3 [&>dt]:border-b [&>dt]:py-3 [&>dt]:pr-6">
           {c.caseNumber && (
             <>
               <dt className="text-muted-foreground">{t("case.number")}</dt>
@@ -120,8 +119,8 @@ function CasePage() {
             </>
           )}
         </dl>
-        {c.notes && <p className="mt-2 text-sm whitespace-pre-wrap">{c.notes}</p>}
-      </Card>
+        {c.notes && <p className="mt-4 text-[15px] whitespace-pre-wrap text-muted-foreground">{c.notes}</p>}
+      </div>
 
       {c.flags.length > 0 && (
         <Section title={t("case.flags")} action={<Badge tone="red">{c.flags.length}</Badge>}>
@@ -159,20 +158,16 @@ function CasePage() {
         }
       >
         {docs.data?.length ? (
-          <ul className="space-y-2">
+          <ul className="list">
             {docs.data.map((d) => (
               <li key={d.id}>
-                <Link
-                  to="/cases/$caseId/documents/$documentId"
-                  params={{ caseId, documentId: d.id }}
-                  className="row-card flex items-center justify-between gap-2 p-4"
-                >
+                <Link to="/cases/$caseId/documents/$documentId" params={{ caseId, documentId: d.id }} className="list-row justify-between">
                   <div className="min-w-0">
-                    <p className="truncate font-medium">
+                    <p className="truncate text-[17px]">
                       {d.title || t(`doctype.${d.type}`)}
                       {d.year ? ` · ${d.year}` : ""}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="mt-0.5 text-[15px] text-muted-foreground">
                       {d.pageCount} {t("doc.pages")}
                     </p>
                   </div>
@@ -190,22 +185,20 @@ function CasePage() {
         {c.hearings.length === 0 ? (
           <Empty />
         ) : (
-          <ol className="space-y-2">
+          <ol className="list">
             {[...upcoming, ...past].map((h) => {
               const d = istDate(h.date);
               const isToday = d === today;
               const isPast = d < today;
               return (
-                <li
-                  key={h.id}
-                  className={cn("row-card p-4", isToday && "border-accent ring-2 ring-accent/20", isPast && h.outcome && "opacity-75")}
-                >
+                <li key={h.id} className={cn("list-item", isPast && h.outcome && "opacity-70")}>
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-semibold">
+                      <p className="text-[17px]">
                         {fmtDate(h.date, locale, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                        {isToday && <span className="chip ml-2 align-middle !bg-accent-soft !text-accent">{t("today.today")}</span>}
                       </p>
-                      {h.purpose && <p className="text-sm">{h.purpose}</p>}
+                      {h.purpose && <p className="mt-0.5 text-[15px] text-muted-foreground">{h.purpose}</p>}
                     </div>
                     {canEdit && (isPast || isToday) && (
                       <Button variant={h.outcome ? "ghost" : "outline"} size="sm" onClick={() => setSheet({ kind: "outcome", hearing: h })}>
@@ -214,13 +207,13 @@ function CasePage() {
                     )}
                   </div>
                   {h.outcome && (
-                    <p className="mt-1 text-sm">
+                    <p className="mt-2 text-[15px]">
                       <span className="text-muted-foreground">{t("case.outcome")}: </span>
                       {h.outcome}
                     </p>
                   )}
                   {h.nextStep && (
-                    <p className="text-sm">
+                    <p className="text-[15px]">
                       <span className="text-muted-foreground">{t("case.nextStep")}: </span>
                       {h.nextStep}
                     </p>
@@ -236,12 +229,12 @@ function CasePage() {
         {c.parties.length === 0 ? (
           <Empty />
         ) : (
-          <ul className="panel divide-y overflow-hidden">
+          <ul className="list">
             {c.parties.map((p) => (
-              <li key={p.id} className="flex items-center justify-between gap-2 p-3">
+              <li key={p.id} className="list-row justify-between">
                 <div>
-                  <p className="font-medium">{p.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-[17px]">{p.name}</p>
+                  <p className="mt-0.5 text-[15px] text-muted-foreground">
                     {t(`role.${p.role}`)}
                     {p.opposingCounsel ? ` · ${p.opposingCounsel}` : ""}
                   </p>
@@ -257,12 +250,12 @@ function CasePage() {
         {c.properties.length === 0 ? (
           <Empty />
         ) : (
-          <ul className="space-y-2">
+          <ul className="list">
             {c.properties.map((p) => (
               <li key={p.id}>
-                <Link to="/cases/$caseId/properties/$propertyId" params={{ caseId, propertyId: p.id }} className="row-card block p-4">
-                  <p className="font-semibold">{propTitle(p)}</p>
-                  <p className="text-sm text-muted-foreground">
+                <Link to="/cases/$caseId/properties/$propertyId" params={{ caseId, propertyId: p.id }} className="list-item">
+                  <p className="text-[17px]">{propTitle(p)}</p>
+                  <p className="mt-0.5 text-[15px] text-muted-foreground">
                     {[p.village, p.taluka, p.district].filter(Boolean).join(", ")} · {t("land.chain")}: {p.eventCount}
                   </p>
                 </Link>
@@ -276,21 +269,21 @@ function CasePage() {
         {c.feeAgreements.length === 0 ? (
           <Empty />
         ) : (
-          <ul className="space-y-2">
+          <ul className="list">
             {c.feeAgreements.map((a) => (
-              <li key={a.id} className="row-card p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-medium">{a.description}</p>
-                  <p className="text-right text-sm">
-                    <span className="block font-semibold">{rupees(Math.max(0, a.totalPaise - paid(a)), locale)}</span>
+              <li key={a.id} className="list-item">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[17px]">{a.description}</p>
+                  <p className="text-right text-[15px]">
+                    <span className="font-display block text-xl">{rupees(Math.max(0, a.totalPaise - paid(a)), locale)}</span>
                     <span className="text-muted-foreground">{t("fees.outstanding")}</span>
                   </p>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="mt-1 text-[15px] text-muted-foreground">
                   {t("fees.total")} {rupees(a.totalPaise, locale)} · {t("fees.paid")} {rupees(paid(a), locale)}
                 </p>
                 {isOwner && (
-                  <Button variant="outline" size="sm" className="mt-2" onClick={() => setSheet({ kind: "payment", agreementId: a.id })}>
+                  <Button variant="outline" size="sm" className="mt-3" onClick={() => setSheet({ kind: "payment", agreementId: a.id })}>
                     {t("fees.recordPayment")}
                   </Button>
                 )}
@@ -310,14 +303,14 @@ function CasePage() {
           }
         >
           {c.grants.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("case.shareHint")}</p>
+            <p className="text-[15px] text-muted-foreground">{t("case.shareHint")}</p>
           ) : (
-            <ul className="panel divide-y overflow-hidden">
+            <ul className="list">
               {c.grants.map((g) => (
-                <li key={g.id} className="flex items-center justify-between gap-2 p-3">
+                <li key={g.id} className="list-row justify-between">
                   <div>
-                    <p className="font-medium">{g.advocate.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-[17px]">{g.advocate.name}</p>
+                    <p className="mt-0.5 text-[15px] text-muted-foreground">
                       {g.advocate.email} · {g.role === "EDITOR" ? t("case.editor") : t("case.viewer")}
                     </p>
                   </div>
@@ -333,7 +326,7 @@ function CasePage() {
 
       {isOwner && (
         <Section title={t("case.delete")}>
-          <p className="mb-2 text-sm text-muted-foreground">{t("case.deleteHint")}</p>
+          <p className="mb-4 text-[15px] text-muted-foreground">{t("case.deleteHint")}</p>
           <ErrorBox error={remove.error} />
           <Button
             variant="destructive"

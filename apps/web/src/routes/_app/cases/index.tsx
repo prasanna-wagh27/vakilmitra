@@ -33,14 +33,14 @@ function CasesPage() {
         }
       />
       <Input
-        className="mb-2"
+        className="mb-3"
         type="search"
         placeholder={t("case.searchHint")}
         aria-label={t("common.search")}
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
-      <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-6 flex gap-1 overflow-x-auto pb-1">
         {(["", ...CASE_STATUSES] as const).map((s) => (
           <Chip key={s} active={status === s} onClick={() => setStatus(s)}>
             {s ? t(`status.${s}`) : t("case.all")}
@@ -53,20 +53,22 @@ function CasesPage() {
       ) : data?.length === 0 ? (
         <Empty />
       ) : (
-        <ul className="space-y-2">
+        <ul className="list">
           {data?.map((c) => (
             <li key={c.id}>
-              <Link to="/cases/$caseId" params={{ caseId: c.id }} className="row-card block p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-semibold">{c.title}</p>
+              <Link to="/cases/$caseId" params={{ caseId: c.id }} className="list-item">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[17px] leading-snug">{c.title}</p>
                   {c.openFlags > 0 && (
                     <Badge tone="red">
                       <Flag /> {c.openFlags}
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">{[c.caseNumber, c.court, c.client?.name].filter(Boolean).join(" · ")}</p>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                <p className="mt-1 text-[15px] text-muted-foreground">
+                  {[c.caseNumber, c.court, c.client?.name].filter(Boolean).join(" · ")}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-[15px]">
                   <Badge>{t(`kind.${c.kind}`)}</Badge>
                   {c.shared && <Badge tone="blue">{t("case.shared")}</Badge>}
                   <span className={c.nextHearing ? "" : "text-muted-foreground"}>
