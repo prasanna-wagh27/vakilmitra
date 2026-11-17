@@ -18,6 +18,7 @@ import type {
   OwnershipEvent,
   Property,
   SearchHit,
+  TitleReportResponse,
 } from "@vakilmitra/shared";
 import { API_BASE, api } from "./api";
 
@@ -42,6 +43,12 @@ export const propertyQuery = (caseId: string, propertyId: string) =>
   queryOptions({
     queryKey: ["property", propertyId],
     queryFn: () => api<{ property: PropertyDetail }>(`/cases/${caseId}/properties/${propertyId}`).then((r) => r.property),
+  });
+
+export const reportQuery = (caseId: string, propertyId: string) =>
+  queryOptions({
+    queryKey: ["report", propertyId],
+    queryFn: () => api<TitleReportResponse>(`/cases/${caseId}/properties/${propertyId}/report`),
   });
 
 export interface Board {

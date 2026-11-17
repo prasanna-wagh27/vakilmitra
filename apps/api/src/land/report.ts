@@ -10,9 +10,24 @@ import { type ChainEvent, chronological, classifyOtherRight, currentOwners } fro
 const ymd = (d: Date) => d.toISOString().slice(0, 10);
 
 export interface ReportInput {
-  property: { village: string | null; taluka: string | null; district: string | null; surveyNo: string | null; gatNo: string | null; hissaNo: string | null };
+  property: {
+    village: string | null;
+    taluka: string | null;
+    district: string | null;
+    surveyNo: string | null;
+    gatNo: string | null;
+    hissaNo: string | null;
+  };
   events: (ChainEvent & { notes?: string | null; documentId?: string | null })[];
-  flags: { id: string; rule: string; severity: "HIGH" | "MEDIUM" | "LOW"; message: string; resolved: boolean; resolution: string | null; eventIds: string[] }[];
+  flags: {
+    id: string;
+    rule: string;
+    severity: "HIGH" | "MEDIUM" | "LOW";
+    message: string;
+    resolved: boolean;
+    resolution: string | null;
+    eventIds: string[];
+  }[];
   documents: { id: string; type: string; year: number | null; title: string | null; pageCount: number }[];
   asOf: Date;
   years?: number;
@@ -30,7 +45,12 @@ export function buildTitleReport(input: ReportInput): TitleReport {
   // Encumbrances: the latest 7/12's other-rights entries, and mortgages not followed by a release.
   const encumbrances: TitleReport["encumbrances"] = (latest?.otherRights ?? [])
     .filter((r) => r.trim())
-    .map((entry) => ({ source: "other_right" as const, text: entry, category: classifyOtherRight(entry)?.category ?? null, eventId: latest?.id ?? null }));
+    .map((entry) => ({
+      source: "other_right" as const,
+      text: entry,
+      category: classifyOtherRight(entry)?.category ?? null,
+      eventId: latest?.id ?? null,
+    }));
   for (const e of chain) {
     if ((e.subtype ?? "").toUpperCase() !== "MORTGAGE") continue;
     const released = chain.some((r) => (r.subtype ?? "").toUpperCase() === "RELEASE" && r.date >= e.date);
@@ -71,7 +91,9 @@ export function buildTitleReport(input: ReportInput): TitleReport {
     })),
     encumbrances,
     flags: {
-      open: input.flags.filter((f) => !f.resolved).map(({ id, rule, severity, message, eventIds }) => ({ id, rule, severity, message, eventIds })),
+      open: input.flags
+        .filter((f) => !f.resolved)
+        .map(({ id, rule, severity, message, eventIds }) => ({ id, rule, severity, message, eventIds })),
       resolved: input.flags
         .filter((f) => f.resolved)
         .map(({ id, rule, severity, message, resolution, eventIds }) => ({ id, rule, severity, message, resolution, eventIds })),
