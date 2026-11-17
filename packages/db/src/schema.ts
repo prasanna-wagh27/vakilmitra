@@ -367,7 +367,9 @@ export const drafts = pgTable(
     caseId: text("case_id")
       .notNull()
       .references(() => cases.id, { onDelete: "cascade" }),
-    template: text("template").notNull(),
+    template: text("template").notNull(), // e.g. TSR (title search report)
+    // For a property's title report: one per property.
+    propertyId: text("property_id").references(() => properties.id, { onDelete: "cascade" }),
     language: localeEnum("language").notNull().default("mr"),
     title: text("title").notNull(),
     body: text("body").notNull(),
@@ -376,10 +378,11 @@ export const drafts = pgTable(
     version: integer("version").notNull().default(1),
     status: draftStatusEnum("status").notNull().default("DRAFT"), // DRAFT = "draft for advocate review"
     approvedAt: ts("approved_at"),
+    approvedById: text("approved_by_id").references(() => advocates.id, { onDelete: "set null" }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [index("draft_case_idx").on(t.caseId)],
+  (t) => [index("draft_case_idx").on(t.caseId), uniqueIndex("draft_property_template_idx").on(t.propertyId, t.template)],
 );
 
 // ---------- Case diary ----------

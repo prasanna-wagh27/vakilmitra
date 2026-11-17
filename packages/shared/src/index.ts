@@ -499,6 +499,71 @@ export interface Fact {
   reviewed: boolean;
   reviewedAt: string | null;
 }
+/** Title search report, assembled from a property's chain (see apps/api/src/land/report.ts). */
+export interface TitleReport {
+  property: {
+    village: string | null;
+    taluka: string | null;
+    district: string | null;
+    surveyNo: string | null;
+    gatNo: string | null;
+    hissaNo: string | null;
+    areaSqm: number | null;
+    landClass: string | null;
+  };
+  /** The search period: earliest record to the report date, and whether it covers the required years. */
+  period: { from: string | null; to: string; years: number; complete: boolean };
+  /** Owners at the end of the chain, as per the latest 7/12 and later transfers. */
+  owners: { names: string[]; asPerEventId: string; asPerDate: string } | null;
+  chain: {
+    id: string;
+    date: string;
+    kind: EventKind;
+    subtype: string | null;
+    ferfarNo: string | null;
+    deedRegNo: string | null;
+    from: string[];
+    to: string[];
+    owners: string[];
+    areaSqm: number | null;
+    section155: boolean;
+    notes: string | null;
+    documentId: string | null;
+  }[];
+  encumbrances: { source: "other_right" | "mortgage"; text: string; category: string | null; eventId: string | null }[];
+  flags: {
+    open: { id: string; rule: string; severity: Severity; message: string; eventIds: string[] }[];
+    resolved: { id: string; rule: string; severity: Severity; message: string; resolution: string | null; eventIds: string[] }[];
+  };
+  documents: { id: string; type: string; year: number | null; title: string | null; pageCount: number }[];
+}
+
+/** The advocate's opinion and sign-off on a title report. */
+export interface ReportDraft {
+  id: string;
+  language: Locale;
+  opinion: string;
+  status: "DRAFT" | "APPROVED";
+  approvedAt: string | null;
+  approvedBy: string | null;
+  /** The report as it stood when approved; it does not change when the chain does. */
+  approved: TitleReport | null;
+  updatedAt: string;
+}
+
+export interface TitleReportResponse {
+  /** The report from the chain as it is now. */
+  report: TitleReport;
+  draft: ReportDraft | null;
+  /** True when an approved report no longer matches the chain (records or flags changed since). */
+  changedSinceApproval: boolean;
+  advocate: { name: string; barCouncilNo: string | null; phone: string | null; email: string };
+  client: { name: string } | null;
+  caseTitle: string;
+}
+
+export const reportDraftInput = z.object({ opinion: z.string().max(20_000), language: z.enum(LOCALES) });
+
 export interface Extraction {
   /** The record kind used, or null when the document could not be identified. */
   kind: RecordKind | null;
