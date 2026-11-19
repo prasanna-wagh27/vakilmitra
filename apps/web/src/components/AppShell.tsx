@@ -14,6 +14,7 @@ import { type MessageKey, useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { Brand } from "./Brand";
 import { LanguageToggle } from "./LanguageToggle";
+import { PlanBanner } from "./PlanBanner";
 import { Button } from "./ui/button";
 
 const NAV: { to: string; key: MessageKey; icon: typeof Home01Icon }[] = [
@@ -63,6 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <main key={pathname} className="page-enter mx-auto max-w-5xl px-4 pt-6 pb-28 md:pb-12">
+        {!pathname.startsWith("/billing") && <PlanBanner />}
         {children}
       </main>
 

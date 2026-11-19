@@ -16,11 +16,13 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppDiaryRouteImport } from './routes/_app/diary'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppBillingIndexRouteImport } from './routes/_app/billing/index'
 import { Route as AppCasesIndexRouteImport } from './routes/_app/cases/index'
 import { Route as AppCasesNewRouteImport } from './routes/_app/cases/new'
 import { Route as AppClientsIndexRouteImport } from './routes/_app/clients/index'
 import { Route as AppClientsClientIdRouteImport } from './routes/_app/clients/$clientId'
 import { Route as AppFeesIndexRouteImport } from './routes/_app/fees/index'
+import { Route as AppBillingInvoicesInvoiceIdRouteImport } from './routes/_app/billing/invoices.$invoiceId'
 import { Route as AppCasesCaseIdIndexRouteImport } from './routes/_app/cases/$caseId/index'
 import { Route as AppCasesCaseIdScanRouteImport } from './routes/_app/cases/$caseId/scan'
 import { Route as AppFeesInvoiceClientIdRouteImport } from './routes/_app/fees/invoice/$clientId'
@@ -62,6 +64,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBillingIndexRoute = AppBillingIndexRouteImport.update({
+  id: '/billing/',
+  path: '/billing/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCasesIndexRoute = AppCasesIndexRouteImport.update({
   id: '/cases/',
   path: '/cases/',
@@ -87,6 +94,12 @@ const AppFeesIndexRoute = AppFeesIndexRouteImport.update({
   path: '/fees/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBillingInvoicesInvoiceIdRoute =
+  AppBillingInvoicesInvoiceIdRouteImport.update({
+    id: '/billing/invoices/$invoiceId',
+    path: '/billing/invoices/$invoiceId',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppCasesCaseIdIndexRoute = AppCasesCaseIdIndexRouteImport.update({
   id: '/cases/$caseId/',
   path: '/cases/$caseId/',
@@ -130,9 +143,11 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AppSettingsRoute
   '/cases/new': typeof AppCasesNewRoute
   '/clients/$clientId': typeof AppClientsClientIdRoute
+  '/billing/': typeof AppBillingIndexRoute
   '/cases/': typeof AppCasesIndexRoute
   '/clients/': typeof AppClientsIndexRoute
   '/fees/': typeof AppFeesIndexRoute
+  '/billing/invoices/$invoiceId': typeof AppBillingInvoicesInvoiceIdRoute
   '/cases/$caseId/scan': typeof AppCasesCaseIdScanRoute
   '/fees/invoice/$clientId': typeof AppFeesInvoiceClientIdRoute
   '/cases/$caseId/': typeof AppCasesCaseIdIndexRoute
@@ -149,9 +164,11 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/cases/new': typeof AppCasesNewRoute
   '/clients/$clientId': typeof AppClientsClientIdRoute
+  '/billing': typeof AppBillingIndexRoute
   '/cases': typeof AppCasesIndexRoute
   '/clients': typeof AppClientsIndexRoute
   '/fees': typeof AppFeesIndexRoute
+  '/billing/invoices/$invoiceId': typeof AppBillingInvoicesInvoiceIdRoute
   '/cases/$caseId/scan': typeof AppCasesCaseIdScanRoute
   '/fees/invoice/$clientId': typeof AppFeesInvoiceClientIdRoute
   '/cases/$caseId': typeof AppCasesCaseIdIndexRoute
@@ -170,9 +187,11 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/cases/new': typeof AppCasesNewRoute
   '/_app/clients/$clientId': typeof AppClientsClientIdRoute
+  '/_app/billing/': typeof AppBillingIndexRoute
   '/_app/cases/': typeof AppCasesIndexRoute
   '/_app/clients/': typeof AppClientsIndexRoute
   '/_app/fees/': typeof AppFeesIndexRoute
+  '/_app/billing/invoices/$invoiceId': typeof AppBillingInvoicesInvoiceIdRoute
   '/_app/cases/$caseId/scan': typeof AppCasesCaseIdScanRoute
   '/_app/fees/invoice/$clientId': typeof AppFeesInvoiceClientIdRoute
   '/_app/cases/$caseId/': typeof AppCasesCaseIdIndexRoute
@@ -191,9 +210,11 @@ export interface FileRouteTypes {
     | '/settings'
     | '/cases/new'
     | '/clients/$clientId'
+    | '/billing/'
     | '/cases/'
     | '/clients/'
     | '/fees/'
+    | '/billing/invoices/$invoiceId'
     | '/cases/$caseId/scan'
     | '/fees/invoice/$clientId'
     | '/cases/$caseId/'
@@ -210,9 +231,11 @@ export interface FileRouteTypes {
     | '/'
     | '/cases/new'
     | '/clients/$clientId'
+    | '/billing'
     | '/cases'
     | '/clients'
     | '/fees'
+    | '/billing/invoices/$invoiceId'
     | '/cases/$caseId/scan'
     | '/fees/invoice/$clientId'
     | '/cases/$caseId'
@@ -230,9 +253,11 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/cases/new'
     | '/_app/clients/$clientId'
+    | '/_app/billing/'
     | '/_app/cases/'
     | '/_app/clients/'
     | '/_app/fees/'
+    | '/_app/billing/invoices/$invoiceId'
     | '/_app/cases/$caseId/scan'
     | '/_app/fees/invoice/$clientId'
     | '/_app/cases/$caseId/'
@@ -298,6 +323,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/billing/': {
+      id: '/_app/billing/'
+      path: '/billing'
+      fullPath: '/billing/'
+      preLoaderRoute: typeof AppBillingIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/cases/': {
       id: '/_app/cases/'
       path: '/cases'
@@ -331,6 +363,13 @@ declare module '@tanstack/react-router' {
       path: '/fees'
       fullPath: '/fees/'
       preLoaderRoute: typeof AppFeesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/billing/invoices/$invoiceId': {
+      id: '/_app/billing/invoices/$invoiceId'
+      path: '/billing/invoices/$invoiceId'
+      fullPath: '/billing/invoices/$invoiceId'
+      preLoaderRoute: typeof AppBillingInvoicesInvoiceIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/cases/$caseId/': {
@@ -385,9 +424,11 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppCasesNewRoute: typeof AppCasesNewRoute
   AppClientsClientIdRoute: typeof AppClientsClientIdRoute
+  AppBillingIndexRoute: typeof AppBillingIndexRoute
   AppCasesIndexRoute: typeof AppCasesIndexRoute
   AppClientsIndexRoute: typeof AppClientsIndexRoute
   AppFeesIndexRoute: typeof AppFeesIndexRoute
+  AppBillingInvoicesInvoiceIdRoute: typeof AppBillingInvoicesInvoiceIdRoute
   AppCasesCaseIdScanRoute: typeof AppCasesCaseIdScanRoute
   AppFeesInvoiceClientIdRoute: typeof AppFeesInvoiceClientIdRoute
   AppCasesCaseIdIndexRoute: typeof AppCasesCaseIdIndexRoute
@@ -403,9 +444,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppCasesNewRoute: AppCasesNewRoute,
   AppClientsClientIdRoute: AppClientsClientIdRoute,
+  AppBillingIndexRoute: AppBillingIndexRoute,
   AppCasesIndexRoute: AppCasesIndexRoute,
   AppClientsIndexRoute: AppClientsIndexRoute,
   AppFeesIndexRoute: AppFeesIndexRoute,
+  AppBillingInvoicesInvoiceIdRoute: AppBillingInvoicesInvoiceIdRoute,
   AppCasesCaseIdScanRoute: AppCasesCaseIdScanRoute,
   AppFeesInvoiceClientIdRoute: AppFeesInvoiceClientIdRoute,
   AppCasesCaseIdIndexRoute: AppCasesCaseIdIndexRoute,

@@ -22,6 +22,7 @@ import { caseInput, caseListQuery, grantInput, istDayRange, partyInput } from "@
 import { keys } from "@vakilmitra/storage";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
+import { assertJuniorSeat } from "../billing/service.js";
 import { db } from "../db.js";
 import { logAccess, requireCaseAccess, requireCaseOwner, requireOwnClient, visibleCase } from "../lib/access.js";
 import { forbidden, HttpError, likePattern, notFound } from "../lib/http.js";
@@ -191,6 +192,7 @@ export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
     const junior = await db.query.advocates.findFirst({ where: eq(advocates.email, req.body.email), columns: { id: true } });
     if (!junior) throw notFound("Advocate with that email");
     if (junior.id === req.advocateId) throw new HttpError(400, "invalid_input", "You already own this case");
+    await assertJuniorSeat(req.advocateId, junior.id);
     const [grant] = await db
       .insert(caseAccess)
       .values({ caseId: req.params.id, advocateId: junior.id, role: req.body.role })

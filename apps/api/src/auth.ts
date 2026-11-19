@@ -1,4 +1,5 @@
-import { accessLogs, accounts, advocates, sessions, verifications } from "@vakilmitra/db";
+import { accessLogs, accounts, advocates, sessions, subscriptions, verifications } from "@vakilmitra/db";
+import { TRIAL_DAYS } from "@vakilmitra/shared";
 import { keys } from "@vakilmitra/storage";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -37,6 +38,19 @@ export const auth = betterAuth({
       // If this step fails, what remains is unreadable ciphertext, never a record pointing at nothing.
       afterDelete: async (user) => {
         await getServices().storage.deletePrefix(keys.advocate(user.id));
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        // The free trial starts at sign-up.
+        after: async (user) => {
+          await db
+            .insert(subscriptions)
+            .values({ advocateId: user.id, trialEndsAt: new Date(Date.now() + TRIAL_DAYS * 86_400_000) })
+            .onConflictDoNothing();
+        },
       },
     },
   },

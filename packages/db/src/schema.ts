@@ -3,7 +3,20 @@
 // and every extracted fact keeps a link to the exact crop of the scan it came from.
 
 import { relations, sql } from "drizzle-orm";
-import { boolean, doublePrecision, index, integer, jsonb, pgEnum, pgTable, real, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  doublePrecision,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgSequence,
+  pgTable,
+  real,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 const id = () =>
   text("id")
@@ -449,6 +462,88 @@ export const payments = pgTable("payment", {
   reference: text("reference"),
   createdAt: createdAt(),
 });
+
+// ---------- Subscription billing (Razorpay) ----------
+
+export const planEnum = pgEnum("plan", ["TRIAL", "SOLO", "PRO", "CHAMBER"]);
+export const billingIntervalEnum = pgEnum("billing_interval", ["MONTHLY", "YEARLY"]);
+
+/**
+ * One row per advocate who owns an account. Access is decided from dates, not a status flag:
+ * before trialEndsAt / paidUntil the account is open, then GRACE_DAYS of grace, then read-only.
+ * Data is never deleted for non-payment.
+ */
+export const subscriptions = pgTable("subscription", {
+  advocateId: text("advocate_id")
+    .primaryKey()
+    .references(() => advocates.id, { onDelete: "cascade" }),
+  plan: planEnum("plan").notNull().default("TRIAL"),
+  interval: billingIntervalEnum("interval"),
+  trialEndsAt: ts("trial_ends_at").notNull(),
+  paidUntil: ts("paid_until"),
+  // Razorpay recurring subscription (monthly plans); yearly plans are one-off orders.
+  razorpaySubscriptionId: text("razorpay_subscription_id").unique(),
+  // Set when the Razorpay subscription is halted after failed retries.
+  paymentFailing: boolean("payment_failing").notNull().default(false),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+  // A plan given by staff without payment (support, partners); shown in the admin panel.
+  complimentary: boolean("complimentary").notNull().default(false),
+  billingName: text("billing_name"),
+  gstin: text("gstin"),
+  billingState: text("billing_state"),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/** Checkouts started but not yet paid: what a Razorpay order or subscription was for. */
+export const checkouts = pgTable(
+  "checkout",
+  {
+    id: id(),
+    advocateId: text("advocate_id")
+      .notNull()
+      .references(() => advocates.id, { onDelete: "cascade" }),
+    plan: planEnum("plan").notNull(),
+    interval: billingIntervalEnum("interval").notNull(),
+    razorpayOrderId: text("razorpay_order_id").unique(),
+    razorpaySubscriptionId: text("razorpay_subscription_id").unique(),
+    amountPaise: integer("amount_paise").notNull(), // excluding GST
+    completedAt: ts("completed_at"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("checkout_advocate_idx").on(t.advocateId)],
+);
+
+/** Sequential invoice numbers (GST invoices need a unique serial per financial year). */
+export const invoiceNumberSeq = pgSequence("invoice_number_seq");
+
+/** GST tax invoice for every successful charge. One per Razorpay payment (webhooks are idempotent on it). */
+export const invoices = pgTable(
+  "invoice",
+  {
+    id: id(),
+    // Kept after the advocate deletes their account: tax records must be retained.
+    advocateId: text("advocate_id").references(() => advocates.id, { onDelete: "set null" }),
+    number: text("number").notNull().unique(), // VM/2026-27/000123
+    plan: planEnum("plan").notNull(),
+    interval: billingIntervalEnum("interval").notNull(),
+    amountPaise: integer("amount_paise").notNull(),
+    cgstPaise: integer("cgst_paise").notNull(),
+    sgstPaise: integer("sgst_paise").notNull(),
+    igstPaise: integer("igst_paise").notNull(),
+    totalPaise: integer("total_paise").notNull(),
+    periodStart: ts("period_start").notNull(),
+    periodEnd: ts("period_end").notNull(),
+    billingName: text("billing_name").notNull(),
+    billingEmail: text("billing_email").notNull(),
+    gstin: text("gstin"),
+    billingState: text("billing_state"),
+    status: text("status").notNull().default("PAID"), // PAID | REFUNDED
+    razorpayPaymentId: text("razorpay_payment_id").notNull().unique(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("invoice_advocate_idx").on(t.advocateId, t.createdAt)],
+);
 
 // ---------- Audit ----------
 
