@@ -17,6 +17,7 @@ import { effectiveAccess } from "./billing/service.js";
 import { env, isProd } from "./env.js";
 import { HttpError } from "./lib/http.js";
 import { accountRoutes } from "./routes/account.js";
+import { adminRoutes } from "./routes/admin.js";
 import { billingRoutes, razorpayWebhook } from "./routes/billing.js";
 import { caseRoutes } from "./routes/cases.js";
 import { clientRoutes } from "./routes/clients.js";
@@ -53,7 +54,11 @@ export async function buildApp() {
   app.decorateRequest("advocateId", "");
 
   await app.register(helmet, { global: true });
-  await app.register(cors, { origin: env.WEB_ORIGIN, credentials: true, methods: ["GET", "POST", "PATCH", "PUT", "DELETE"] });
+  await app.register(cors, {
+    origin: [env.WEB_ORIGIN, env.ADMIN_ORIGIN],
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+  });
   await app.register(multipart, { limits: { fileSize: PAGE_UPLOAD.maxBytes, files: 1 } });
   await app.register(swagger, {
     openapi: { info: { title: "VakilMitra API", version: "0.1.0" }, components: {} },
@@ -112,6 +117,9 @@ export async function buildApp() {
 
   // Razorpay calls this; it is verified by signature, not by session.
   await app.register(razorpayWebhook, { prefix: "/api/webhooks" });
+
+  // Staff panel: its own sign-in, separate from advocates.
+  await app.register(adminRoutes, { prefix: "/api/admin" });
 
   // Everything else needs a signed-in advocate.
   await app.register(async (authed) => {

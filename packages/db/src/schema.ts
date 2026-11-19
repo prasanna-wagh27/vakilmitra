@@ -545,6 +545,60 @@ export const invoices = pgTable(
   (t) => [index("invoice_advocate_idx").on(t.advocateId, t.createdAt)],
 );
 
+// ---------- Admin panel (VakilMitra staff; separate from advocates) ----------
+
+export const staffRoleEnum = pgEnum("staff_role", ["OWNER", "SUPPORT"]);
+
+/**
+ * Staff who run the business. Separate from advocates: own login (password + authenticator
+ * code), own sessions, own audit trail. Staff see accounts, plans and usage counts, never client files.
+ */
+export const staff = pgTable("staff", {
+  id: id(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  role: staffRoleEnum("role").notNull().default("SUPPORT"),
+  passwordHash: text("password_hash").notNull(), // scrypt$N$r$p$salt$hash
+  totpSecret: text("totp_secret").notNull(), // AES-GCM encrypted base32 secret
+  // Last accepted 30-second step, so a code cannot be used twice.
+  totpLastStep: integer("totp_last_step"),
+  disabled: boolean("disabled").notNull().default(false),
+  lastLoginAt: ts("last_login_at"),
+  createdAt: createdAt(),
+});
+
+export const staffSessions = pgTable(
+  "staff_session",
+  {
+    id: id(),
+    staffId: text("staff_id")
+      .notNull()
+      .references(() => staff.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(), // sha256 of the cookie value
+    expiresAt: ts("expires_at").notNull(),
+    ip: text("ip"),
+    userAgent: text("user_agent"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("staff_session_staff_idx").on(t.staffId)],
+);
+
+/** Every staff sign-in and every change staff make to an account. */
+export const staffAudit = pgTable(
+  "staff_audit",
+  {
+    id: id(),
+    staffId: text("staff_id").references(() => staff.id, { onDelete: "set null" }),
+    action: text("action").notNull(), // login, login.failed, trial.extend, plan.comp, invoice.refund, ...
+    targetType: text("target_type"),
+    targetId: text("target_id"),
+    details: jsonb("details").$type<Record<string, unknown>>(),
+    ip: text("ip"),
+    at: ts("at").notNull().defaultNow(),
+  },
+  (t) => [index("staff_audit_at_idx").on(t.at), index("staff_audit_target_idx").on(t.targetType, t.targetId)],
+);
+
 // ---------- Audit ----------
 
 export const accessLogs = pgTable(

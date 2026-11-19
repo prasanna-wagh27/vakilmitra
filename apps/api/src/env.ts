@@ -10,6 +10,8 @@ const schema = z.object({
   BETTER_AUTH_SECRET: z.string().min(16),
   API_URL: z.url().default("http://localhost:4000"),
   WEB_ORIGIN: z.url().default("http://localhost:5173"),
+  // The staff admin panel (a separate site).
+  ADMIN_ORIGIN: z.url().default("http://localhost:5174"),
   PORT: z.coerce.number().int().positive().default(4000),
   VALKEY_URL: z.url().default("redis://localhost:6379"),
   // Razorpay (billing). Without the keys, checkout answers 503 and everyone stays on their trial dates.
