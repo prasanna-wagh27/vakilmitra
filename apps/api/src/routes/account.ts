@@ -11,6 +11,7 @@ const profile = {
   id: true,
   name: true,
   email: true,
+  emailVerified: true,
   phone: true,
   barCouncilNo: true,
   locale: true,

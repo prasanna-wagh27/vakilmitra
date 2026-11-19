@@ -91,7 +91,15 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - Setup: put the keys in `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`, run `pnpm --filter @vakilmitra/api billing:plans` once to create the monthly plans and copy the printed ids into env, and add a webhook to `<API_URL>/api/webhooks/razorpay` with secret `RAZORPAY_WEBHOOK_SECRET` (events listed in `apps/api/.env.example`). Use `rzp_test_` keys until going live.
 - After a trial or paid period ends there are 7 days of grace, then the account turns read-only: everything stays readable and exportable, and nothing is ever deleted for non-payment. Juniors on a senior's paid plan are covered by it.
 - Every payment gets a GST tax invoice (CGST + SGST inside Maharashtra, IGST outside), numbered `VM/<financial year>/<serial>`. Set the seller details (`BILLING_SUPPLIER_*`, `BILLING_SAC`) before going live.
-- Not done yet: proration when switching plans mid-period (a switch starts a fresh period today), and emailing invoices.
+- Each payment emails a receipt with a link to its GST invoice, in the advocate's language.
+- Not done yet: proration when switching plans mid-period (a switch starts a fresh period today).
+
+## Email
+
+- Sent over SMTP from `apps/api/src/mail.ts`: set `SMTP_URL` (e.g. Amazon SES in Mumbai, `smtps://USER:PASS@email-smtp.ap-south-1.amazonaws.com:465`) and `MAIL_FROM`. Without `SMTP_URL`, development prints each email, with its link, to the API log; production sends nothing and logs a warning.
+- Forgot password: a one-hour, single-use link. Setting the new password signs out every device. The answer is the same whether or not the address has an account.
+- Address check: a link is sent at sign-up; Settings shows whether it is confirmed and can send it again. Signing in does not wait for it.
+- Both are limited to 3 requests per 15 minutes from one IP address, on top of the general auth rate limit.
 
 ## Admin panel (`apps/admin`)
 
@@ -148,6 +156,13 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 2. **License, pricing, exit path:** SIL Open Font License 1.1, free. It allows bundling in commercial software; the only limits are not selling the fonts on their own and not shipping modified copies under the reserved names. We ship them unmodified. To exit, remove the imports at the top of `apps/web/src/main.tsx`: the CSS font stacks fall back to system fonts (Noto Sans Devanagari on Android).
 3. **Approved by:** _pending._ Added during an unattended run on 2026-11-16; Prasanna Wagh to confirm or reject. The license gate lists the three packages by name.
 4. **New default for future projects?** Suggested yes for fonts only: OFL is the standard license for open fonts.
+
+### nodemailer (MIT-0), pending owner confirmation
+
+1. **What and why:** `nodemailer` sends the API's emails (password resets, address checks, payment receipts) over SMTP, so any provider works (Amazon SES Mumbai, Zoho, Brevo) and switching is a change of `SMTP_URL`. It has no dependencies.
+2. **License, pricing, exit path:** MIT-0 is MIT without the requirement to keep the copyright notice: more permissive than MIT, but not on the allowed list by name. Free. To exit, replace `SmtpMailer` in `apps/api/src/mail.ts` with a provider's HTTP API called through `fetch`.
+3. **Approved by:** _pending._ Prasanna Wagh to confirm, or to add MIT-0 to the allowed licenses.
+4. **New default for future projects?** Suggested yes: add MIT-0 to the allowed list.
 
 ### Dev-only note
 

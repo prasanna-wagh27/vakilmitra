@@ -1,6 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link01Icon, ShieldKeyIcon, SquareLock02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -8,9 +6,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { authClient } from "@/lib/auth-client";
 import { useI18n } from "@/lib/i18n";
-import { Brand } from "./Brand";
+import { AuthShell } from "./AuthShell";
 import { ErrorBox, Field } from "./common";
-import { LanguageToggle } from "./LanguageToggle";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
@@ -55,84 +52,50 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
   }
 
   const e = f.formState.errors;
-  const trust = [
-    { icon: SquareLock02Icon, text: t("auth.trust1") },
-    { icon: Link01Icon, text: t("auth.trust2") },
-    { icon: ShieldKeyIcon, text: t("auth.trust3") },
-  ];
   return (
-    <main className="mx-auto grid min-h-dvh max-w-5xl content-start items-center gap-4 px-4 py-4 md:content-center md:grid-cols-[1.05fr_1fr] md:gap-10 md:py-10">
-      {/* Brand side: what this is and why it can be trusted. */}
-      <section className="px-1 py-2 md:py-0">
-        <Brand />
-        <h1 className="font-display mt-6 text-2xl leading-8 md:mt-10 md:text-4xl md:leading-[1.15]">{t("auth.hero")}</h1>
-        <p className="mt-3 hidden max-w-md text-muted-foreground sm:block">{t("auth.heroSub")}</p>
-        <ul className="mt-8 hidden space-y-3 border-t pt-6 sm:block">
-          {trust.map((x) => (
-            <li key={x.text} className="flex items-center gap-3 text-sm">
-              <HugeiconsIcon icon={x.icon} className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-              {x.text}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="panel w-full p-6">
-        <div className="mb-6 flex items-center justify-between gap-2">
-          <h2 className="font-display text-xl">{mode === "login" ? t("auth.signIn") : t("auth.signUp")}</h2>
-          <LanguageToggle />
-        </div>
-        <form onSubmit={f.handleSubmit(submit)} className="space-y-4" noValidate>
-          {mode === "register" && (
-            <Field id="name" label={t("auth.name")} error={e.name}>
-              <Input id="name" autoComplete="name" {...f.register("name")} />
-            </Field>
-          )}
-          <Field id="email" label={t("auth.email")} error={e.email}>
-            <Input id="email" type="email" autoComplete="email" {...f.register("email")} />
+    <AuthShell title={mode === "login" ? t("auth.signIn") : t("auth.signUp")}>
+      <form onSubmit={f.handleSubmit(submit)} className="space-y-4" noValidate>
+        {mode === "register" && (
+          <Field id="name" label={t("auth.name")} error={e.name}>
+            <Input id="name" autoComplete="name" {...f.register("name")} />
           </Field>
-          <Field
+        )}
+        <Field id="email" label={t("auth.email")} error={e.email}>
+          <Input id="email" type="email" autoComplete="email" {...f.register("email")} />
+        </Field>
+        <Field id="password" label={t("auth.password")} hint={mode === "register" ? t("auth.passwordHint") : undefined} error={e.password}>
+          <Input
             id="password"
-            label={t("auth.password")}
-            hint={mode === "register" ? t("auth.passwordHint") : undefined}
-            error={e.password}
-          >
-            <Input
-              id="password"
-              type="password"
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
-              {...f.register("password")}
-            />
+            type="password"
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
+            {...f.register("password")}
+          />
+        </Field>
+        {mode === "register" && (
+          <Field id="barCouncilNo" label={`${t("auth.barNo")} (${t("common.optional")})`}>
+            <Input id="barCouncilNo" {...f.register("barCouncilNo")} />
           </Field>
-          {mode === "register" && (
-            <Field id="barCouncilNo" label={`${t("auth.barNo")} (${t("common.optional")})`}>
-              <Input id="barCouncilNo" {...f.register("barCouncilNo")} />
-            </Field>
-          )}
-          <ErrorBox error={error} />
-          <Button type="submit" className="w-full" disabled={f.formState.isSubmitting}>
-            {mode === "login" ? t("auth.signIn") : t("auth.signUp")}
-          </Button>
-        </form>
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          {mode === "login" ? t("auth.noAccount") : t("auth.haveAccount")}{" "}
-          <Link
-            className="font-medium text-primary underline underline-offset-4"
-            to={mode === "login" ? "/register" : "/login"}
-            search={{ next }}
-          >
-            {mode === "login" ? t("auth.signUp") : t("auth.signIn")}
+        )}
+        {mode === "login" && (
+          <Link to="/forgot-password" className="-mt-2 block text-right text-sm text-muted-foreground underline-offset-4 hover:underline">
+            {t("auth.forgot")}
           </Link>
-        </p>
-        <ul className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2 border-t pt-5 text-xs text-muted-foreground sm:hidden">
-          {trust.map((x) => (
-            <li key={x.text} className="flex items-center gap-1.5">
-              <HugeiconsIcon icon={x.icon} className="size-3.5" aria-hidden />
-              {x.text}
-            </li>
-          ))}
-        </ul>
-      </section>
-    </main>
+        )}
+        <ErrorBox error={error} />
+        <Button type="submit" className="w-full" disabled={f.formState.isSubmitting}>
+          {mode === "login" ? t("auth.signIn") : t("auth.signUp")}
+        </Button>
+      </form>
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        {mode === "login" ? t("auth.noAccount") : t("auth.haveAccount")}{" "}
+        <Link
+          className="font-medium text-primary underline underline-offset-4"
+          to={mode === "login" ? "/register" : "/login"}
+          search={{ next }}
+        >
+          {mode === "login" ? t("auth.signUp") : t("auth.signIn")}
+        </Link>
+      </p>
+    </AuthShell>
   );
 }
