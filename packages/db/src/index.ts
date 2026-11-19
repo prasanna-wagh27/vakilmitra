@@ -3,7 +3,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import pg from "pg";
 import * as schema from "./schema.js";
 
-export { and, asc, count, desc, eq, exists, gte, ilike, inArray, isNull, lt, lte, ne, not, or, sql } from "drizzle-orm";
+export { and, asc, count, countDistinct, desc, eq, exists, gte, ilike, inArray, isNull, lt, lte, ne, not, or, sql, sum } from "drizzle-orm";
 export * from "./schema.js";
 export { schema };
 

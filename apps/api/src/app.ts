@@ -13,9 +13,11 @@ import {
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
 import { auth } from "./auth.js";
+import { effectiveAccess } from "./billing/service.js";
 import { env, isProd } from "./env.js";
 import { HttpError } from "./lib/http.js";
 import { accountRoutes } from "./routes/account.js";
+import { billingRoutes, razorpayWebhook } from "./routes/billing.js";
 import { caseRoutes } from "./routes/cases.js";
 import { clientRoutes } from "./routes/clients.js";
 import { diaryRoutes } from "./routes/diary.js";
@@ -108,13 +110,29 @@ export async function buildApp() {
     },
   });
 
+  // Razorpay calls this; it is verified by signature, not by session.
+  await app.register(razorpayWebhook, { prefix: "/api/webhooks" });
+
   // Everything else needs a signed-in advocate.
   await app.register(async (authed) => {
     authed.addHook("preHandler", async (req) => {
       const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
       if (!session) throw new HttpError(401, "unauthenticated", "Please sign in");
       req.advocateId = session.user.id;
+      // Once a trial or plan has run out (after grace), the account is read-only: everything
+      // stays visible and exportable, but nothing new can be added until a plan is chosen.
+      if (req.method !== "GET" && req.method !== "HEAD" && !/^\/api\/(billing|me)(\/|\?|$)/.test(req.url)) {
+        const { state } = await effectiveAccess(req.advocateId);
+        if (state === "READ_ONLY") {
+          throw new HttpError(
+            402,
+            "read_only",
+            "Your plan has ended. Choose a plan to add or change work; your files stay available to read and export.",
+          );
+        }
+      }
     });
+    await authed.register(billingRoutes, { prefix: "/api/billing" });
     await authed.register(accountRoutes, { prefix: "/api/me" });
     await authed.register(clientRoutes, { prefix: "/api/clients" });
     await authed.register(caseRoutes, { prefix: "/api/cases" });

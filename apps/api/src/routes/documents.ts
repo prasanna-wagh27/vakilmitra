@@ -6,6 +6,7 @@ import { keys } from "@vakilmitra/storage";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import sharp, { type OutputInfo } from "sharp";
 import { z } from "zod";
+import { assertPageQuota } from "../billing/service.js";
 import { db } from "../db.js";
 import { logAccess, requireCaseAccess, visibleCase } from "../lib/access.js";
 import { HttpError, likePattern, notFound } from "../lib/http.js";
@@ -169,6 +170,8 @@ export const documentRoutes: FastifyPluginAsyncZod = async (app) => {
         where: and(eq(pages.documentId, doc.id), eq(pages.pageNo, pageNo)),
         columns: { id: true },
       });
+      // New pages count towards the plan of the case owner (juniors scan into the senior's plan).
+      if (!existing) await assertPageQuota(doc.case.advocateId, image.data.length);
       const pageId = existing?.id ?? randomUUID();
       // Key uses the case owner's id, so deleting the owner's account removes every page.
       const storageKey = keys.page(doc.case.advocateId, doc.caseId, doc.id, pageId);

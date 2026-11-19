@@ -1,6 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { Advocate } from "@vakilmitra/shared";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -10,11 +12,12 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox, Input } from "@/components/ui/input";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
 import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { fmtDate, orNull } from "@/lib/format";
-import { useI18n } from "@/lib/i18n";
-import { meQuery, useApiMutation } from "@/lib/queries";
+import { type MessageKey, useI18n } from "@/lib/i18n";
+import { billingQuery, meQuery, useApiMutation } from "@/lib/queries";
 
 export const Route = createFileRoute("/_app/settings")({ component: SettingsPage });
 
@@ -57,6 +60,10 @@ function SettingsPage() {
       <PageHeader title={t("settings.title")} />
       <Section title={t("settings.language")}>
         <LanguageToggle persist />
+      </Section>
+
+      <Section title={t("nav.billing")}>
+        <PlanLink />
       </Section>
 
       <Section title={t("settings.profile")}>
@@ -120,6 +127,24 @@ function SettingsPage() {
         </form>
       </Section>
     </>
+  );
+}
+
+function PlanLink() {
+  const { t } = useI18n();
+  const { data: b } = useQuery(billingQuery);
+  return (
+    <Item asChild variant="outline">
+      <Link to="/billing">
+        <ItemContent>
+          <ItemTitle>{b ? t(`billing.plan.${b.plan}` as MessageKey) : t("billing.yourPlan")}</ItemTitle>
+          {b && <ItemDescription>{t(`billing.state.${b.state}` as MessageKey)}</ItemDescription>}
+        </ItemContent>
+        <ItemActions>
+          <HugeiconsIcon icon={ArrowRight01Icon} className="size-4 text-muted-foreground" />
+        </ItemActions>
+      </Link>
+    </Item>
   );
 }
 

@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+/** Optional setting; an empty value (as copied from .env.example) counts as not set. */
+const optional = z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional());
+
 /** Validated at boot: the process refuses to start with missing or malformed config. */
 const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -9,6 +12,19 @@ const schema = z.object({
   WEB_ORIGIN: z.url().default("http://localhost:5173"),
   PORT: z.coerce.number().int().positive().default(4000),
   VALKEY_URL: z.url().default("redis://localhost:6379"),
+  // Razorpay (billing). Without the keys, checkout answers 503 and everyone stays on their trial dates.
+  RAZORPAY_KEY_ID: optional,
+  RAZORPAY_KEY_SECRET: optional,
+  RAZORPAY_WEBHOOK_SECRET: optional,
+  // Razorpay plan ids for the monthly subscriptions (create them with `pnpm --filter @vakilmitra/api billing:plans`).
+  RAZORPAY_PLAN_SOLO: optional,
+  RAZORPAY_PLAN_PRO: optional,
+  RAZORPAY_PLAN_CHAMBER: optional,
+  // Seller details printed on GST invoices (fill in before going live).
+  BILLING_SUPPLIER_NAME: z.string().default("VakilMitra"),
+  BILLING_SUPPLIER_ADDRESS: optional,
+  BILLING_SUPPLIER_GSTIN: optional,
+  BILLING_SAC: optional,
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 

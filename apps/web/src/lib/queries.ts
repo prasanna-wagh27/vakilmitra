@@ -1,6 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   Advocate,
+  BillingStatus,
   CaseAccessLevel,
   CaseDetail,
   CaseListItem,
@@ -15,7 +16,9 @@ import type {
   FeeTotals,
   Flag,
   HearingWithCase,
+  InvoiceSupplier,
   OwnershipEvent,
+  PlanInvoice,
   Property,
   SearchHit,
   TitleReportResponse,
@@ -144,3 +147,20 @@ export const factsQuery = (documentId: string) =>
   });
 
 export const pageImageUrl = (documentId: string, pageId: string) => `${API_BASE}/api/documents/${documentId}/pages/${pageId}/image`;
+
+export const billingQuery = queryOptions({
+  queryKey: ["billing"],
+  queryFn: () => api<{ billing: BillingStatus }>("/billing").then((r) => r.billing),
+  staleTime: 60_000,
+});
+
+export const planInvoicesQuery = queryOptions({
+  queryKey: ["billing", "invoices"],
+  queryFn: () => api<{ invoices: PlanInvoice[] }>("/billing/invoices").then((r) => r.invoices),
+});
+
+export const planInvoiceQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["billing", "invoice", id],
+    queryFn: () => api<{ invoice: PlanInvoice; supplier: InvoiceSupplier }>(`/billing/invoices/${id}`),
+  });

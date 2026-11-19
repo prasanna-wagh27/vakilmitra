@@ -64,6 +64,13 @@
       "when": 1794943195165,
       "tag": "0008_hearing_details",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795083923447,
+      "tag": "0009_billing",
+      "breakpoints": true
     }
   ]
 }

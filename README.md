@@ -84,6 +84,15 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - The worker is CPU-bound (about 1 s per page per core); set `OCR_CONCURRENCY` to the number of cores.
 - Cloud reads run on their own queue (`ocr-cloud`, limit `OCR_CLOUD_CONCURRENCY`, default 4), so a slow cloud call (Sarvam polls for up to 2 minutes) never holds a Tesseract slot. The local job saves Tesseract's reading first (route `local:cloud-queued`), so the advocate sees text at once; the cloud job then replaces it. Just before sending, the cloud job re-checks that the page is still the version it was queued for (version and image size, read again after fetching the image) and that the owner still consents, and it writes the audit row before sending. After its last retry, the local reading stays (route `local:cloud-failed`).
 
+## Plans and billing
+
+- Plans live in `packages/shared/src/billing.ts`: a 14-day free trial, then Solo, Pro and Chamber, monthly or yearly (yearly = 10 months' price). Prices exclude 18% GST. Every plan has every feature; plans differ in junior seats, pages scanned per month and storage.
+- Payments use Razorpay. Monthly plans are Razorpay Subscriptions (UPI Autopay, cards); yearly plans are one-off orders, because RBI rules need extra authentication for each auto-debit above ₹15,000.
+- Setup: put the keys in `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`, run `pnpm --filter @vakilmitra/api billing:plans` once to create the monthly plans and copy the printed ids into env, and add a webhook to `<API_URL>/api/webhooks/razorpay` with secret `RAZORPAY_WEBHOOK_SECRET` (events listed in `apps/api/.env.example`). Use `rzp_test_` keys until going live.
+- After a trial or paid period ends there are 7 days of grace, then the account turns read-only: everything stays readable and exportable, and nothing is ever deleted for non-payment. Juniors on a senior's paid plan are covered by it.
+- Every payment gets a GST tax invoice (CGST + SGST inside Maharashtra, IGST outside), numbered `VM/<financial year>/<serial>`. Set the seller details (`BILLING_SUPPLIER_*`, `BILLING_SAC`) before going live.
+- Not done yet: proration when switching plans mid-period (a switch starts a fresh period today), and emailing invoices.
+
 ## Land-record extraction
 
 - **How it reads.** Words from OCR are grouped into lines by their boxes. Known Marathi labels (गाव, गट क्रमांक, भोगवटादाराचे नाव, क्षेत्र, इतर हक्क, फेरफार नोंद क्रमांक, लिहून देणार …) are matched, and the words after each label become the value.

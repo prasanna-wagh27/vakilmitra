@@ -12,6 +12,12 @@ export default defineConfig({
       BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret",
       API_URL: "http://localhost:4000",
       WEB_ORIGIN: "http://localhost:5173",
+      RAZORPAY_KEY_ID: "rzp_test_key",
+      RAZORPAY_KEY_SECRET: "test-key-secret",
+      RAZORPAY_WEBHOOK_SECRET: "test-webhook-secret",
+      RAZORPAY_PLAN_SOLO: "plan_solo",
+      RAZORPAY_PLAN_PRO: "plan_pro",
+      RAZORPAY_PLAN_CHAMBER: "plan_chamber",
     },
   },
 });

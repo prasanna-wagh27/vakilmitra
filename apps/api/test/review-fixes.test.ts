@@ -1,5 +1,5 @@
 /** Regression tests for the full-codebase review (fix/full-review). */
-import { accessLogs, and, count, eq } from "@vakilmitra/db";
+import { accessLogs, and, count, eq, subscriptions } from "@vakilmitra/db";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildApp } from "../src/app.js";
@@ -28,6 +28,12 @@ let caseId: string;
 
 beforeAll(async () => {
   ({ agent: owner } = await signup("rv-owner"));
+  // Chamber plan: these tests share one case with several juniors.
+  const ownerId = (await owner.get("/api/me")).body.advocate.id;
+  await db
+    .update(subscriptions)
+    .set({ plan: "CHAMBER", paidUntil: new Date(Date.now() + 86_400_000) })
+    .where(eq(subscriptions.advocateId, ownerId));
   ({ agent: junior, email: juniorEmail } = await signup("rv-junior"));
   ownerClientId = (await owner.post("/api/clients").send({ name: "मालक पक्षकार" })).body.client.id;
   caseId = (await owner.post("/api/cases").send({ title: "Review case", clientId: ownerClientId })).body.case.id;
