@@ -93,6 +93,17 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - Every payment gets a GST tax invoice (CGST + SGST inside Maharashtra, IGST outside), numbered `VM/<financial year>/<serial>`. Set the seller details (`BILLING_SUPPLIER_*`, `BILLING_SAC`) before going live.
 - Not done yet: proration when switching plans mid-period (a switch starts a fresh period today), and emailing invoices.
 
+## Admin panel (`apps/admin`)
+
+- A separate site for VakilMitra staff (dev: http://localhost:5174, `pnpm --filter @vakilmitra/admin dev`), deployed apart from the advocates' app, e.g. on `admin.` next to `api.`. Set `ADMIN_ORIGIN` on the API to its address.
+- Staff have their own login, separate from advocates: password plus a 6-digit authenticator code, a 12-hour session cookie (`__Host-vm_admin`, SameSite=Strict), lockout after 5 failed tries, and changes accepted only from `ADMIN_ORIGIN`.
+- Staff are created only on the server: `pnpm --filter @vakilmitra/api admin:staff --email you@example.com --name "Name" --role OWNER` prints the password and authenticator key once. `--reset` reissues them; `--disable` removes access and signs out every session.
+- **Dashboard:**
+  - MRR, paid accounts by plan, trials, trial-to-paid conversion, money collected in the last 30 days, accounts in grace or read-only;
+  - sign-ups per day, pages scanned by where they were read (cloud reads cost money), OCR failures, and system health.
+- **Accounts:** search and filter; each account shows its plan, usage and counts. Support staff can extend a trial. Owners can also give a free plan and refund a payment through Razorpay.
+- Every staff sign-in and change is in the audit log. Staff never see clients, cases or documents, only counts.
+
 ## Land-record extraction
 
 - **How it reads.** Words from OCR are grouped into lines by their boxes. Known Marathi labels (गाव, गट क्रमांक, भोगवटादाराचे नाव, क्षेत्र, इतर हक्क, फेरफार नोंद क्रमांक, लिहून देणार …) are matched, and the words after each label become the value.

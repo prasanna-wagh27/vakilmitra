@@ -10,7 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "seed": "tsx --env-file-if-exists=.env src/seed.ts",
-    "billing:plans": "tsx --env-file-if-exists=.env src/scripts/billing-plans.ts"
+    "billing:plans": "tsx --env-file-if-exists=.env src/scripts/billing-plans.ts",
+    "admin:staff": "tsx --env-file-if-exists=.env src/scripts/admin-staff.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.4.3",
