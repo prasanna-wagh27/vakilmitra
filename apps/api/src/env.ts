@@ -27,6 +27,9 @@ const schema = z.object({
   BILLING_SUPPLIER_ADDRESS: optional,
   BILLING_SUPPLIER_GSTIN: optional,
   BILLING_SAC: optional,
+  // Outgoing email over SMTP, e.g. smtps://user:pass@email-smtp.ap-south-1.amazonaws.com:465. Unset: printed to the log in dev.
+  SMTP_URL: optional,
+  MAIL_FROM: z.string().default("VakilMitra <no-reply@vakilmitra.in>"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 
@@ -37,6 +40,7 @@ if (!parsed.success) {
 }
 export const env = parsed.data;
 export const isProd = env.NODE_ENV === "production";
+if (isProd && !env.SMTP_URL) console.warn("SMTP_URL is not set: password resets and receipts will not be emailed");
 
 if (isProd && env.BETTER_AUTH_SECRET.length < 32) {
   console.error("BETTER_AUTH_SECRET must be at least 32 characters in production");

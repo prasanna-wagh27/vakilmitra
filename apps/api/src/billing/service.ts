@@ -33,11 +33,13 @@ import {
   PLANS,
   TRIAL_DAYS,
 } from "@vakilmitra/shared";
+import { translate } from "@vakilmitra/shared/i18n";
 import { addDays, addMonths, addYears } from "date-fns";
 import { db } from "../db.js";
 import { env } from "../env.js";
 import { HttpError } from "../lib/http.js";
-import { getServices } from "../services.js";
+import { receiptMail } from "../mail.js";
+import { getServices, mailer } from "../services.js";
 
 export type Subscription = typeof subscriptions.$inferSelect;
 type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
@@ -208,7 +210,7 @@ export async function recordCharge(c: {
   now?: Date;
 }) {
   const now = c.now ?? new Date();
-  const replaced = await db.transaction(async (tx) => {
+  const done = await db.transaction(async (tx) => {
     const done = await tx.query.invoices.findFirst({ where: eq(invoices.razorpayPaymentId, c.paymentId), columns: { id: true } });
     if (done) {
       // Already recorded (e.g. by the browser); only take Razorpay's exact period end.
@@ -225,7 +227,10 @@ export async function recordCharge(c: {
       .values({ advocateId: c.advocateId, trialEndsAt: addDays(now, TRIAL_DAYS) })
       .onConflictDoNothing();
     const [sub] = await tx.select().from(subscriptions).where(eq(subscriptions.advocateId, c.advocateId)).for("update");
-    const advocate = await tx.query.advocates.findFirst({ where: eq(advocates.id, c.advocateId), columns: { name: true, email: true } });
+    const advocate = await tx.query.advocates.findFirst({
+      where: eq(advocates.id, c.advocateId),
+      columns: { name: true, email: true, locale: true },
+    });
     if (!sub || !advocate) throw new HttpError(404, "not_found", "Advocate not found");
 
     // A yearly renewal of the same plan stacks on top of the time left; anything else starts today.
@@ -251,33 +256,62 @@ export async function recordCharge(c: {
     const amount = priceOf(c.plan, c.interval);
     const tax = gstFor(amount, sub.billingState);
     const [{ n }] = (await tx.execute(sql`select nextval('invoice_number_seq') as n`)).rows as [{ n: string }];
-    await tx.insert(invoices).values({
-      advocateId: c.advocateId,
-      number: `VM/${financialYear(now)}/${String(n).padStart(6, "0")}`,
-      plan: c.plan,
-      interval: c.interval,
-      amountPaise: amount,
-      cgstPaise: tax.cgstPaise,
-      sgstPaise: tax.sgstPaise,
-      igstPaise: tax.igstPaise,
-      totalPaise: tax.totalPaise,
-      periodStart: start,
-      periodEnd: end,
-      billingName: sub.billingName ?? advocate.name,
-      billingEmail: advocate.email,
-      gstin: sub.gstin,
-      billingState: sub.billingState,
-      razorpayPaymentId: c.paymentId,
-    });
+    const [inv] = await tx
+      .insert(invoices)
+      .values({
+        advocateId: c.advocateId,
+        number: `VM/${financialYear(now)}/${String(n).padStart(6, "0")}`,
+        plan: c.plan,
+        interval: c.interval,
+        amountPaise: amount,
+        cgstPaise: tax.cgstPaise,
+        sgstPaise: tax.sgstPaise,
+        igstPaise: tax.igstPaise,
+        totalPaise: tax.totalPaise,
+        periodStart: start,
+        periodEnd: end,
+        billingName: sub.billingName ?? advocate.name,
+        billingEmail: advocate.email,
+        gstin: sub.gstin,
+        billingState: sub.billingState,
+        razorpayPaymentId: c.paymentId,
+      })
+      .returning({ id: invoices.id, number: invoices.number, totalPaise: invoices.totalPaise, periodEnd: invoices.periodEnd });
     if (c.checkoutId) await tx.update(checkouts).set({ completedAt: now }).where(eq(checkouts.id, c.checkoutId));
     await logBilling(tx, c.advocateId, "billing.paid", c.paymentId);
-    return oldRecurring;
+    return { oldRecurring, advocate, inv: inv! };
   });
+  if (!done) return;
   // A plan change replaces the old monthly subscription; stop it so it is not charged again.
-  if (replaced)
+  if (done.oldRecurring)
     await getServices()
-      .razorpay?.cancelSubscription(replaced, false)
+      .razorpay?.cancelSubscription(done.oldRecurring, false)
       .catch(() => undefined);
+  sendReceipt(done.advocate, c.plan, done.inv);
+}
+
+/** Emails the receipt with a link to the GST invoice. Never fails the charge. */
+function sendReceipt(
+  to: { name: string; email: string; locale: "mr" | "en" },
+  plan: PaidPlanId,
+  inv: { id: string; number: string; totalPaise: number; periodEnd: Date },
+) {
+  const l = to.locale;
+  const mail = receiptMail(to, {
+    number: inv.number,
+    planLabel: translate(l, `billing.plan.${plan}`),
+    total: `₹${(inv.totalPaise / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
+    periodEnd: inv.periodEnd.toLocaleDateString(l === "mr" ? "mr-IN" : "en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "Asia/Kolkata",
+    }),
+    url: `${env.WEB_ORIGIN}/billing/invoices/${inv.id}`,
+  });
+  void mailer()
+    .send(mail)
+    .catch((err) => console.error("[mail] receipt failed:", (err as Error).message));
 }
 
 export async function logBilling(tx: Tx | typeof db, advocateId: string, action: string, entityId: string) {

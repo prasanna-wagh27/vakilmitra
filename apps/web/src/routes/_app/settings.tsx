@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ErrorBox, Field, PageHeader, Section } from "@/components/common";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox, Input } from "@/components/ui/input";
@@ -68,7 +69,7 @@ function SettingsPage() {
 
       <Section title={t("settings.profile")}>
         <form onSubmit={f.handleSubmit((v) => save.mutate(v))} className="space-y-3" noValidate>
-          <p className="text-sm text-muted-foreground">{advocate.email}</p>
+          <EmailLine advocate={advocate} />
           <Field id="name" label={t("auth.name")} error={f.formState.errors.name}>
             <Input id="name" {...f.register("name")} />
           </Field>
@@ -182,5 +183,42 @@ function CloudOcrConsent() {
         <ErrorBox error={toggle.error} />
       </Card>
     </Section>
+  );
+}
+
+/** The sign-in email, and whether its owner has opened the confirmation link. */
+function EmailLine({ advocate }: { advocate: Advocate }) {
+  const { t } = useI18n();
+  const resend = useApiMutation(() =>
+    authClient.sendVerificationEmail({ email: advocate.email, callbackURL: `${window.location.origin}/settings?verified=1` }).then((r) => {
+      if (r.error) throw new Error(r.error.message ?? t("common.error"));
+    }),
+  );
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+      <span className="text-muted-foreground">{advocate.email}</span>
+      {advocate.emailVerified ? (
+        <Badge tone="green">{t("auth.emailConfirmed")}</Badge>
+      ) : (
+        <>
+          <Badge tone="amber">{t("auth.emailUnconfirmed")}</Badge>
+          {resend.isSuccess ? (
+            <span role="status">{t("auth.resent")}</span>
+          ) : (
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              className="h-auto p-0 underline underline-offset-4"
+              disabled={resend.isPending}
+              onClick={() => resend.mutate()}
+            >
+              {t("auth.resendLink")}
+            </Button>
+          )}
+          <ErrorBox error={resend.error} />
+        </>
+      )}
+    </div>
   );
 }

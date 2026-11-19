@@ -5,7 +5,8 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db.js";
 import { env, isProd } from "./env.js";
-import { getServices } from "./services.js";
+import { type Mail, resetPasswordMail, verifyEmailMail } from "./mail.js";
+import { getServices, mailer } from "./services.js";
 
 /**
  * Better Auth runs inside our own Postgres. An advocate is Better Auth's "user".
@@ -20,7 +21,30 @@ export const auth = betterAuth({
     provider: "pg",
     schema: { user: advocates, session: sessions, account: accounts, verification: verifications },
   }),
-  emailAndPassword: { enabled: true, minPasswordLength: 8, maxPasswordLength: 200 },
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 8,
+    maxPasswordLength: 200,
+    resetPasswordTokenExpiresIn: 60 * 60,
+    // A reset signs out every device, in case the old password was known to someone else.
+    revokeSessionsOnPasswordReset: true,
+    // Not awaited, so the answer takes the same time whether or not the account exists.
+    sendResetPassword: async ({ user, url }) => {
+      void send(resetPasswordMail(user, url));
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    expiresIn: 60 * 60 * 24,
+    sendVerificationEmail: async ({ user, url }) => {
+      // Land back in the app, not on the API: sign-up sends a relative "/" that would resolve against the API.
+      const u = new URL(url);
+      if (!u.searchParams.get("callbackURL")?.startsWith(`${env.WEB_ORIGIN}/`))
+        u.searchParams.set("callbackURL", `${env.WEB_ORIGIN}/settings?verified=1`);
+      void send(verifyEmailMail(user, u.toString()));
+    },
+  },
   session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 },
   user: {
     additionalFields: {
@@ -54,8 +78,22 @@ export const auth = betterAuth({
       },
     },
   },
-  rateLimit: { enabled: env.NODE_ENV !== "test", window: 60, max: 30 },
+  rateLimit: {
+    enabled: env.NODE_ENV !== "test",
+    window: 60,
+    max: 30,
+    // Each of these sends an email: a few per address-holder is plenty.
+    customRules: {
+      "/request-password-reset": { window: 15 * 60, max: 3 },
+      "/send-verification-email": { window: 15 * 60, max: 3 },
+    },
+  },
   advanced: { useSecureCookies: isProd },
 });
+
+const send = (m: Mail) =>
+  mailer()
+    .send(m)
+    .catch((err) => console.error("[mail] failed:", (err as Error).message));
 
 export type Session = typeof auth.$Infer.Session;

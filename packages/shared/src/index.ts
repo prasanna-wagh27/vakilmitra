@@ -331,6 +331,7 @@ export interface Advocate {
   id: string;
   name: string;
   email: string;
+  emailVerified: boolean;
   phone?: string | null;
   barCouncilNo?: string | null;
   locale: Locale;
