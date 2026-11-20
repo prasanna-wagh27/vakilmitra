@@ -11,7 +11,7 @@
  * run still lists it, so every kept run can be restored in full.
  */
 import { spawn } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { backupRuns, type Db, eq, lt, sql } from "@vakilmitra/db";
@@ -67,6 +67,21 @@ function pgConn(url: string) {
   return { dbname: u.toString(), env: { ...process.env, PGPASSWORD: password } };
 }
 
+/**
+ * pg_dump/pg_restore matching the server's major version: a newer pg_dump writes settings an
+ * older server rejects on restore. PG_BIN_DIR wins; else Debian/Ubuntu's per-version folder
+ * when installed; else whatever is on the path.
+ */
+async function pgTool(client: pg.ClientBase, tool: "pg_dump" | "pg_restore") {
+  if (process.env.PG_BIN_DIR) return join(process.env.PG_BIN_DIR, tool);
+  const { rows } = await client.query<{ v: string }>("show server_version_num");
+  const versioned = `/usr/lib/postgresql/${Math.floor(Number(rows[0].v) / 10000)}/bin/${tool}`;
+  return access(versioned).then(
+    () => versioned,
+    () => tool,
+  );
+}
+
 function run(cmd: string, args: string[], env: NodeJS.ProcessEnv) {
   return new Promise<void>((resolve, reject) => {
     const p = spawn(cmd, args, { env, stdio: ["ignore", "ignore", "pipe"] });
@@ -106,7 +121,7 @@ async function dumpWithCounts(url: string, file: string) {
     const counts = await countRows(client);
     const { dbname, env } = pgConn(url);
     await run(
-      "pg_dump",
+      await pgTool(client, "pg_dump"),
       ["--format=custom", "--no-owner", "--no-acl", "--no-comments", `--snapshot=${rows[0].s}`, `--file=${file}`, `--dbname=${dbname}`],
       env,
     );
@@ -259,11 +274,13 @@ export async function pickRun(backup: BlobStore, id = "latest") {
 export async function restoreDatabase(backup: BlobStore, masterKeys: MasterKey[], id: string, targetUrl: string) {
   const client = new pg.Client({ connectionString: targetUrl });
   await client.connect();
+  let pgRestore: string;
   try {
     const { rows } = await client.query<{ n: string }>(
       "select count(*) as n from information_schema.tables where table_schema in ('public', 'drizzle')",
     );
     if (Number(rows[0].n) > 0) throw new Error("The target database is not empty; restore into a new, empty database");
+    pgRestore = await pgTool(client, "pg_restore");
   } finally {
     await client.end();
   }
@@ -274,7 +291,7 @@ export async function restoreDatabase(backup: BlobStore, masterKeys: MasterKey[]
     const file = join(dir, "db.dump");
     await writeFile(file, dump, { mode: 0o600 });
     const { dbname, env } = pgConn(targetUrl);
-    await run("pg_restore", ["--no-owner", "--no-acl", "--exit-on-error", "--single-transaction", `--dbname=${dbname}`, file], env);
+    await run(pgRestore, ["--no-owner", "--no-acl", "--exit-on-error", "--single-transaction", `--dbname=${dbname}`, file], env);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

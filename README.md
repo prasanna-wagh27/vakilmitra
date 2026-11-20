@@ -129,8 +129,8 @@ error at start while it is off, and the admin dashboard shows the last backup an
   sample of files is decrypted. The scratch database is dropped afterwards.
 - **The master keys are the only way to read a backup.** Keep a copy of `STORAGE_MASTER_KEYS`
   offline, away from both the servers and the backup bucket.
-- `pg_dump` and `pg_restore` must be on the worker's path, the same major version as the server
-  or newer.
+- The worker needs `pg_dump` and `pg_restore` of the server's major version: it uses
+  `PG_BIN_DIR` if set, else `/usr/lib/postgresql/<version>/bin` when installed, else the path.
 
 By hand (`node dist/backup-cli.js` in production, `pnpm --filter @vakilmitra/worker backup` in development):
 
