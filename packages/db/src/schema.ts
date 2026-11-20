@@ -602,18 +602,37 @@ export const staffAudit = pgTable(
 
 // ---------- Audit ----------
 
+/**
+ * The audit trail: one row per request to the API by a signed-in advocate (views, lists,
+ * searches, changes, exports, refusals), per sign-in event, and per system action on a
+ * client's data (e.g. a page sent for cloud reading). Never holds client content: ids, the
+ * route, which fields changed, and the result. Staff actions are in staff_audit.
+ */
 export const accessLogs = pgTable(
   "access_log",
   {
     id: id(),
+    // Who: the advocate (owner or junior); null when unknown (failed sign-in) or deleted.
     advocateId: text("advocate_id").references(() => advocates.id, { onDelete: "set null" }),
-    action: text("action").notNull(), // case.view, case.share, case.delete, account.delete, ...
-    entityType: text("entity_type").notNull(),
-    entityId: text("entity_id").notNull(),
+    actor: text("actor").notNull().default("advocate"), // advocate | system | anonymous
+    action: text("action").notNull(), // case.view, case.share, document.create, auth.sign_in, ...
+    entityType: text("entity_type"),
+    entityId: text("entity_id"),
+    // The case it belongs to, so a case's owner sees everyone's activity on it (kept after the case is deleted).
+    caseId: text("case_id"),
+    method: text("method"),
+    route: text("route"), // the route pattern, e.g. /api/cases/:id
+    status: integer("status"),
+    details: jsonb("details").$type<Record<string, unknown>>(),
     ip: text("ip"),
+    userAgent: text("user_agent"),
     at: ts("at").notNull().defaultNow(),
   },
-  (t) => [index("access_log_advocate_at_idx").on(t.advocateId, t.at), index("access_log_entity_idx").on(t.entityType, t.entityId)],
+  (t) => [
+    index("access_log_advocate_at_idx").on(t.advocateId, t.at),
+    index("access_log_entity_idx").on(t.entityType, t.entityId),
+    index("access_log_case_at_idx").on(t.caseId, t.at),
+  ],
 );
 
 // ---------- Backups ----------

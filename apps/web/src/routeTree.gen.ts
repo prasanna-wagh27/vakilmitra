@@ -21,6 +21,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppActivityRouteImport } from './routes/_app/activity'
 import { Route as AppDiaryRouteImport } from './routes/_app/diary'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
@@ -95,6 +96,11 @@ const TermsRoute = TermsRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppActivityRoute = AppActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDiaryRoute = AppDiaryRouteImport.update({
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/activity': typeof AppActivityRoute
   '/diary': typeof AppDiaryRoute
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/activity': typeof AppActivityRoute
   '/diary': typeof AppDiaryRoute
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/_app/activity': typeof AppActivityRoute
   '/_app/diary': typeof AppDiaryRoute
   '/_app/search': typeof AppSearchRoute
   '/_app/settings': typeof AppSettingsRoute
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/terms'
+    | '/activity'
     | '/diary'
     | '/search'
     | '/settings'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/terms'
+    | '/activity'
     | '/diary'
     | '/search'
     | '/settings'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/terms'
+    | '/_app/activity'
     | '/_app/diary'
     | '/_app/search'
     | '/_app/settings'
@@ -462,6 +474,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/activity': {
+      id: '/_app/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof AppActivityRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/diary': {
       id: '/_app/diary'
       path: '/diary'
@@ -578,6 +597,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppActivityRoute: typeof AppActivityRoute
   AppDiaryRoute: typeof AppDiaryRoute
   AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRoute
@@ -598,6 +618,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppActivityRoute: AppActivityRoute,
   AppDiaryRoute: AppDiaryRoute,
   AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRoute,

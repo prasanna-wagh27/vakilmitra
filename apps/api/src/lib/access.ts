@@ -1,7 +1,8 @@
-import { accessLogs, and, caseAccess, cases, clients, eq, gte, inArray, or } from "@vakilmitra/db";
+import { and, caseAccess, cases, clients, eq, inArray, or } from "@vakilmitra/db";
 import type { CaseAccessLevel } from "@vakilmitra/shared";
 import type { FastifyRequest } from "fastify";
 import { db } from "../db.js";
+import { noteCase } from "./audit.js";
 import { forbidden, notFound } from "./http.js";
 
 /**
@@ -15,6 +16,7 @@ export async function requireCaseAccess(advocateId: string, caseId: string, need
     with: { grants: { where: eq(caseAccess.advocateId, advocateId), columns: { role: true } } },
   });
   if (!c) throw notFound("Case");
+  noteCase(caseId);
   if (c.advocateId === advocateId) return "OWNER";
   const grant = c.grants[0];
   if (!grant) throw notFound("Case");
@@ -34,28 +36,13 @@ export function visibleCase(advocateId: string) {
   )!;
 }
 
-/** Access log on every sensitive view, share, export and delete. */
-/** How long repeat views of the same item by the same advocate count as one (screens refresh while OCR runs). */
-const VIEW_DEDUPE_MS = 10 * 60_000;
-
-export async function logAccess(req: FastifyRequest, action: string, entityType: string, entityId: string) {
-  if (action.endsWith(".view")) {
-    const [recent] = await db
-      .select({ id: accessLogs.id })
-      .from(accessLogs)
-      .where(
-        and(
-          eq(accessLogs.advocateId, req.advocateId),
-          eq(accessLogs.entityType, entityType),
-          eq(accessLogs.entityId, entityId),
-          eq(accessLogs.action, action),
-          gte(accessLogs.at, new Date(Date.now() - VIEW_DEDUPE_MS)),
-        ),
-      )
-      .limit(1);
-    if (recent) return;
-  }
-  await db.insert(accessLogs).values({ advocateId: req.advocateId, action, entityType, entityId, ip: req.ip });
+/**
+ * Name this request's audit entry more precisely than the route does (e.g. case.share).
+ * The entry itself is written once, when the response is sent (lib/audit.ts).
+ */
+export function logAccess(req: FastifyRequest, action: string, entityType: string, entityId: string) {
+  Object.assign(req.audit, { action, entityType, entityId });
+  if (entityType === "case") req.audit.caseId ??= entityId;
 }
 
 /** The client must belong to this advocate. Returns it, or 404 (never reveals another advocate's client). */

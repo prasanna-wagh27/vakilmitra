@@ -113,7 +113,7 @@ export const documentRoutes: FastifyPluginAsyncZod = async (app) => {
       orderBy: asc(pages.pageNo),
       columns: { ...pageSummary, ocrText: true, ocrWords: true, ocrEngine: true, ocrRoute: true },
     });
-    await logAccess(req, "document.view", "document", doc.id);
+    logAccess(req, "document.view", "document", doc.id);
     const { case: _c, ...document } = doc;
     return { document: { ...document, pageCount: pageRows.length, pages: pageRows } };
   });
@@ -134,7 +134,7 @@ export const documentRoutes: FastifyPluginAsyncZod = async (app) => {
     const doc = await documentWithAccess(req.advocateId, req.params.id, "write");
     await db.delete(documents).where(eq(documents.id, doc.id));
     await getServices().storage.deletePrefix(keys.document(doc.case.advocateId, doc.caseId, doc.id));
-    await logAccess(req, "document.delete", "document", doc.id);
+    logAccess(req, "document.delete", "document", doc.id);
     return reply.code(204).send();
   });
 
@@ -210,7 +210,7 @@ export const documentRoutes: FastifyPluginAsyncZod = async (app) => {
     const page = await db.query.pages.findFirst({ where: and(eq(pages.id, req.params.pageId), eq(pages.documentId, doc.id)) });
     if (!page) throw notFound("Page");
     const image = await getServices().storage.get(page.storageKey);
-    await logAccess(req, "page.view", "page", page.id);
+    logAccess(req, "page.view", "page", page.id);
     return reply
       .header("Content-Type", "image/jpeg")
       .header("Cache-Control", "private, no-store")

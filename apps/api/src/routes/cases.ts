@@ -112,7 +112,7 @@ export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
           .groupBy(ownershipEvents.propertyId)
       : [];
     const evMap = new Map(eventCounts.map((e) => [e.propertyId, e.n]));
-    await logAccess(req, "case.view", "case", c.id);
+    logAccess(req, "case.view", "case", c.id);
     const { advocateId: _owner, ...rest } = c;
     return {
       access,
@@ -147,7 +147,7 @@ export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
     await db.delete(cases).where(eq(cases.id, req.params.id));
     // Delete scanned files after the rows: a failure here leaves unreachable ciphertext, never a dangling row.
     await getServices().storage.deletePrefix(keys.case(req.advocateId, req.params.id));
-    await logAccess(req, "case.delete", "case", req.params.id);
+    logAccess(req, "case.delete", "case", req.params.id);
     return reply.code(204).send();
   });
 
@@ -198,7 +198,7 @@ export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
       .values({ caseId: req.params.id, advocateId: junior.id, role: req.body.role })
       .onConflictDoUpdate({ target: [caseAccess.caseId, caseAccess.advocateId], set: { role: req.body.role } })
       .returning();
-    await logAccess(req, "case.share", "case", req.params.id);
+    logAccess(req, "case.share", "case", req.params.id);
     return reply.code(201).send({ grant });
   });
 
@@ -209,7 +209,7 @@ export const caseRoutes: FastifyPluginAsyncZod = async (app) => {
       .where(and(eq(caseAccess.id, req.params.grantId), eq(caseAccess.caseId, req.params.id)))
       .returning({ id: caseAccess.id });
     if (!gone.length) throw notFound("Grant");
-    await logAccess(req, "case.unshare", "case", req.params.id);
+    logAccess(req, "case.unshare", "case", req.params.id);
     return reply.code(204).send();
   });
 };

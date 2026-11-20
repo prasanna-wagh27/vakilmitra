@@ -119,9 +119,15 @@ export async function processCloudPage(
       // DPDP audit trail, written before the page leaves our servers: if this insert fails, nothing is sent.
       // Recorded against the advocate whose consent allowed it, so it shows in their access history.
       beforeCloudSend: async (engine) => {
-        await db
-          .insert(accessLogs)
-          .values({ advocateId: owner.id, action: `page.sent_to_ocr:${engine}`, entityType: "page", entityId: pageId });
+        await db.insert(accessLogs).values({
+          advocateId: owner.id,
+          actor: "system",
+          action: `page.sent_to_ocr:${engine}`,
+          entityType: "page",
+          entityId: pageId,
+          caseId: now!.document.case.id,
+          details: { engine },
+        });
       },
     },
   );

@@ -96,6 +96,17 @@ function SettingsPage() {
         <Card className="gap-3 px-(--card-spacing)">
           <p className="text-sm">{t("settings.privacyText")}</p>
         </Card>
+        <Item asChild variant="outline" className="mt-3">
+          <Link to="/activity">
+            <ItemContent>
+              <ItemTitle>{t("activity.title")}</ItemTitle>
+              <ItemDescription>{t("activity.open")}</ItemDescription>
+            </ItemContent>
+            <ItemActions>
+              <HugeiconsIcon icon={ArrowRight01Icon} className="size-4 text-muted-foreground" />
+            </ItemActions>
+          </Link>
+        </Item>
       </Section>
 
       <Section title={t("auth.signOut")}>
