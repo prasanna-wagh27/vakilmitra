@@ -1,0 +1,1 @@
+CREATE INDEX "access_log_at_idx" ON "access_log" USING btree ("at");

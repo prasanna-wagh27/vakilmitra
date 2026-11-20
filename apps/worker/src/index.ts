@@ -3,8 +3,10 @@ import {
   BACKUP_SCHEDULE,
   connectionFromUrl,
   createBackupQueue,
+  createHousekeepingQueue,
   createOcrCloudQueue,
   enqueueCloudOcr,
+  HOUSEKEEPING_SCHEDULE,
   type OcrCloudJob,
   type OcrJob,
   QUEUES,
@@ -16,6 +18,7 @@ import pino from "pino";
 import { checkRestore, runBackup } from "./backup.js";
 import { loadEnv } from "./env.js";
 import { markCloudFailed, markFailed, processCloudPage, processPage } from "./process-page.js";
+import { pruneActivity } from "./retention.js";
 
 const env = loadEnv();
 // OCR settings (including OCR_CONCURRENCY, which sizes both the job concurrency and the Tesseract pool).
@@ -105,6 +108,19 @@ if (backupQueue) {
   log.error("Backups are OFF: set BACKUP_STORAGE_DRIVER and its bucket (see README, Backups)");
 }
 
+// Daily clean-up: activity records older than a year (always on; it needs only the database).
+const housekeepingQueue = createHousekeepingQueue(env.VALKEY_URL);
+const housekeepingWorker = new Worker(
+  QUEUES.housekeeping,
+  async () => {
+    const { deleted, cutoff } = await pruneActivity(db);
+    log.info({ deleted, before: cutoff.toISOString() }, "old activity records deleted");
+  },
+  { connection: connectionFromUrl(env.VALKEY_URL), concurrency: 1, lockDuration: 10 * 60_000 },
+);
+housekeepingWorker.on("failed", (_job, err) => log.error({ err }, "daily clean-up failed"));
+await housekeepingQueue.upsertJobScheduler("daily-housekeeping", HOUSEKEEPING_SCHEDULE, { name: "housekeeping" });
+
 worker.on("ready", () =>
   log.info(
     {
@@ -123,8 +139,8 @@ worker.on("error", (err) => log.error({ err }, "worker error"));
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, async () => {
     log.info("shutting down");
-    await Promise.all([worker.close(), cloudWorker?.close(), backupWorker?.close()]);
-    await Promise.all([cloudQueue?.close(), backupQueue?.close()]);
+    await Promise.all([worker.close(), cloudWorker?.close(), backupWorker?.close(), housekeepingWorker.close()]);
+    await Promise.all([cloudQueue?.close(), backupQueue?.close(), housekeepingQueue.close()]);
     await policy.local.close();
     await policy.cloud?.close();
     await pool.end();
