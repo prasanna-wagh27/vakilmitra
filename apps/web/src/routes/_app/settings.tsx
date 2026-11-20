@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ErrorBox, Field, PageHeader, Section } from "@/components/common";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { PolicyFooter } from "@/components/legal/LegalPage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -127,6 +128,7 @@ function SettingsPage() {
           </Button>
         </form>
       </Section>
+      <PolicyFooter className="mt-6" />
     </>
   );
 }

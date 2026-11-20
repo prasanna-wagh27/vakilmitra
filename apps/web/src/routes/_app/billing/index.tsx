@@ -1,18 +1,11 @@
-import { CheckmarkCircle02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  type BillingInterval,
-  type BillingStatus,
-  type Checkout,
-  INDIAN_STATES,
-  PAID_PLANS,
-  type PaidPlanId,
-  PLANS,
-} from "@vakilmitra/shared";
+import { type BillingInterval, type BillingStatus, type Checkout, INDIAN_STATES, type PaidPlanId } from "@vakilmitra/shared";
 import { useEffect, useState } from "react";
 import { Empty, ErrorBox, Field, Loading, PageHeader, Section } from "@/components/common";
+import { PlanCards } from "@/components/PlanCards";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -182,55 +175,29 @@ function Plans({ b }: { b: BillingStatus }) {
         </p>
       )}
       {!b.razorpayKeyId && <p className="mb-3 rounded-xl bg-muted p-3 text-sm text-muted-foreground">{t("billing.unavailable")}</p>}
-      <div className="grid gap-3 md:grid-cols-3">
-        {PAID_PLANS.map((p) => {
-          const { limits, price } = PLANS[p];
-          const amount = price![interval];
-          const feats = [
-            limits.juniors === 0
-              ? t("billing.featJuniors0")
-              : limits.juniors === 1
-                ? t("billing.featJuniors1")
-                : tf("billing.featJuniors", { n: fmtNumber(limits.juniors, locale) }),
-            tf("billing.featPages", { n: fmtNumber(limits.pagesPerMonth, locale) }),
-            tf("billing.featStorage", { n: fmtNumber(limits.storageBytes / GB, locale) }),
-          ];
-          return (
-            <Card key={p} className={cn(p === "PRO" && "ring-2 ring-primary")}>
-              <CardHeader>
-                <CardTitle>{t(`billing.plan.${p}` as MessageKey)}</CardTitle>
-                <CardDescription>{t(`billing.planHint.${p}` as MessageKey)}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-1 flex-col gap-4">
-                <div>
-                  <span className="text-3xl font-semibold tabular-nums">{rupees(amount, locale)}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {t(interval === "MONTHLY" ? "billing.perMonth" : "billing.perYear")}
-                  </span>
-                  <p className="text-xs text-muted-foreground">{t("billing.plusGst")}</p>
-                </div>
-                <ul className="flex flex-col gap-2 text-sm">
-                  {feats.map((f) => (
-                    <li key={f} className="flex items-center gap-2">
-                      <HugeiconsIcon icon={Tick02Icon} className="size-4 text-success" /> {f}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  className="w-full"
-                  variant={p === "PRO" ? "default" : "outline"}
-                  disabled={!b.razorpayKeyId || buy.isPending || isCurrent(p)}
-                  onClick={() => buy.mutate(p)}
-                >
-                  {isCurrent(p) ? t("billing.currentPlan") : tf("billing.choose", { plan: t(`billing.plan.${p}` as MessageKey) })}
-                </Button>
-              </CardFooter>
-            </Card>
-          );
-        })}
-      </div>
+      <PlanCards
+        interval={interval}
+        action={(p) => (
+          <Button
+            className="w-full"
+            variant={p === "PRO" ? "default" : "outline"}
+            disabled={!b.razorpayKeyId || buy.isPending || isCurrent(p)}
+            onClick={() => buy.mutate(p)}
+          >
+            {isCurrent(p) ? t("billing.currentPlan") : tf("billing.choose", { plan: t(`billing.plan.${p}` as MessageKey) })}
+          </Button>
+        )}
+      />
+      <p className="mt-3 text-xs text-muted-foreground">
+        {t("legal.payAgree")}{" "}
+        <Link to="/terms" className="underline underline-offset-4">
+          {t("legal.terms")}
+        </Link>
+        {" · "}
+        <Link to="/refunds" className="underline underline-offset-4">
+          {t("legal.refunds")}
+        </Link>
+      </p>
       <ErrorBox error={buy.error} />
     </Section>
   );

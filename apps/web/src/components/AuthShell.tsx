@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useI18n } from "@/lib/i18n";
 import { Brand } from "./Brand";
 import { LanguageToggle } from "./LanguageToggle";
+import { PolicyFooter } from "./legal/LegalPage";
 
 /** The signed-out pages: what VakilMitra is on one side, the form on the other. */
 export function AuthShell({ title, children }: { title: string; children: ReactNode }) {
@@ -45,6 +46,7 @@ export function AuthShell({ title, children }: { title: string; children: ReactN
           ))}
         </ul>
       </section>
+      <PolicyFooter className="border-0 md:col-span-2" />
     </main>
   );
 }

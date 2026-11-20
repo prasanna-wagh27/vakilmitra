@@ -94,6 +94,13 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - Each payment emails a receipt with a link to its GST invoice, in the advocate's language.
 - Not done yet: proration when switching plans mid-period (a switch starts a fresh period today).
 
+## Policy pages
+
+- Public pages, no sign-in: `/pricing`, `/terms`, `/privacy`, `/refunds`, `/delivery`, `/contact`. Razorpay checks for these before turning on live payments. They are linked from sign-in and sign-up, Settings and the billing page, and sign-up says that creating an account accepts the Terms and Privacy Policy.
+- Text is in English (the binding version), with a short Marathi summary at the top for Marathi readers. Source: `apps/web/src/components/legal/`.
+- Business details (legal name, address, support and grievance contacts, courts' city) live in `apps/web/src/lib/legal.ts`. Until every one is filled in, the pages show "to be added" and a draft notice.
+- The text is a starting draft written to match how the app works today. Have a lawyer review it before launch.
+
 ## Email
 
 - Sent over SMTP from `apps/api/src/mail.ts`: set `SMTP_URL` (e.g. Amazon SES in Mumbai, `smtps://USER:PASS@email-smtp.ap-south-1.amazonaws.com:465`) and `MAIL_FROM`. Without `SMTP_URL`, development prints each email, with its link, to the API log; production sends nothing and logs a warning.
