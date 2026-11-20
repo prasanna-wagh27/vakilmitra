@@ -34,6 +34,15 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      - name: Postgres 16 client tools (backups dump and restore with the server's version)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pg16"
+          for t in pg_dump pg_restore; do
+            printf '#!/bin/sh\nexec docker run --rm --network host -e PGPASSWORD -v /tmp:/tmp postgres:16 %s "$@"\n' "$t" > "$RUNNER_TEMP/pg16/$t"
+            chmod +x "$RUNNER_TEMP/pg16/$t"
+          done
+          echo "PG_BIN_DIR=$RUNNER_TEMP/pg16" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/pg16/pg_dump" --version
       - run: pnpm install --frozen-lockfile
       - name: License check (fails on banned licenses)
         run: pnpm check:licenses

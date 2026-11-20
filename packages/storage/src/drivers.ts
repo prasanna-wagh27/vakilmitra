@@ -1,5 +1,5 @@
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import {
   DeleteObjectCommand,
   DeleteObjectsCommand,
@@ -16,6 +16,8 @@ export interface BlobStore {
   delete(key: string): Promise<void>;
   /** Delete every object whose key starts with `prefix` (which must end with "/"). */
   deletePrefix(prefix: string): Promise<number>;
+  /** Every key under `prefix` (which must end with "/"). */
+  list(prefix: string): Promise<string[]>;
 }
 
 const SAFE_KEY = /^[A-Za-z0-9][A-Za-z0-9/_.-]*$/;
@@ -52,6 +54,18 @@ export class FsBlobStore implements BlobStore {
     assertPrefix(prefix);
     await rm(join(this.root, prefix), { recursive: true, force: true });
     return 0;
+  }
+  async list(prefix: string) {
+    assertPrefix(prefix);
+    const dir = join(this.root, prefix);
+    const entries = await readdir(dir, { recursive: true, withFileTypes: true }).catch((e) => {
+      if ((e as NodeJS.ErrnoException).code === "ENOENT") return [];
+      throw e;
+    });
+    return entries
+      .filter((e) => e.isFile())
+      .map((e) => relative(this.root, join(e.parentPath, e.name)).split(sep).join("/"))
+      .sort();
   }
 }
 
@@ -111,5 +125,16 @@ export class S3BlobStore implements BlobStore {
       token = page.IsTruncated ? page.NextContinuationToken : undefined;
     } while (token);
     return deleted;
+  }
+  async list(prefix: string) {
+    assertPrefix(prefix);
+    const out: string[] = [];
+    let token: string | undefined;
+    do {
+      const page = await this.client.send(new ListObjectsV2Command({ Bucket: this.cfg.bucket, Prefix: prefix, ContinuationToken: token }));
+      for (const o of page.Contents ?? []) if (o.Key) out.push(o.Key);
+      token = page.IsTruncated ? page.NextContinuationToken : undefined;
+    } while (token);
+    return out.sort();
   }
 }

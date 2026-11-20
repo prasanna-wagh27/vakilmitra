@@ -91,6 +91,10 @@ export interface Health {
   ocrQueue: Record<string, number> | null;
   pagesStuck: number;
   razorpay: boolean;
+  backup: {
+    lastOk: { id: string; at: string; checkedAt: string | null; checkOk: boolean | null } | null;
+    lastFailed: { at: string; error: string | null } | null;
+  };
 }
 
 export const meQuery = queryOptions({

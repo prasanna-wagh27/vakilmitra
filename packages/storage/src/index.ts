@@ -35,8 +35,12 @@ export class SecureStorage {
 
 export type StorageConfig = { driver: "fs"; dir: string; masterKeys: string } | ({ driver: "s3"; masterKeys: string } & S3Config);
 
-export function createStorage(cfg: StorageConfig): SecureStorage {
-  const store = cfg.driver === "fs" ? new FsBlobStore(cfg.dir) : new S3BlobStore(cfg);
-  return new SecureStorage(store, parseMasterKeys(cfg.masterKeys));
+/** The bare store, for copying encrypted blobs as they are (backups). */
+export function createBlobStore(cfg: StorageConfig): BlobStore {
+  return cfg.driver === "fs" ? new FsBlobStore(cfg.dir) : new S3BlobStore(cfg);
 }
-export { storageConfigFromEnv } from "./env.js";
+
+export function createStorage(cfg: StorageConfig): SecureStorage {
+  return new SecureStorage(createBlobStore(cfg), parseMasterKeys(cfg.masterKeys));
+}
+export { backupStorageConfigFromEnv, storageConfigFromEnv } from "./env.js";

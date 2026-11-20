@@ -6,6 +6,7 @@
 import {
   advocates,
   and,
+  backupRuns,
   cases,
   clients,
   count,
@@ -495,7 +496,25 @@ export const adminRoutes: FastifyPluginAsyncZod = async (app) => {
         .select({ n: count() })
         .from(pages)
         .where(and(inArray(pages.ocrStatus, ["PENDING", "PROCESSING"]), sql`${pages.createdAt} < now() - interval '1 hour'`));
-      return { db: { ok: true, ms: dbMs }, ocrQueue: queue, pagesStuck: stuck?.n ?? 0, razorpay: !!getServices().razorpay };
+      const [lastOk] = await db
+        .select({ id: backupRuns.id, at: backupRuns.finishedAt, checkedAt: backupRuns.checkedAt, checkOk: backupRuns.checkOk })
+        .from(backupRuns)
+        .where(eq(backupRuns.status, "OK"))
+        .orderBy(desc(backupRuns.startedAt))
+        .limit(1);
+      const [lastFailed] = await db
+        .select({ at: backupRuns.startedAt, error: backupRuns.error })
+        .from(backupRuns)
+        .where(eq(backupRuns.status, "FAILED"))
+        .orderBy(desc(backupRuns.startedAt))
+        .limit(1);
+      return {
+        db: { ok: true, ms: dbMs },
+        ocrQueue: queue,
+        pagesStuck: stuck?.n ?? 0,
+        razorpay: !!getServices().razorpay,
+        backup: { lastOk: lastOk ?? null, lastFailed: lastFailed ?? null },
+      };
     });
   });
 };

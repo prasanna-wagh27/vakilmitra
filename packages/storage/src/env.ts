@@ -44,3 +44,19 @@ export function storageConfigFromEnv(env: Record<string, string | undefined>): S
     masterKeys: e.STORAGE_MASTER_KEYS,
   };
 }
+
+/**
+ * Where backups go: the same settings with a BACKUP_ prefix (BACKUP_STORAGE_DRIVER,
+ * BACKUP_STORAGE_DIR, BACKUP_S3_BUCKET, ...), encrypted with the same STORAGE_MASTER_KEYS.
+ * Use a different bucket (ideally a different account) from the live files. Null when unset.
+ */
+export function backupStorageConfigFromEnv(env: Record<string, string | undefined>): StorageConfig | null {
+  if (!env.BACKUP_STORAGE_DRIVER) return null;
+  const unprefixed: Record<string, string | undefined> = { STORAGE_MASTER_KEYS: env.STORAGE_MASTER_KEYS };
+  for (const [k, v] of Object.entries(env)) if (k.startsWith("BACKUP_")) unprefixed[k.slice("BACKUP_".length)] = v;
+  const cfg = storageConfigFromEnv(unprefixed);
+  const live = storageConfigFromEnv(env);
+  const same = cfg.driver === "fs" ? live.driver === "fs" && cfg.dir === live.dir : live.driver === "s3" && cfg.bucket === live.bucket;
+  if (same) throw new Error("Backups must go to a different place from the live files (BACKUP_S3_BUCKET or BACKUP_STORAGE_DIR)");
+  return cfg;
+}
