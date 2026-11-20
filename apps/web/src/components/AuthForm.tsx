@@ -85,6 +85,20 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
         <Button type="submit" className="w-full" disabled={f.formState.isSubmitting}>
           {mode === "login" ? t("auth.signIn") : t("auth.signUp")}
         </Button>
+        {mode === "register" && (
+          <p className="text-center text-xs text-muted-foreground">
+            {t("legal.agree1")}{" "}
+            <Link to="/terms" className="underline underline-offset-4">
+              {t("legal.terms")}
+            </Link>{" "}
+            {t("legal.and")}{" "}
+            <Link to="/privacy" className="underline underline-offset-4">
+              {t("legal.privacy")}
+            </Link>
+            {locale === "en" ? "" : " "}
+            {t("legal.agree2")}
+          </p>
+        )}
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
         {mode === "login" ? t("auth.noAccount") : t("auth.haveAccount")}{" "}
