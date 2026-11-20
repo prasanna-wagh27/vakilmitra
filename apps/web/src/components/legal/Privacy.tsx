@@ -102,6 +102,7 @@ function En() {
           When you delete a case or your account, its records and files are deleted at once. Backup copies are overwritten within 30 days.
           We keep an anonymous record that a deletion happened.
         </li>
+        <li>The activity log: for 1 year from each entry, then deleted automatically.</li>
         <li>Invoices and payment records: for 8 years, as required by tax law, even after the account is deleted.</li>
       </ul>
 
@@ -226,6 +227,7 @@ function Mr() {
           तुम्ही एखादे प्रकरण किंवा खाते हटवल्यास, त्याच्या नोंदी आणि फाइल्स लगेच हटवल्या जातात. बॅकअपमधील प्रती {n(30)} दिवसांत पुसल्या जातात. हटवणे झाले याची
           नाव नसलेली नोंद आम्ही ठेवतो.
         </li>
+        <li>हालचालींची नोंद: प्रत्येक नोंद {n(1)} वर्ष ठेवली जाते, त्यानंतर आपोआप हटवली जाते.</li>
         <li>बीजके आणि पेमेंटच्या नोंदी: कर कायद्यानुसार {n(8)} वर्षे, खाते हटवल्यानंतरही.</li>
       </ul>
 

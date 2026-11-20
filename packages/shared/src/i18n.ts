@@ -522,7 +522,7 @@ export const en = {
   "field.to_party": "To (transferee)",
   "activity.title": "Activity log",
   "activity.hint":
-    "Who opened or changed your cases and files, and every sign-in to your account. Juniors' actions on your cases are included.",
+    "Who opened or changed your cases and files, and every sign-in to your account. Juniors' actions on your cases are included. Kept for 1 year.",
   "activity.open": "See who opened or changed what",
   "activity.history": "History",
   "activity.kind.all": "All",
@@ -1129,7 +1129,7 @@ export const mr: Partial<Record<MessageKey, string>> = {
   "field.to_party": "घेणार",
   "activity.title": "हालचालींची नोंद",
   "activity.hint":
-    "तुमची प्रकरणे व कागदपत्रे कोणी उघडली किंवा बदलली, आणि तुमच्या खात्यातील प्रत्येक लॉग इन. तुमच्या प्रकरणांवरील ज्युनियरच्या हालचालीही यात आहेत.",
+    "तुमची प्रकरणे व कागदपत्रे कोणी उघडली किंवा बदलली, आणि तुमच्या खात्यातील प्रत्येक लॉग इन. तुमच्या प्रकरणांवरील ज्युनियरच्या हालचालीही यात आहेत. नोंदी १ वर्ष ठेवल्या जातात.",
   "activity.open": "कोणी काय उघडले किंवा बदलले ते पाहा",
   "activity.history": "इतिहास",
   "activity.kind.all": "सर्व",

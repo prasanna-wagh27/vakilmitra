@@ -607,6 +607,7 @@ export const staffAudit = pgTable(
  * searches, changes, exports, refusals), per sign-in event, and per system action on a
  * client's data (e.g. a page sent for cloud reading). Never holds client content: ids, the
  * route, which fields changed, and the result. Staff actions are in staff_audit.
+ * Kept for one year (the worker's daily clean-up), except the anonymous account.delete rows.
  */
 export const accessLogs = pgTable(
   "access_log",
@@ -632,6 +633,8 @@ export const accessLogs = pgTable(
     index("access_log_advocate_at_idx").on(t.advocateId, t.at),
     index("access_log_entity_idx").on(t.entityType, t.entityId),
     index("access_log_case_at_idx").on(t.caseId, t.at),
+    // The daily clean-up deletes by age.
+    index("access_log_at_idx").on(t.at),
   ],
 );
 

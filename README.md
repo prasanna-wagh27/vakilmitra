@@ -133,6 +133,8 @@ Everything is on record, without client content:
   and kind, downloadable as a spreadsheet in their language. A case's owner has a History link
   on the case. Staff see an account's activity on its admin page (ids only, never case names);
   opening it is itself recorded.
+- **How long:** one year. The worker's daily clean-up (02:30 IST) deletes older rows, except the
+  anonymous record that an account was deleted. Staff records (`staff_audit`) are not deleted.
 
 ## Backups
 
