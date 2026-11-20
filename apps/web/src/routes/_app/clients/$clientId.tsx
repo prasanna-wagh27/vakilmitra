@@ -52,7 +52,7 @@ function ClientPage() {
               {c.email}
             </a>
           )}
-          {c.whatsappOptIn && <Badge tone="green">WhatsApp ✓</Badge>}
+          {c.whatsappOptIn && <Badge tone="green">{t("client.whatsappBadge")}</Badge>}
         </div>
         {c.address && <p className="mt-1 text-sm">{c.address}</p>}
         {c.notes && <p className="mt-1 text-sm whitespace-pre-wrap text-muted-foreground">{c.notes}</p>}

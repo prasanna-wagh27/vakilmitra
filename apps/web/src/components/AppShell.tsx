@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/" aria-label={t("app.name")} className="mr-4">
             <Brand />
           </Link>
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
+          <nav className="hidden items-center gap-1 md:flex" aria-label={t("nav.main")}>
             {NAV.map((n) => (
               <Button key={n.to} asChild variant={active(n.to) ? "secondary" : "ghost"} size="sm">
                 <Link to={n.to} aria-current={active(n.to) ? "page" : undefined}>
@@ -70,7 +70,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <nav
         className="no-print fixed inset-x-0 bottom-0 z-40 border-t bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
-        aria-label="Main"
+        aria-label={t("nav.main")}
       >
         <ul className="grid grid-cols-5">
           {NAV.map((n) => {

@@ -5,6 +5,7 @@ import { ErrorBox, Field } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+import { authError } from "@/lib/errors";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/forgot-password")({ component: ForgotPassword });
@@ -23,7 +24,7 @@ function ForgotPassword() {
     const r = await authClient.requestPasswordReset({ email: email.trim(), redirectTo: `${window.location.origin}/reset-password` });
     setBusy(false);
     // The answer is the same whether or not the account exists.
-    if (r.error) setError(new Error(r.error.message ?? t("common.error")));
+    if (r.error) setError(authError(r.error));
     else setSent(true);
   }
 

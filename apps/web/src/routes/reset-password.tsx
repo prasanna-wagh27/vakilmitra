@@ -6,6 +6,7 @@ import { ErrorBox, Field } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+import { authError } from "@/lib/errors";
 import { useI18n } from "@/lib/i18n";
 
 /** The emailed link lands here with ?token=..., or ?error=INVALID_TOKEN when it has expired. */
@@ -32,7 +33,7 @@ function ResetPassword() {
     setBusy(false);
     if (!r.error) setDone(true);
     else if (r.error.code === "INVALID_TOKEN") setExpired(true);
-    else setError(new Error(r.error.message ?? t("common.error")));
+    else setError(authError(r.error));
   }
 
   return (
