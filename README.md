@@ -97,7 +97,8 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 ## Policy pages
 
 - Public pages, no sign-in: `/pricing`, `/terms`, `/privacy`, `/refunds`, `/delivery`, `/contact`. Razorpay checks for these before turning on live payments. They are linked from sign-in and sign-up, Settings and the billing page, and sign-up says that creating an account accepts the Terms and Privacy Policy.
-- Text is in English (the binding version), with a short Marathi summary at the top for Marathi readers. Source: `apps/web/src/components/legal/`.
+- Each policy is written in full in Marathi and in English, and readers see only their chosen language (if the two differ, the English text prevails). Source: `apps/web/src/components/legal/`.
+- Language rule for the whole web app: no English on a Marathi screen and no Marathi on an English one (except the language switch). Server errors are translated in `apps/web/src/lib/errors.ts`; add a Marathi line there for every new API error message.
 - Business details (legal name, address, support and grievance contacts, courts' city) live in `apps/web/src/lib/legal.ts`. Until every one is filled in, the pages show "to be added" and a draft notice.
 - The text is a starting draft written to match how the app works today. Have a lawyer review it before launch.
 
