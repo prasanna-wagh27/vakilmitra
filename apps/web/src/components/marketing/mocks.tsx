@@ -2,15 +2,7 @@
  * Still pictures of the product for the home page, drawn with HTML in the reader's language
  * (no screenshots, so they never go stale or mix languages). All hidden from screen readers.
  */
-import {
-  Alert02Icon,
-  Camera01Icon,
-  CheckmarkBadge01Icon,
-  CheckmarkCircle02Icon,
-  DocumentValidationIcon,
-  Link04Icon,
-  Search01Icon,
-} from "@hugeicons/core-free-icons";
+import { Alert02Icon, CheckmarkCircle02Icon, DocumentValidationIcon, Link04Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { addDays, istDate } from "@vakilmitra/shared";
 import type { ReactNode } from "react";
@@ -52,7 +44,7 @@ export function CasesMock() {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.c} className={cn("border-b last:border-0", r.c === 1 && "bg-amber-50")}>
+              <tr key={r.c} className={cn("border-b last:border-0", r.c === 1 && "bg-muted/60")}>
                 <td className="px-4 py-2.5 font-medium">{t(`home.mock.case${r.c}` as MessageKey)}</td>
                 <td className="hidden px-4 py-2.5 text-muted-foreground sm:table-cell">{t(r.court)}</td>
                 <td className="px-4 py-2.5 tabular-nums">
@@ -75,7 +67,7 @@ export function CasesMock() {
       {/* The detail card, overlapping the list like a panel opened from it. */}
       <div className="relative mx-3 -mt-6 rotate-1 rounded-2xl bg-card p-4 shadow-2xl ring-1 ring-foreground/10 sm:absolute sm:top-1/2 sm:-right-6 sm:mx-0 sm:mt-0 sm:w-[19rem] md:-right-12">
         <div className="flex items-center gap-2">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-muted text-foreground">
             <HugeiconsIcon icon={DocumentValidationIcon} className="size-4" />
           </span>
           <p className="text-sm font-semibold">{t("home.mock.factTitle")}</p>
@@ -85,7 +77,7 @@ export function CasesMock() {
           <dd className="font-medium">{t("home.mock.surveyValue")}</dd>
           <dt className="text-muted-foreground">{t("home.mock.owner")}</dt>
           <dd className="font-medium">
-            <mark className="rounded bg-amber-100 px-1">{t("home.mock.ownerName")}</mark>
+            <mark className="rounded bg-[#e6eaf3] px-1">{t("home.mock.ownerName")}</mark>
           </dd>
           <dt className="text-muted-foreground">{t("home.mock.area")}</dt>
           <dd className="font-medium">{t("home.mock.areaValue")}</dd>
@@ -95,7 +87,7 @@ export function CasesMock() {
             <HugeiconsIcon icon={Link04Icon} className="size-3.5" />
             {t("home.mock.source")}
           </span>
-          <span className="inline-flex items-center gap-1 font-medium text-emerald-700">
+          <span className="inline-flex items-center gap-1 font-medium text-link">
             <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-3.5" />
             {t("home.mock.checked")}
           </span>
@@ -147,7 +139,7 @@ export function TodayMock() {
           </ul>
         </div>
       ))}
-      <div className="mt-4 flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800">
+      <div className="mt-4 flex items-center gap-2 rounded-xl bg-graphite px-3 py-2.5 text-sm text-white">
         <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4 shrink-0" />
         {t("home.demo.reportReady")}
       </div>
@@ -155,96 +147,57 @@ export function TodayMock() {
   );
 }
 
-// ---------- The four steps ----------
+// ---------- Title search, step by step ----------
 
-const Line = ({ w, hi }: { w: string; hi?: boolean }) => (
-  <span className={cn("block h-2 rounded-full", hi ? "bg-amber-300" : "bg-foreground/15")} style={{ width: w }} />
+const Done = ({ last }: { last?: boolean }) => (
+  <span
+    className={cn(
+      "flex size-4 shrink-0 items-center justify-center rounded-[4px]",
+      last ? "bg-graphite text-white" : "bg-muted text-muted-foreground",
+    )}
+  >
+    <HugeiconsIcon icon={Tick02Icon} className="size-3" strokeWidth={2.5} />
+  </span>
 );
 
-export function ScanStep() {
-  const { t } = useI18n();
+/** The title search as a list of finished steps, the way the app reports progress. */
+export function StepsMock() {
+  const { t, tf, locale } = useI18n();
+  const docs: MessageKey[] = ["home.doc.712", "home.doc.ferfar", "home.doc.index2"];
   return (
-    <div className="flex flex-col items-center gap-3 p-4">
-      <div className="relative w-36 -rotate-2 rounded-md bg-white p-3 shadow-md ring-1 ring-foreground/10">
-        <div className="absolute -inset-1.5 rounded-lg border-2 border-dashed border-orange-400" />
-        <div className="flex flex-col gap-1.5">
-          <Line w="60%" />
-          <Line w="90%" />
-          <Line w="80%" />
-          <Line w="95%" />
-          <Line w="70%" />
-          <Line w="85%" />
-        </div>
-      </div>
-      <p className="text-xs text-muted-foreground">{t("home.how.page")}</p>
-      <span className="flex size-11 items-center justify-center rounded-full bg-orange-500 text-white shadow-md ring-4 ring-orange-200">
-        <HugeiconsIcon icon={Camera01Icon} className="size-5" />
-      </span>
-    </div>
-  );
-}
-
-export function ReadStep() {
-  const { t } = useI18n();
-  return (
-    <div className="flex flex-col gap-3 p-4">
-      <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-sm shadow-sm ring-1 ring-foreground/10">
-        <HugeiconsIcon icon={Search01Icon} className="size-4 text-muted-foreground" />
-        {t("home.how.searchWord")}
-      </div>
-      <div className="flex flex-col gap-1.5 rounded-lg bg-white p-3 shadow-sm ring-1 ring-foreground/10">
-        <Line w="85%" />
-        <Line w="40%" hi />
-        <Line w="92%" />
-        <Line w="70%" />
-        <Line w="35%" hi />
-        <Line w="80%" />
-      </div>
-      <p className="text-xs font-medium text-emerald-700">{t("home.how.found")}</p>
-    </div>
-  );
-}
-
-export function CheckStep() {
-  const { t } = useI18n();
-  const rows: [MessageKey, MessageKey][] = [
-    ["home.mock.survey", "home.mock.surveyValue"],
-    ["home.mock.owner", "home.mock.ownerName"],
-    ["home.mock.area", "home.mock.areaValue"],
-  ];
-  return (
-    <ul className="flex flex-col gap-2 p-4">
-      {rows.map(([k, v]) => (
-        <li key={k} className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm shadow-sm ring-1 ring-foreground/10">
-          <span className="min-w-0 flex-1">
-            <span className="block text-[11px] text-muted-foreground">{t(k)}</span>
-            <span className="block truncate font-medium">{t(v)}</span>
-          </span>
-          <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-5 shrink-0 text-sky-600" />
+    <div aria-hidden className="w-full max-w-lg rounded-xl bg-white p-5 text-sm text-neutral-700 shadow-2xl">
+      <ul className="flex flex-col gap-3.5">
+        <li className="flex items-center gap-3">
+          <Done />
+          {tf("home.steps.scan", { n: fmtNumber(3, locale) })}
         </li>
-      ))}
-    </ul>
-  );
-}
-
-export function ApproveStep() {
-  const { t } = useI18n();
-  return (
-    <div className="flex justify-center p-4">
-      <div className="relative w-40 rounded-md bg-white p-3 shadow-md ring-1 ring-foreground/10">
-        <p className="text-[11px] font-semibold">{t("report.title")}</p>
-        <div className="mt-2 flex flex-col gap-1.5">
-          <Line w="90%" />
-          <Line w="75%" />
-          <Line w="85%" />
-          <Line w="60%" />
-          <Line w="80%" />
-        </div>
-        <span className="absolute -right-4 -bottom-3 inline-flex -rotate-12 items-center gap-1 rounded-md border-2 border-violet-600 bg-white px-2 py-0.5 text-xs font-bold text-violet-700">
-          <HugeiconsIcon icon={CheckmarkBadge01Icon} className="size-3.5" />
-          {t("home.how.approved")}
-        </span>
-      </div>
+        <li className="flex items-center gap-3">
+          <Done />
+          {t("home.steps.read")}
+        </li>
+        <li className="flex flex-col gap-2.5">
+          <span className="flex items-center gap-3">
+            <Done />
+            {t("home.steps.search")}
+          </span>
+          <span className="ms-7 flex flex-wrap gap-1.5">
+            {docs.map((d) => (
+              <span key={d} className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-neutral-600">
+                {t(d)}
+              </span>
+            ))}
+          </span>
+          <span className="ms-7 text-neutral-500">{tf("home.steps.found", { n: fmtNumber(14, locale) })}</span>
+        </li>
+        <li className="flex items-center gap-3">
+          <Done />
+          {t("home.steps.chain")}
+        </li>
+        <li className="flex items-center gap-3 font-medium text-neutral-900">
+          <Done last />
+          {t("home.steps.done")}
+        </li>
+      </ul>
     </div>
   );
 }
@@ -252,7 +205,7 @@ export function ApproveStep() {
 function Src({ k }: { k: MessageKey }) {
   const { t } = useI18n();
   return (
-    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700">
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-link">
       <HugeiconsIcon icon={Link04Icon} className="size-3" />
       {t(k)}
     </span>
@@ -266,10 +219,10 @@ export function ReportMock() {
     <div aria-hidden className="mx-auto max-w-2xl rounded-xl bg-white p-6 text-neutral-900 shadow-2xl sm:p-8">
       <div className="flex items-start justify-between gap-4 border-b border-neutral-200 pb-4">
         <div>
-          <p className="font-serif text-2xl">{t("report.title")}</p>
+          <p className="font-heading text-xl font-semibold">{t("report.title")}</p>
           <p className="mt-1 text-sm text-neutral-500">{t("home.report.village")}</p>
         </div>
-        <span className="shrink-0 rounded-md border-2 border-emerald-600 px-2 py-0.5 text-xs font-bold text-emerald-700">
+        <span className="shrink-0 rounded-md border-2 border-graphite px-2 py-0.5 text-xs font-bold text-graphite">
           {t("home.how.approved")}
         </span>
       </div>
