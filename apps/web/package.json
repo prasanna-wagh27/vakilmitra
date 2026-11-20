@@ -13,7 +13,6 @@
   "dependencies": {
     "@fontsource-variable/figtree": "5.3.0",
     "@fontsource/ibm-plex-sans-devanagari": "5.3.0",
-    "@fontsource/tiro-devanagari-marathi": "5.3.0",
     "@hookform/resolvers": "^5.9.2",
     "@hugeicons/core-free-icons": "4.4.0",
     "@hugeicons/react": "1.1.10",

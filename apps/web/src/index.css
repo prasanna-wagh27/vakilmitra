@@ -191,17 +191,31 @@
   }
 }
 
-/* Home page: a serif for big headlines (Latin and Marathi forms), and the floating tiles. */
+/* Home page: graphite and mist. */
 @theme {
-  --font-serif: "Tiro Devanagari Marathi", Georgia, serif;
-  --animate-float: float 7s ease-in-out infinite;
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0) rotate(var(--tilt, 0deg));
-    }
-    50% {
-      transform: translateY(-10px) rotate(var(--tilt, 0deg));
-    }
-  }
+  --color-graphite: #17191c;
+  --color-paper: #faf9f7;
+  --color-link: #4a5aa8;
+}
+
+/* Soft, out-of-focus sky: blue above, sage and sand below, with one light streak. */
+@utility bg-mist {
+  background:
+    linear-gradient(160deg, transparent 42%, rgb(255 255 255 / 0.16) 52%, transparent 62%),
+    radial-gradient(120% 60% at 10% 92%, #a9b48a 0%, transparent 55%), radial-gradient(90% 55% at 88% 78%, #d8c39a 0%, transparent 60%),
+    radial-gradient(140% 75% at 50% 0%, #4f6898 0%, transparent 70%), #8796b3;
+}
+
+@utility bg-mist-dusk {
+  background:
+    linear-gradient(150deg, transparent 35%, rgb(255 255 255 / 0.2) 48%, transparent 60%),
+    radial-gradient(110% 70% at 85% 20%, #e3c9a0 0%, transparent 60%), radial-gradient(120% 70% at 0% 100%, #9fae86 0%, transparent 60%),
+    radial-gradient(120% 80% at 20% 0%, #5a6f9a 0%, transparent 65%), #a7aebd;
+}
+
+@utility bg-mist-sage {
+  background:
+    linear-gradient(170deg, transparent 45%, rgb(255 255 255 / 0.18) 55%, transparent 65%),
+    radial-gradient(100% 70% at 15% 15%, #b9c49a 0%, transparent 60%), radial-gradient(110% 70% at 90% 90%, #6f86b3 0%, transparent 60%),
+    radial-gradient(80% 60% at 70% 20%, #e2d3b0 0%, transparent 60%), #a3ad9c;
 }
