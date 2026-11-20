@@ -613,7 +613,8 @@ export const en = {
   "activity.a.report.export": "Exported the title report",
   "activity.a.diary.board": "Viewed the hearing board",
   "home.metaTitle": "VakilMitra: practice software for Maharashtra advocates",
-  "home.metaDescription": "Hearing diary, cases, clients and fees, with 7/12 and Ferfar scanning and title search reports. In Marathi or English.",
+  "home.metaDescription":
+    "Hearing diary, cases, clients and fees, with 7/12 and Ferfar scanning and title search reports. In Marathi or English.",
   "home.nav.features": "Features",
   "home.nav.how": "How it works",
   "home.nav.pricing": "Pricing",
@@ -621,7 +622,8 @@ export const en = {
   "home.pill": "{days} days free · no card needed",
   "home.hero1": "Your whole practice,",
   "home.hero2": "in your pocket.",
-  "home.heroSub": "Hearing diary, case files, 7/12 and Ferfar, fees and title reports. In Marathi, on your phone, made for Maharashtra's courts.",
+  "home.heroSub":
+    "Hearing diary, case files, 7/12 and Ferfar, fees and title reports. In Marathi, on your phone, made for Maharashtra's courts.",
   "home.seeHow": "See how it works",
   "home.statsLead": "Your day, ready before you reach court.",
   "home.stat1": "days free, no card",
@@ -722,9 +724,11 @@ export const en = {
   "home.q2": "Does it work on my phone?",
   "home.a2": "Yes. It runs in your phone's browser and you can add it to your home screen. Nothing to download.",
   "home.q3": "Who can see my clients' files?",
-  "home.a3": "Only you and the juniors you share a case with. Our support staff see account details, not your cases or files, and every access is in your activity log.",
+  "home.a3":
+    "Only you and the juniors you share a case with. Our support staff see account details, not your cases or files, and every access is in your activity log.",
   "home.q4": "How accurate is the 7/12 reading?",
-  "home.a4": "Details are read by fixed rules and each one shows the line it came from, so you can check it. You can correct anything before it goes into a report.",
+  "home.a4":
+    "Details are read by fixed rules and each one shows the line it came from, so you can check it. You can correct anything before it goes into a report.",
   "home.q5": "What happens when the trial ends?",
   "home.a5": "Choose a plan to keep working. If you don't, your files stay readable and you can export them; nothing is deleted.",
   "home.q6": "Can my junior use it too?",
@@ -1355,7 +1359,8 @@ export const mr: Partial<Record<MessageKey, string>> = {
   "home.pill": "{days} दिवस मोफत · कार्ड लागत नाही",
   "home.hero1": "तुमची संपूर्ण वकिली,",
   "home.hero2": "तुमच्या खिशात.",
-  "home.heroSub": "सुनावणी डायरी, प्रकरणांच्या फाइल्स, ७/१२ आणि फेरफार, फी आणि मालकी हक्क अहवाल. मराठीत, तुमच्या फोनवर, महाराष्ट्रातील न्यायालयांसाठी बनवलेले.",
+  "home.heroSub":
+    "सुनावणी डायरी, प्रकरणांच्या फाइल्स, ७/१२ आणि फेरफार, फी आणि मालकी हक्क अहवाल. मराठीत, तुमच्या फोनवर, महाराष्ट्रातील न्यायालयांसाठी बनवलेले.",
   "home.seeHow": "कसे चालते ते पाहा",
   "home.statsLead": "न्यायालयात पोहोचण्याआधीच तुमचा दिवस तयार.",
   "home.stat1": "दिवस मोफत, कार्डशिवाय",
@@ -1456,9 +1461,11 @@ export const mr: Partial<Record<MessageKey, string>> = {
   "home.q2": "माझ्या फोनवर चालेल का?",
   "home.a2": "हो. ते फोनच्या ब्राउझरमध्ये चालते आणि होम स्क्रीनवर जोडता येते. काहीही डाउनलोड करावे लागत नाही.",
   "home.q3": "माझ्या पक्षकारांच्या फाइल्स कोण पाहू शकते?",
-  "home.a3": "फक्त तुम्ही आणि ज्या ज्युनियरसोबत तुम्ही प्रकरण शेअर केले आहे ते. आमच्या सपोर्ट टीमला खात्याची माहिती दिसते, तुमची प्रकरणे किंवा फाइल्स नाहीत, आणि प्रत्येक प्रवेश तुमच्या हालचालींच्या नोंदीत दिसतो.",
+  "home.a3":
+    "फक्त तुम्ही आणि ज्या ज्युनियरसोबत तुम्ही प्रकरण शेअर केले आहे ते. आमच्या सपोर्ट टीमला खात्याची माहिती दिसते, तुमची प्रकरणे किंवा फाइल्स नाहीत, आणि प्रत्येक प्रवेश तुमच्या हालचालींच्या नोंदीत दिसतो.",
   "home.q4": "७/१२ वाचन किती अचूक आहे?",
-  "home.a4": "माहिती ठरावीक नियमांनुसार वाचली जाते आणि प्रत्येक तपशील ज्या ओळीतून आला ती ओळ दाखवली जाते, त्यामुळे तुम्ही तो तपासू शकता. अहवालात जाण्यापूर्वी तुम्ही काहीही दुरुस्त करू शकता.",
+  "home.a4":
+    "माहिती ठरावीक नियमांनुसार वाचली जाते आणि प्रत्येक तपशील ज्या ओळीतून आला ती ओळ दाखवली जाते, त्यामुळे तुम्ही तो तपासू शकता. अहवालात जाण्यापूर्वी तुम्ही काहीही दुरुस्त करू शकता.",
   "home.q5": "मोफत कालावधी संपल्यावर काय होते?",
   "home.a5": "काम सुरू ठेवण्यासाठी योजना निवडा. न निवडल्यास तुमच्या फाइल्स वाचता व निर्यात करता येतात; काहीही हटवले जात नाही.",
   "home.q6": "माझा ज्युनियरही वापरू शकतो का?",
