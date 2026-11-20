@@ -1,4 +1,4 @@
-import { accessLogs, and, count, eq, flags, hearings } from "@vakilmitra/db";
+import { accessLogs, and, count, eq, flags, gte, hearings, isNull, lt, or } from "@vakilmitra/db";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildApp } from "../src/app.js";
@@ -22,8 +22,16 @@ const countLogs = async (entityId: string, action: string) =>
     await db
       .select({ n: count() })
       .from(accessLogs)
-      .where(and(eq(accessLogs.entityId, entityId), eq(accessLogs.action, action)))
+      .where(
+        and(eq(accessLogs.entityId, entityId), eq(accessLogs.action, action), or(isNull(accessLogs.status), lt(accessLogs.status, 400))),
+      )
   )[0].n;
+/** Refused attempts are on record too, with who tried. */
+const refused = async (entityId: string, action: string) =>
+  db
+    .select({ advocateId: accessLogs.advocateId, status: accessLogs.status })
+    .from(accessLogs)
+    .where(and(eq(accessLogs.entityId, entityId), eq(accessLogs.action, action), gte(accessLogs.status, 400)));
 
 let senior: ReturnType<typeof request.agent>;
 let other: ReturnType<typeof request.agent>;
@@ -155,6 +163,8 @@ describe("clients and cases", () => {
     expect((await other.post(`/api/cases/${caseId}/hearings`).send({ date: "2026-12-01" })).status).toBe(404);
     expect((await senior.get(`/api/cases/${caseId}`)).status).toBe(200);
     expect(await countLogs(caseId, "case.view")).toBe(1);
+    const otherId = (await other.get("/api/me")).body.advocate.id;
+    expect(await refused(caseId, "case.view")).toEqual([{ advocateId: otherId, status: 404 }]);
   });
 
   it("shares a case with a junior as viewer only", async () => {
@@ -269,6 +279,7 @@ describe("deletion", () => {
     expect((await db.select({ n: count() }).from(hearings).where(eq(hearings.caseId, caseId)))[0].n).toBe(0);
     expect((await db.select({ n: count() }).from(flags).where(eq(flags.caseId, caseId)))[0].n).toBe(0);
     expect(await countLogs(caseId, "case.delete")).toBe(1);
+    expect(await refused(caseId, "case.delete")).toHaveLength(1);
   });
 
   it("deletes the whole account after password confirmation", async () => {

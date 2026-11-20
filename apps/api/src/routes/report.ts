@@ -122,7 +122,7 @@ export const reportRoutes: FastifyPluginAsyncZod = async (app) => {
     const { caseId, propertyId } = req.params;
     await requireCaseAccess(req.advocateId, caseId);
     const data = await loadReport(caseId, propertyId);
-    await logAccess(req, "report.view", "property", propertyId);
+    logAccess(req, "report.view", "property", propertyId);
     return data;
   });
 
@@ -136,7 +136,7 @@ export const reportRoutes: FastifyPluginAsyncZod = async (app) => {
       const data = await loadReport(caseId, propertyId);
       const locale = req.query.lang ?? data.draft?.language ?? "mr";
       const file = await reportDocx(data, locale);
-      await logAccess(req, "report.export", "property", propertyId);
+      logAccess(req, "report.export", "property", propertyId);
       const name = `title-report-${(data.report.property.gatNo ?? data.report.property.surveyNo ?? propertyId).replace(/[^\w-]+/g, "-")}.docx`;
       return reply
         .header("content-type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
@@ -196,7 +196,7 @@ export const reportRoutes: FastifyPluginAsyncZod = async (app) => {
       })
       .where(eq(drafts.id, row.id))
       .returning();
-    await logAccess(req, "report.approve", "property", propertyId);
+    logAccess(req, "report.approve", "property", propertyId);
     return { draft: toDraft(updated) };
   });
 };

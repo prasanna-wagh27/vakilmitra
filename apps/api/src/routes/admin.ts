@@ -36,6 +36,8 @@ import { hashToken, matchTotp, newSessionToken, openSecret, verifyPassword } fro
 import { accessState, billingStatus } from "../billing/service.js";
 import { db } from "../db.js";
 import { env, isProd } from "../env.js";
+import { activityFor, activityQuery } from "../lib/activity.js";
+import { describeRoute } from "../lib/audit.js";
 import { HttpError, likePattern, notFound } from "../lib/http.js";
 import { getServices } from "../services.js";
 
@@ -44,6 +46,7 @@ type Staff = { id: string; name: string; email: string; role: "OWNER" | "SUPPORT
 declare module "fastify" {
   interface FastifyRequest {
     staff: Staff | null;
+    staffAudited: boolean;
   }
 }
 
@@ -67,6 +70,7 @@ function setSessionCookie(reply: FastifyReply, token: string, maxAge: number) {
 }
 
 async function audit(req: FastifyRequest, action: string, target?: { type: string; id: string }, details?: Record<string, unknown>) {
+  req.staffAudited = true;
   await db.insert(staffAudit).values({
     staffId: req.staff?.id ?? null,
     action,
@@ -111,6 +115,26 @@ function mrrOf(subs: (typeof subscriptions.$inferSelect)[], now: Date) {
 
 export const adminRoutes: FastifyPluginAsyncZod = async (app) => {
   app.decorateRequest("staff", null);
+  app.decorateRequest("staffAudited", false);
+
+  // Every staff request is in the trail, not only changes: lists and pages viewed too. Requests
+  // that wrote their own row (sign-in, account views, changes) are not written twice.
+  app.addHook("onResponse", async (req, reply) => {
+    const route = req.routeOptions.url;
+    if (!req.staff || req.staffAudited || !route || req.method === "OPTIONS" || /\/(me|health)$/.test(route)) return;
+    const d = describeRoute(route.replace(/^\/api\/admin\//, "/api/"), req.method, (req.params ?? {}) as Record<string, string>);
+    await db
+      .insert(staffAudit)
+      .values({
+        staffId: req.staff.id,
+        action: d.action,
+        targetType: d.entityType,
+        targetId: d.entityId,
+        details: { route, status: reply.statusCode, query: req.query && Object.keys(req.query).length ? req.query : undefined },
+        ip: req.ip,
+      })
+      .catch((err) => req.log.error({ err }, "staff audit write failed"));
+  });
 
   // Cookie auth needs a CSRF guard: changes are accepted only from the admin site itself.
   app.addHook("onRequest", async (req) => {
@@ -337,6 +361,20 @@ export const adminRoutes: FastifyPluginAsyncZod = async (app) => {
     );
 
     const idParams = z.object({ id: z.string() });
+
+    // The account's audit trail, for support and disputes. Ids only: staff never see case names.
+    authed.get("/accounts/:id/activity", { schema: { params: idParams, querystring: activityQuery } }, async (req) => {
+      const { rows, hasMore } = await activityFor(req.params.id, req.query);
+      await audit(req, "account.activity.view", { type: "advocate", id: req.params.id });
+      return {
+        entries: rows.map(({ details, userAgent, ...r }) => ({
+          ...r,
+          device: userAgent,
+          fields: Array.isArray(details?.fields) ? details.fields : null,
+        })),
+        hasMore,
+      };
+    });
 
     authed.get("/accounts/:id", { schema: { params: idParams } }, async (req) => {
       const a = await db.query.advocates.findFirst({

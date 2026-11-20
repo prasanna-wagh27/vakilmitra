@@ -5,6 +5,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db.js";
 import { env, isProd } from "./env.js";
+import { currentAudit } from "./lib/audit.js";
 import { type Mail, resetPasswordMail, verifyEmailMail } from "./mail.js";
 import { getServices, mailer } from "./services.js";
 
@@ -32,6 +33,11 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url }) => {
       void send(resetPasswordMail(user, url));
     },
+    // Attribute the audit entry for the reset to the account.
+    onPasswordReset: async ({ user }) => {
+      const a = currentAudit();
+      if (a) a.advocateId = user.id;
+    },
   },
   emailVerification: {
     sendOnSignUp: true,
@@ -43,6 +49,10 @@ export const auth = betterAuth({
       if (!u.searchParams.get("callbackURL")?.startsWith(`${env.WEB_ORIGIN}/`))
         u.searchParams.set("callbackURL", `${env.WEB_ORIGIN}/settings?verified=1`);
       void send(verifyEmailMail(user, u.toString()));
+    },
+    afterEmailVerification: async (user) => {
+      const a = currentAudit();
+      if (a) a.advocateId = user.id;
     },
   },
   session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 },
@@ -56,7 +66,9 @@ export const auth = betterAuth({
       enabled: true,
       // Keep an anonymised record that the account was deleted (DPDP audit trail).
       beforeDelete: async (user) => {
-        await db.insert(accessLogs).values({ advocateId: null, action: "account.delete", entityType: "advocate", entityId: user.id });
+        await db
+          .insert(accessLogs)
+          .values({ advocateId: null, actor: "system", action: "account.delete", entityType: "advocate", entityId: user.id });
       },
       // Files go only after the rows are gone: if the delete fails, the account keeps its pages.
       // If this step fails, what remains is unreadable ciphertext, never a record pointing at nothing.

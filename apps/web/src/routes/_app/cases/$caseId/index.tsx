@@ -71,11 +71,20 @@ function CasePage() {
         title={c.title}
         back="/cases"
         action={
-          canEdit && (
-            <Button variant="outline" onClick={() => setSheet({ kind: "edit" })}>
-              {t("common.edit")}
-            </Button>
-          )
+          <div className="flex gap-2">
+            {isOwner && (
+              <Button variant="ghost" asChild>
+                <Link to="/activity" search={{ caseId: c.id }}>
+                  {t("activity.history")}
+                </Link>
+              </Button>
+            )}
+            {canEdit && (
+              <Button variant="outline" onClick={() => setSheet({ kind: "edit" })}>
+                {t("common.edit")}
+              </Button>
+            )}
+          </div>
         }
       />
 

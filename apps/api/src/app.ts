@@ -4,7 +4,7 @@ import multipart from "@fastify/multipart";
 import swagger from "@fastify/swagger";
 import { PAGE_UPLOAD } from "@vakilmitra/shared";
 import { fromNodeHeaders } from "better-auth/node";
-import Fastify, { type FastifyError, type FastifyInstance } from "fastify";
+import Fastify, { type FastifyError, type FastifyInstance, type FastifyRequest } from "fastify";
 import {
   hasZodFastifySchemaValidationErrors,
   jsonSchemaTransform,
@@ -15,8 +15,10 @@ import {
 import { auth } from "./auth.js";
 import { effectiveAccess } from "./billing/service.js";
 import { env, isProd } from "./env.js";
+import { advocateIdByEmail, auditTrail } from "./lib/audit.js";
 import { HttpError } from "./lib/http.js";
 import { accountRoutes } from "./routes/account.js";
+import { activityRoutes } from "./routes/activity.js";
 import { adminRoutes } from "./routes/admin.js";
 import { billingRoutes, razorpayWebhook } from "./routes/billing.js";
 import { caseRoutes } from "./routes/cases.js";
@@ -36,6 +38,47 @@ declare module "fastify" {
 
 export type App = FastifyInstance;
 
+/** Better Auth endpoints used while signed in, and the audit action each records. */
+const AUTH_SESSION_EVENTS: Record<string, string> = {
+  "sign-out": "auth.sign_out",
+  "change-password": "auth.password_change",
+  "change-email": "auth.email_change",
+  "update-user": "account.update",
+  "revoke-session": "auth.session_revoke",
+  "revoke-sessions": "auth.session_revoke",
+  "revoke-other-sessions": "auth.session_revoke",
+  "send-verification-email": "auth.verification_sent",
+};
+
+/** Sign-in, sign-up, password reset and email verification, named for the audit trail. */
+async function auditAuthEvent(req: FastifyRequest, name: string, status: number, text: string | null) {
+  const a = req.audit;
+  const ok = status < 400;
+  const body = (req.body ?? {}) as { email?: unknown };
+  const userId = () => {
+    try {
+      return (JSON.parse(text ?? "{}") as { user?: { id?: string } }).user?.id ?? null;
+    } catch {
+      return null;
+    }
+  };
+  if (name === "sign-in/email") {
+    if (ok) Object.assign(a, { action: "auth.sign_in", advocateId: userId() });
+    else {
+      const advocateId = await advocateIdByEmail(body.email);
+      Object.assign(a, { action: "auth.sign_in_failed", advocateId, actor: "anonymous" });
+      // An address with no account is kept so repeated guessing shows up.
+      if (!advocateId && typeof body.email === "string") a.details = { email: body.email.slice(0, 200) };
+    }
+  } else if (name === "sign-up/email" && ok) Object.assign(a, { action: "account.create", advocateId: userId() });
+  else if (name === "request-password-reset")
+    Object.assign(a, { action: "auth.password_reset_requested", advocateId: await advocateIdByEmail(body.email), actor: "anonymous" });
+  else if (name === "reset-password")
+    Object.assign(a, { action: ok ? "auth.password_reset" : "auth.password_reset_failed", advocateId: a.advocateId ?? null });
+  else if (name === "verify-email")
+    Object.assign(a, { action: ok ? "auth.email_verified" : "auth.email_verify_failed", advocateId: a.advocateId ?? null });
+}
+
 export async function buildApp() {
   const app = Fastify({
     logger:
@@ -52,6 +95,7 @@ export async function buildApp() {
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
   app.decorateRequest("advocateId", "");
+  auditTrail(app);
 
   await app.register(helmet, { global: true });
   await app.register(cors, {
@@ -99,19 +143,28 @@ export async function buildApp() {
       if (url.pathname.toLowerCase().split("/").includes("delete-user")) {
         return reply.code(404).send({ error: "not_found", message: "Use DELETE /api/me" });
       }
+      // Account changes made through Better Auth: note who, before the session may end.
+      const name = url.pathname.replace(/^\/api\/auth\//, "");
+      const sessionEvent = AUTH_SESSION_EVENTS[name];
+      if (sessionEvent) {
+        const s = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
+        Object.assign(req.audit, { action: sessionEvent, advocateId: s?.user.id ?? null });
+      }
       const request = new Request(url, {
         method: req.method,
         headers: fromNodeHeaders(req.headers),
         body: req.method === "GET" || req.body == null ? undefined : JSON.stringify(req.body),
       });
       const res = await auth.handler(request);
+      const text = res.body ? await res.text() : null;
+      await auditAuthEvent(req, name, res.status, text);
       reply.status(res.status);
       res.headers.forEach((value, key) => {
         if (key !== "set-cookie") reply.header(key, value);
       });
       const cookies = res.headers.getSetCookie();
       if (cookies.length) reply.header("set-cookie", cookies);
-      return reply.send(res.body ? await res.text() : null);
+      return reply.send(text);
     },
   });
 
@@ -142,6 +195,7 @@ export async function buildApp() {
     });
     await authed.register(billingRoutes, { prefix: "/api/billing" });
     await authed.register(accountRoutes, { prefix: "/api/me" });
+    await authed.register(activityRoutes, { prefix: "/api/activity" });
     await authed.register(clientRoutes, { prefix: "/api/clients" });
     await authed.register(caseRoutes, { prefix: "/api/cases" });
     await authed.register(diaryRoutes, { prefix: "/api" });

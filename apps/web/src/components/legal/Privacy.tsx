@@ -46,8 +46,10 @@ function En() {
           details.
         </li>
         <li>
-          Security records: sign-in sessions (device and IP address), and a log of who opened, shared or deleted each case. We keep these to
-          protect your account and to show you who accessed your files.
+          Security records: sign-in sessions (device and IP address), and an activity log of every action in your account: who opened,
+          searched, added, changed, shared, exported or deleted each case and file, and every sign-in, with the time, IP address and device.
+          The log never contains the content of your files. We keep these to protect your account and to show you, under Settings, Activity
+          log, who accessed your files.
         </li>
       </ul>
 
@@ -172,8 +174,9 @@ function Mr() {
           तपशील निघून जातात.
         </li>
         <li>
-          सुरक्षा नोंदी: लॉग इन सत्रे (डिव्हाइस आणि आयपी पत्ता), आणि प्रत्येक प्रकरण कोणी उघडले, शेअर केले किंवा हटवले याची नोंद. तुमचे खाते सुरक्षित ठेवण्यासाठी आणि
-          तुमच्या फाइल्स कोणी पाहिल्या हे तुम्हाला दाखवण्यासाठी आम्ही या नोंदी ठेवतो.
+          सुरक्षा नोंदी: लॉग इन सत्रे (डिव्हाइस आणि आयपी पत्ता), आणि तुमच्या खात्यातील प्रत्येक कृतीची हालचाल नोंद: प्रत्येक प्रकरण व फाइल कोणी उघडली, शोधली,
+          जोडली, बदलली, शेअर केली, निर्यात केली किंवा हटवली, आणि प्रत्येक लॉग इन, वेळ, आयपी पत्ता व डिव्हाइससह. या नोंदीत तुमच्या फाइल्समधील मजकूर कधीही
+          नसतो. तुमचे खाते सुरक्षित ठेवण्यासाठी आणि सेटिंग्ज, हालचालींची नोंद येथे तुमच्या फाइल्स कोणी पाहिल्या हे तुम्हाला दाखवण्यासाठी आम्ही या नोंदी ठेवतो.
         </li>
       </ul>
 

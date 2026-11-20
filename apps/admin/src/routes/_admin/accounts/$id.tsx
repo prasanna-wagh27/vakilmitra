@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PAID_PLANS, type PaidPlanId } from "@vakilmitra/shared";
 import { useState } from "react";
@@ -133,6 +133,9 @@ function AccountPage() {
 
       <h2 className="mt-8 mb-3 font-heading text-base font-semibold">Staff actions</h2>
       <History items={q.data.history} />
+
+      <h2 className="mt-8 mb-3 font-heading text-base font-semibold">Account activity</h2>
+      <Activity id={a.id} />
     </>
   );
 }
@@ -227,6 +230,98 @@ function GiveFreePlan({ id }: { id: string }) {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+type ActivityRow = {
+  id: string;
+  at: string;
+  action: string;
+  entityType: string | null;
+  entityId: string | null;
+  caseId: string | null;
+  status: number | null;
+  ip: string | null;
+  device: string | null;
+  actorId: string | null;
+  actorName: string | null;
+  fields: string[] | null;
+};
+
+/**
+ * What the advocate (and juniors on their cases) did, from the audit trail: for disputes and
+ * support. Ids only, never case names. Opening it is itself recorded in the staff trail.
+ */
+function Activity({ id }: { id: string }) {
+  const [open, setOpen] = useState(false);
+  const q = useInfiniteQuery({
+    queryKey: ["account-activity", id],
+    enabled: open,
+    queryFn: ({ pageParam }) =>
+      api<{ entries: ActivityRow[]; hasMore: boolean }>(`/accounts/${id}/activity`, { query: { before: pageParam, limit: "100" } }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => {
+      const e = last.entries.at(-1);
+      return last.hasMore && e ? `${e.at}|${e.id}` : undefined;
+    },
+  });
+  if (!open)
+    return (
+      <div className="flex items-center gap-3">
+        <Button variant="outline" onClick={() => setOpen(true)}>
+          Show activity
+        </Button>
+        <span className="text-sm text-muted-foreground">Opening it is recorded in the staff audit log.</span>
+      </div>
+    );
+  if (q.isPending) return <Loading rows={4} />;
+  if (q.error) return <ErrorBox error={q.error} onRetry={() => q.refetch()} />;
+  const rows = q.data.pages.flatMap((p) => p.entries);
+  if (!rows.length) return <p className="text-sm text-muted-foreground">Nothing recorded.</p>;
+  return (
+    <>
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 text-left text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2 font-medium">When</th>
+              <th className="px-3 py-2 font-medium">Who</th>
+              <th className="px-3 py-2 font-medium">Action</th>
+              <th className="px-3 py-2 font-medium">Item</th>
+              <th className="px-3 py-2 font-medium">Case</th>
+              <th className="px-3 py-2 font-medium">Result</th>
+              <th className="px-3 py-2 font-medium">IP</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {rows.map((r) => (
+              <tr key={r.id} title={[r.device, r.fields && `fields: ${r.fields.join(", ")}`].filter(Boolean).join("\n")}>
+                <td className="px-3 py-2 whitespace-nowrap tabular-nums">{fmtDateTime(r.at)}</td>
+                <td className="px-3 py-2">{r.actorId === id ? "Account owner" : (r.actorName ?? "—")}</td>
+                <td className="px-3 py-2 font-mono text-xs">{r.action}</td>
+                <td className="px-3 py-2 font-mono text-xs">
+                  {r.entityId ? `${r.entityType}:${r.entityId.slice(0, 8)}` : (r.entityType ?? "—")}
+                </td>
+                <td className="px-3 py-2 font-mono text-xs">{r.caseId?.slice(0, 8) ?? "—"}</td>
+                <td className="px-3 py-2">
+                  {r.status && r.status >= 400 ? (
+                    <Badge tone="red">{r.status}</Badge>
+                  ) : (
+                    <span className="text-muted-foreground">{r.status ?? "—"}</span>
+                  )}
+                </td>
+                <td className="px-3 py-2 font-mono text-xs">{r.ip ?? "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {q.hasNextPage && (
+        <Button variant="outline" className="mt-3" onClick={() => q.fetchNextPage()} disabled={q.isFetchingNextPage}>
+          Older
+        </Button>
+      )}
+    </>
   );
 }
 

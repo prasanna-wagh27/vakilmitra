@@ -109,6 +109,31 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - Address check: a link is sent at sign-up; Settings shows whether it is confirmed and can send it again. Signing in does not wait for it.
 - Both are limited to 3 requests per 15 minutes from one IP address, on top of the general auth rate limit.
 
+## Audit trail
+
+Everything is on record, without client content:
+
+- **Every API request by a signed-in advocate** (owner or junior) writes one `access_log` row just
+  before its answer is sent: views, lists, searches, adds, changes, exports, deletes, and refused
+  attempts (another advocate's case, no access). Written centrally in `apps/api/src/lib/audit.ts`,
+  so a new route is covered without extra code. The action is named from the route
+  (`/api/cases/:id` GET → `case.view`); a route can name it more precisely with `logAccess()`.
+- **Each row has** who, what, the item and its case, the HTTP status, IP address, device (user
+  agent), and for changes the names of the fields sent. Never values, file content, or search
+  words (only their length). Repeat views of the same thing by the same person within 10 minutes
+  count once (screens refresh while pages are read).
+- **Sign-in events:** sign-in, failed sign-in (against the account, or the address tried if there
+  is none), sign-out, sign-up, password change, reset request and reset, email verification,
+  signing out other devices.
+- **System actions:** a page sent for cloud reading (written before it leaves our servers),
+  account deletion, payments.
+- **Staff:** every admin-panel request is in `staff_audit`, including lists and pages viewed.
+- **Who sees it:** advocates under Settings, Activity log (`/activity`): their own actions
+  everywhere, and everyone's actions on cases they own (juniors included), filterable by case
+  and kind, downloadable as a spreadsheet in their language. A case's owner has a History link
+  on the case. Staff see an account's activity on its admin page (ids only, never case names);
+  opening it is itself recorded.
+
 ## Backups
 
 The worker takes a backup every night at 03:00 IST and then proves it restores. It is off until

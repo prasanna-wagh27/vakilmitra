@@ -161,7 +161,7 @@ export const factRoutes: FastifyPluginAsyncZod = async (app) => {
         );
       }
     });
-    await logAccess(req, "document.extract", "document", doc.id);
+    logAccess(req, "document.extract", "document", doc.id);
     return { extraction: await extraction({ ...doc, type: kind }, kind) };
   });
 
