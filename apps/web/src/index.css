@@ -190,3 +190,18 @@
     color: black;
   }
 }
+
+/* Home page: a serif for big headlines (Latin and Marathi forms), and the floating tiles. */
+@theme {
+  --font-serif: "Tiro Devanagari Marathi", Georgia, serif;
+  --animate-float: float 7s ease-in-out infinite;
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(var(--tilt, 0deg));
+    }
+    50% {
+      transform: translateY(-10px) rotate(var(--tilt, 0deg));
+    }
+  }
+}

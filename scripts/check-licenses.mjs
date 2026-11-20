@@ -19,6 +19,7 @@ const REVIEWED = {
   "@img/sharp-libvips-*": "LGPL-3.0, approved by Prasanna Wagh on 2026-11-16: unmodified prebuilt libvips under sharp, server-side only",
   "@fontsource-variable/figtree": "OFL-1.1 font files, bundled unmodified; PENDING owner confirmation (see README)",
   "@fontsource/ibm-plex-sans-devanagari": "OFL-1.1 font files, bundled unmodified; PENDING owner confirmation (see README)",
+  "@fontsource/tiro-devanagari-marathi": "OFL-1.1 font files, bundled unmodified; PENDING owner confirmation (see README)",
   nodemailer: "MIT-0 (MIT without the attribution clause), server-side email; PENDING owner confirmation (see README)",
 };
 const reviewed = (name) => Object.keys(REVIEWED).some((k) => (k.endsWith("*") ? name.startsWith(k.slice(0, -1)) : name === k));
