@@ -6,7 +6,7 @@ import { ErrorBox, Loading, PageHeader, PLAN_LABEL, STATE_LABEL, Stat } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { fmtBytes, fmtNum, rupees } from "@/lib/format";
-import { type Dashboard, dashboardQuery, healthQuery } from "@/lib/queries";
+import { type Dashboard, dashboardQuery, type Health, healthQuery } from "@/lib/queries";
 
 export const Route = createFileRoute("/_admin/")({ component: DashboardPage });
 
@@ -190,6 +190,39 @@ function Pages({ data }: { data: Dashboard["pages30d"] }) {
   );
 }
 
+const HOURS = 3600_000;
+const ago = (iso: string) => {
+  const h = Math.floor((Date.now() - new Date(iso).getTime()) / HOURS);
+  return h < 1 ? "under an hour ago" : h < 48 ? `${h} h ago` : `${Math.floor(h / 24)} days ago`;
+};
+
+/** Nightly at 03:00 IST: anything older than 26 hours means last night's backup did not happen. */
+function BackupRows({ b }: { b: Health["backup"] }) {
+  const ok = b.lastOk;
+  const fresh = ok && Date.now() - new Date(ok.at).getTime() < 26 * HOURS;
+  const failedSince = b.lastFailed && (!ok || b.lastFailed.at > ok.at) ? b.lastFailed : null;
+  return (
+    <>
+      <dt>Last backup</dt>
+      <dd className="text-right">
+        <Badge tone={fresh ? "green" : "red"} title={failedSince?.error ?? undefined}>
+          {ok ? ago(ok.at) : "None yet"}
+          {failedSince ? " · last try failed" : ""}
+        </Badge>
+      </dd>
+      <dt>Restore check</dt>
+      <dd className="text-right">
+        <Badge
+          tone={ok?.checkOk ? "green" : ok?.checkOk === false ? "red" : "amber"}
+          title={ok?.checkedAt ? new Date(ok.checkedAt).toLocaleString("en-IN") : undefined}
+        >
+          {ok?.checkOk ? "Restored OK" : ok?.checkOk === false ? "Failed" : "Not run"}
+        </Badge>
+      </dd>
+    </>
+  );
+}
+
 function HealthCard() {
   const h = useQuery(healthQuery);
   const q = h.data?.ocrQueue;
@@ -218,6 +251,7 @@ function HealthCard() {
             <dd className="text-right">
               <Badge tone={h.data.pagesStuck ? "amber" : "green"}>{fmtNum(h.data.pagesStuck)}</Badge>
             </dd>
+            <BackupRows b={h.data.backup} />
             <dt>Razorpay</dt>
             <dd className="text-right">
               <Badge tone={h.data.razorpay ? "green" : "amber"}>{h.data.razorpay ? "Connected" : "Not set up"}</Badge>

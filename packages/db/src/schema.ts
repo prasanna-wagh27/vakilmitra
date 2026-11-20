@@ -4,6 +4,7 @@
 
 import { relations, sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   doublePrecision,
   index,
@@ -613,6 +614,31 @@ export const accessLogs = pgTable(
     at: ts("at").notNull().defaultNow(),
   },
   (t) => [index("access_log_advocate_at_idx").on(t.advocateId, t.at), index("access_log_entity_idx").on(t.entityType, t.entityId)],
+);
+
+// ---------- Backups ----------
+
+/**
+ * One nightly backup and its restore check. The backup store holds everything needed to
+ * restore without this table (it is lost with the database); this is for the admin panel.
+ */
+export const backupRuns = pgTable(
+  "backup_run",
+  {
+    id: text("id").primaryKey(), // the run's folder in the backup store, e.g. 20261120T213000Z
+    status: text("status").notNull().default("RUNNING"), // RUNNING | OK | FAILED
+    startedAt: ts("started_at").notNull().defaultNow(),
+    finishedAt: ts("finished_at"),
+    dumpBytes: bigint("dump_bytes", { mode: "number" }),
+    rows: integer("rows"), // rows in the dump, all tables
+    files: integer("files"), // client files this run's restore needs
+    filesCopied: integer("files_copied"), // of those, copied tonight (the rest were already there)
+    error: text("error"),
+    checkedAt: ts("checked_at"),
+    checkOk: boolean("check_ok"),
+    checkError: text("check_error"),
+  },
+  (t) => [index("backup_run_started_idx").on(t.startedAt)],
 );
 
 // ---------- Relations (for the relational query API) ----------

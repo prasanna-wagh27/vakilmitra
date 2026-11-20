@@ -5,7 +5,7 @@
 import { and, count, type Db, documents, eq, pages } from "@vakilmitra/db";
 import { type ConnectionOptions, Queue, type QueueOptions } from "bullmq";
 
-export const QUEUES = { ocr: "ocr", ocrCloud: "ocr-cloud" } as const;
+export const QUEUES = { ocr: "ocr", ocrCloud: "ocr-cloud", backup: "backup" } as const;
 
 export interface OcrJob {
   pageId: string;
@@ -47,6 +47,20 @@ export function createOcrCloudQueue(url: string, opts: Partial<QueueOptions> = {
     ...opts,
   });
 }
+
+/** Nightly backup at 03:00 IST (one job at a time; the worker schedules it). */
+export function createBackupQueue(url: string) {
+  return new Queue<Record<string, never>, void, string>(QUEUES.backup, {
+    connection: connectionFromUrl(url),
+    defaultJobOptions: {
+      attempts: 2,
+      backoff: { type: "fixed", delay: 15 * 60_000 },
+      removeOnComplete: { count: 30 },
+      removeOnFail: { count: 30 },
+    },
+  });
+}
+export const BACKUP_SCHEDULE = { pattern: "0 3 * * *", tz: "Asia/Kolkata" } as const;
 
 export type OcrCloudQueue = ReturnType<typeof createOcrCloudQueue>;
 export type OcrCloudQueueLike = Pick<OcrCloudQueue, "add">;

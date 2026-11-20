@@ -109,6 +109,42 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - Address check: a link is sent at sign-up; Settings shows whether it is confirmed and can send it again. Signing in does not wait for it.
 - Both are limited to 3 requests per 15 minutes from one IP address, on top of the general auth rate limit.
 
+## Backups
+
+The worker takes a backup every night at 03:00 IST and then proves it restores. It is off until
+`BACKUP_STORAGE_DRIVER` is set (see `apps/worker/.env.example`); in production the worker logs an
+error at start while it is off, and the admin dashboard shows the last backup and restore check
+(red when last night's backup is missing or the check failed).
+
+- **What is saved:** the whole database (`pg_dump`, encrypted with `STORAGE_MASTER_KEYS`) and a copy
+  of every client file (copied as they are: already encrypted). Only files new since the last night
+  are copied.
+- **Where:** a separate bucket from the live files, ideally in another cloud account, in India.
+  The worker refuses to back up into the live bucket.
+- **How long:** 30 days, as the privacy policy says. Each night's run lists the files it needs;
+  a file is deleted once no run from the last 30 days lists it.
+- **Restore check:** each night the newest backup is restored into a scratch database
+  (`BACKUP_RESTORE_CHECK_URL`, name ending in `_restore_check`; it is dropped and recreated, so it
+  needs CREATEDB), every table's row count is compared with the count taken at backup time, and a
+  sample of files is decrypted. The scratch database is dropped afterwards.
+- **The master keys are the only way to read a backup.** Keep a copy of `STORAGE_MASTER_KEYS`
+  offline, away from both the servers and the backup bucket.
+- `pg_dump` and `pg_restore` must be on the worker's path, the same major version as the server
+  or newer.
+
+By hand (`node dist/backup-cli.js` in production, `pnpm --filter @vakilmitra/worker backup` in development):
+
+```sh
+backup list                                  # backups in the store
+backup backup                                # take one now
+backup check [--run <id>]                    # restore check now
+backup restore --to <empty database url> [--run <id>] [--files]
+```
+
+**Disaster recovery:** create a new, empty database; run `restore --to <its url> --files` (the newest
+backup by default; `--files` copies the client files back into the bucket named by `STORAGE_*`);
+point `DATABASE_URL` at it; start the API, which applies any newer migrations.
+
 ## Admin panel (`apps/admin`)
 
 - A separate site for VakilMitra staff (dev: http://localhost:5174, `pnpm --filter @vakilmitra/admin dev`), deployed apart from the advocates' app, e.g. on `admin.` next to `api.`. Set `ADMIN_ORIGIN` on the API to its address.
