@@ -18,7 +18,7 @@ import { PlanBanner } from "./PlanBanner";
 import { Button } from "./ui/button";
 
 const NAV: { to: string; key: MessageKey; icon: typeof Home01Icon }[] = [
-  { to: "/", key: "nav.today", icon: Home01Icon },
+  { to: "/today", key: "nav.today", icon: Home01Icon },
   { to: "/cases", key: "nav.cases", icon: Folder01Icon },
   { to: "/diary", key: "nav.diary", icon: Calendar03Icon },
   { to: "/clients", key: "nav.clients", icon: UserGroupIcon },
@@ -29,13 +29,13 @@ const NAV: { to: string; key: MessageKey; icon: typeof Home01Icon }[] = [
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const active = (to: string) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
+  const active = (to: string) => pathname.startsWith(to);
 
   return (
     <>
       <header className="no-print sticky top-0 z-40 border-b bg-background/80 backdrop-blur-lg">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4">
-          <Link to="/" aria-label={t("app.name")} className="mr-4">
+          <Link to="/today" aria-label={t("app.name")} className="mr-4">
             <Brand />
           </Link>
           <nav className="hidden items-center gap-1 md:flex" aria-label={t("nav.main")}>

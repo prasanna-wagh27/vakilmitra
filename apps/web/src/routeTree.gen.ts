@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DeliveryRouteImport } from './routes/delivery'
@@ -20,11 +21,11 @@ import { Route as RefundsRouteImport } from './routes/refunds'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppActivityRouteImport } from './routes/_app/activity'
 import { Route as AppDiaryRouteImport } from './routes/_app/diary'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppTodayRouteImport } from './routes/_app/today'
 import { Route as AppBillingIndexRouteImport } from './routes/_app/billing/index'
 import { Route as AppCasesIndexRouteImport } from './routes/_app/cases/index'
 import { Route as AppCasesNewRouteImport } from './routes/_app/cases/new'
@@ -39,6 +40,11 @@ import { Route as AppCasesCaseIdDocumentsDocumentIdRouteImport } from './routes/
 import { Route as AppCasesCaseIdPropertiesPropertyIdRouteImport } from './routes/_app/cases/$caseId/properties/$propertyId'
 import { Route as AppCasesCaseIdPropertiesPropertyIdReportRouteImport } from './routes/_app/cases/$caseId/properties/$propertyId_.report'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -93,11 +99,6 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppActivityRoute = AppActivityRouteImport.update({
   id: '/activity',
   path: '/activity',
@@ -116,6 +117,11 @@ const AppSearchRoute = AppSearchRouteImport.update({
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTodayRoute = AppTodayRouteImport.update({
+  id: '/today',
+  path: '/today',
   getParentRoute: () => AppRoute,
 } as any)
 const AppBillingIndexRoute = AppBillingIndexRouteImport.update({
@@ -189,7 +195,7 @@ const AppCasesCaseIdPropertiesPropertyIdReportRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AppIndexRoute
+  '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/diary': typeof AppDiaryRoute
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
+  '/today': typeof AppTodayRoute
   '/cases/new': typeof AppCasesNewRoute
   '/clients/$clientId': typeof AppClientsClientIdRoute
   '/billing/': typeof AppBillingIndexRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/cases/$caseId/properties/$propertyId/report': typeof AppCasesCaseIdPropertiesPropertyIdReportRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -233,7 +241,7 @@ export interface FileRoutesByTo {
   '/diary': typeof AppDiaryRoute
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
-  '/': typeof AppIndexRoute
+  '/today': typeof AppTodayRoute
   '/cases/new': typeof AppCasesNewRoute
   '/clients/$clientId': typeof AppClientsClientIdRoute
   '/billing': typeof AppBillingIndexRoute
@@ -250,6 +258,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
@@ -265,7 +274,7 @@ export interface FileRoutesById {
   '/_app/diary': typeof AppDiaryRoute
   '/_app/search': typeof AppSearchRoute
   '/_app/settings': typeof AppSettingsRoute
-  '/_app/': typeof AppIndexRoute
+  '/_app/today': typeof AppTodayRoute
   '/_app/cases/new': typeof AppCasesNewRoute
   '/_app/clients/$clientId': typeof AppClientsClientIdRoute
   '/_app/billing/': typeof AppBillingIndexRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/diary'
     | '/search'
     | '/settings'
+    | '/today'
     | '/cases/new'
     | '/clients/$clientId'
     | '/billing/'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/cases/$caseId/properties/$propertyId/report'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/contact'
     | '/delivery'
     | '/forgot-password'
@@ -327,7 +338,7 @@ export interface FileRouteTypes {
     | '/diary'
     | '/search'
     | '/settings'
-    | '/'
+    | '/today'
     | '/cases/new'
     | '/clients/$clientId'
     | '/billing'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/cases/$caseId/properties/$propertyId/report'
   id:
     | '__root__'
+    | '/'
     | '/_app'
     | '/contact'
     | '/delivery'
@@ -358,7 +370,7 @@ export interface FileRouteTypes {
     | '/_app/diary'
     | '/_app/search'
     | '/_app/settings'
-    | '/_app/'
+    | '/_app/today'
     | '/_app/cases/new'
     | '/_app/clients/$clientId'
     | '/_app/billing/'
@@ -375,6 +387,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   ContactRoute: typeof ContactRoute
   DeliveryRoute: typeof DeliveryRoute
@@ -390,6 +403,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -467,13 +487,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/': {
-      id: '/_app/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/activity': {
       id: '/_app/activity'
       path: '/activity'
@@ -500,6 +513,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/today': {
+      id: '/_app/today'
+      path: '/today'
+      fullPath: '/today'
+      preLoaderRoute: typeof AppTodayRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/billing/': {
@@ -601,7 +621,7 @@ interface AppRouteChildren {
   AppDiaryRoute: typeof AppDiaryRoute
   AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRoute
-  AppIndexRoute: typeof AppIndexRoute
+  AppTodayRoute: typeof AppTodayRoute
   AppCasesNewRoute: typeof AppCasesNewRoute
   AppClientsClientIdRoute: typeof AppClientsClientIdRoute
   AppBillingIndexRoute: typeof AppBillingIndexRoute
@@ -622,7 +642,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDiaryRoute: AppDiaryRoute,
   AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRoute,
-  AppIndexRoute: AppIndexRoute,
+  AppTodayRoute: AppTodayRoute,
   AppCasesNewRoute: AppCasesNewRoute,
   AppClientsClientIdRoute: AppClientsClientIdRoute,
   AppBillingIndexRoute: AppBillingIndexRoute,
@@ -644,6 +664,7 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   ContactRoute: ContactRoute,
   DeliveryRoute: DeliveryRoute,

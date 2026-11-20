@@ -1,5 +1,6 @@
 import { Link01Icon, ShieldKeyIcon, SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useI18n } from "@/lib/i18n";
 import { Brand } from "./Brand";
@@ -18,7 +19,9 @@ export function AuthShell({ title, children }: { title: string; children: ReactN
     <main className="mx-auto grid min-h-dvh max-w-5xl content-start items-center gap-4 px-4 py-4 md:content-center md:grid-cols-[1.05fr_1fr] md:gap-10 md:py-10">
       {/* Brand side: what this is and why it can be trusted. */}
       <section className="px-1 py-2 md:py-0">
-        <Brand />
+        <Link to="/" aria-label={t("app.name")}>
+          <Brand />
+        </Link>
         <h1 className="font-display mt-6 text-2xl leading-8 md:mt-10 md:text-4xl md:leading-[1.15]">{t("auth.hero")}</h1>
         <p className="mt-3 hidden max-w-md text-muted-foreground sm:block">{t("auth.heroSub")}</p>
         <ul className="mt-8 hidden space-y-3 border-t pt-6 sm:block">
