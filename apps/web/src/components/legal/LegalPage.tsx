@@ -27,7 +27,7 @@ export function PublicPage({ title, children }: { title: string; children: React
     <div className="min-h-dvh">
       <header className="border-b">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3">
-          <Link to="/login" aria-label="VakilMitra">
+          <Link to="/" aria-label="VakilMitra">
             <Brand />
           </Link>
           <LanguageToggle />

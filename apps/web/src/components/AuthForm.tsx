@@ -48,7 +48,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
       return;
     }
     qc.clear();
-    const safe = next?.startsWith("/") && !next.startsWith("//") ? next : "/";
+    const safe = next?.startsWith("/") && !next.startsWith("//") && next !== "/" ? next : "/today";
     await navigate({ to: safe });
   }
 

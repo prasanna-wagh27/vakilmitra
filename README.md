@@ -97,6 +97,7 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 ## Policy pages
 
 - Public pages, no sign-in: `/pricing`, `/terms`, `/privacy`, `/refunds`, `/delivery`, `/contact`. Razorpay checks for these before turning on live payments. They are linked from sign-in and sign-up, Settings and the billing page, and sign-up says that creating an account accepts the Terms and Privacy Policy.
+- The home page (`/`, `apps/web/src/routes/index.tsx`) is public: what VakilMitra does, features, privacy, pricing and questions, in the reader's language. Signed-in advocates are sent to their day (`/today`). Its claims must stay true to what is built.
 - Each policy is written in full in Marathi and in English, and readers see only their chosen language (if the two differ, the English text prevails). Source: `apps/web/src/components/legal/`.
 - Language rule for the whole web app: no English on a Marathi screen and no Marathi on an English one (except the language switch). Server errors are translated in `apps/web/src/lib/errors.ts`; add a Marathi line there for every new API error message.
 - Business details (legal name, address, support and grievance contacts, courts' city) live in `apps/web/src/lib/legal.ts`. Until every one is filled in, the pages show "to be added" and a draft notice.

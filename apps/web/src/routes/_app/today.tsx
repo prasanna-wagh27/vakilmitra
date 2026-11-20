@@ -15,7 +15,7 @@ import { useI18n } from "@/lib/i18n";
 import { boardQuery, feeSummaryQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_app/")({ component: TodayPage });
+export const Route = createFileRoute("/_app/today")({ component: TodayPage });
 
 function TodayPage() {
   const { t, tf, locale } = useI18n();

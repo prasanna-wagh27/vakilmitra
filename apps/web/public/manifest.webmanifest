@@ -2,7 +2,7 @@
   "name": "VakilMitra",
   "short_name": "VakilMitra",
   "lang": "mr",
-  "start_url": "/",
+  "start_url": "/today",
   "display": "standalone",
   "background_color": "#f3f3f5",
   "theme_color": "#f3f3f5",
