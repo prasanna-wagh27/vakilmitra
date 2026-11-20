@@ -30,7 +30,7 @@ function DiaryPage() {
     <>
       <PageHeader title={t("diary.title")} />
       <div className="mb-3 flex items-center gap-2">
-        <Button variant="outline" size="icon" aria-label="previous" onClick={() => setFrom(addDays(from, -14))}>
+        <Button variant="outline" size="icon" aria-label={t("common.previous")} onClick={() => setFrom(addDays(from, -14))}>
           <HugeiconsIcon icon={ArrowLeft01Icon} />
         </Button>
         <Input
@@ -40,7 +40,7 @@ function DiaryPage() {
           onChange={(e) => e.target.value && setFrom(e.target.value)}
           aria-label={t("common.date")}
         />
-        <Button variant="outline" size="icon" aria-label="next" onClick={() => setFrom(addDays(from, 14))}>
+        <Button variant="outline" size="icon" aria-label={t("common.next")} onClick={() => setFrom(addDays(from, 14))}>
           <HugeiconsIcon icon={ArrowRight01Icon} />
         </Button>
       </div>

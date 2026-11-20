@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { authClient } from "@/lib/auth-client";
+import { authError } from "@/lib/errors";
 import { useI18n } from "@/lib/i18n";
 import { AuthShell } from "./AuthShell";
 import { ErrorBox, Field } from "./common";
@@ -43,7 +44,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
             locale,
           });
     if (res.error) {
-      setError(new Error(res.error.message ?? t("common.error")));
+      setError(authError(res.error));
       return;
     }
     qc.clear();

@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import type { FieldError } from "react-hook-form";
 import { ApiError } from "@/lib/api";
+import { errorText } from "@/lib/errors";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "./ui/alert";
@@ -96,10 +97,11 @@ export function Loading({ rows = 3 }: { rows?: number }) {
 }
 
 export function ErrorBox({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   if (!error) return null;
-  const message = error instanceof Error ? error.message : t("common.error");
-  const details = error instanceof ApiError ? error.details : undefined;
+  const message = errorText(error, locale, t("common.error"));
+  // Field-level details are English from the server: shown only to English readers.
+  const details = error instanceof ApiError && locale === "en" && Array.isArray(error.details) ? error.details : undefined;
   return (
     <Alert variant="destructive" className="my-3">
       <HugeiconsIcon icon={AlertCircleIcon} />

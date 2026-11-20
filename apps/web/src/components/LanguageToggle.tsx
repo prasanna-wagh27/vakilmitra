@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 
 export function LanguageToggle({ persist = false, compact = false }: { persist?: boolean; compact?: boolean; onDark?: boolean }) {
-  const { locale, setLocale } = useI18n();
+  const { t, locale, setLocale } = useI18n();
   const choose = (l: "mr" | "en") => {
     setLocale(l);
     if (persist) void api("/me", { method: "PATCH", body: { locale: l } }).catch(() => undefined);
@@ -26,7 +26,7 @@ export function LanguageToggle({ persist = false, compact = false }: { persist?:
   }
   return (
     <Tabs value={locale} onValueChange={(v) => choose(v as "mr" | "en")}>
-      <TabsList aria-label="Language">
+      <TabsList aria-label={t("settings.language")}>
         <TabsTrigger value="mr">मराठी</TabsTrigger>
         <TabsTrigger value="en">English</TabsTrigger>
       </TabsList>

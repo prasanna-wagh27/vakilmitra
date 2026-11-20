@@ -17,6 +17,7 @@ import { Checkbox, Input } from "@/components/ui/input";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
 import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
+import { authError } from "@/lib/errors";
 import { fmtDate, orNull } from "@/lib/format";
 import { type MessageKey, useI18n } from "@/lib/i18n";
 import { billingQuery, meQuery, useApiMutation } from "@/lib/queries";
@@ -193,7 +194,7 @@ function EmailLine({ advocate }: { advocate: Advocate }) {
   const { t } = useI18n();
   const resend = useApiMutation(() =>
     authClient.sendVerificationEmail({ email: advocate.email, callbackURL: `${window.location.origin}/settings?verified=1` }).then((r) => {
-      if (r.error) throw new Error(r.error.message ?? t("common.error"));
+      if (r.error) throw authError(r.error);
     }),
   );
   return (

@@ -1,6 +1,7 @@
 import type { Locale } from "@vakilmitra/shared";
 import { interpolate, type MessageKey, translate } from "@vakilmitra/shared/i18n";
 import { useCallback, useEffect } from "react";
+import { z } from "zod";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -34,3 +35,22 @@ export function useI18n() {
   }, [locale]);
   return { locale, setLocale, t, tf };
 }
+
+// Form checks without a message of their own get one in the reader's language (zod's defaults are English).
+z.config({
+  customError: (iss) => {
+    const key: MessageKey =
+      iss.code === "invalid_format" && iss.format === "email"
+        ? "common.invalidEmail"
+        : iss.code === "too_small"
+          ? iss.minimum === 1
+            ? "common.required"
+            : "common.tooShort"
+          : iss.code === "too_big"
+            ? "common.tooLong"
+            : iss.code === "invalid_type"
+              ? "common.required"
+              : "common.invalid";
+    return translate(useLocaleStore.getState().locale, key);
+  },
+});
