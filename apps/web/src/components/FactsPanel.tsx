@@ -199,7 +199,7 @@ function FactRow({ fact, doc, canEdit }: { fact: Fact; doc: DocumentDetail; canE
         {page && fact.crop ? (
           <SourceCrop documentId={doc.id} page={page} crop={fact.crop} />
         ) : page ? (
-          <a href={`#page-${page.pageNo}`} className="text-sm text-primary underline underline-offset-4">
+          <a href={`#page-${page.pageNo}`} className="text-sm text-brand underline underline-offset-4">
             {t("fact.wholePage")}
           </a>
         ) : null}

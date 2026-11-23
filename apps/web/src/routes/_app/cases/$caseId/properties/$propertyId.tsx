@@ -147,7 +147,7 @@ function PropertyPage() {
                   flaggedEvents.has(e.id) && "border-destructive/40",
                 )}
               >
-                <span aria-hidden className="absolute top-4 -left-[1.45rem] size-3 rounded-full border-2 border-background bg-primary" />
+                <span aria-hidden className="absolute top-4 -left-[1.45rem] size-3 rounded-full border-2 border-background bg-brand" />
                 <div className="mb-1 flex flex-wrap items-center gap-2">
                   <span className="font-semibold">{fmtDate(e.date, locale)}</span>
                   <Badge tone={kindTone[e.kind]}>{t(`land.kind.${e.kind}`)}</Badge>

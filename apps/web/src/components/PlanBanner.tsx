@@ -37,7 +37,7 @@ export function PlanBanner() {
         "no-print mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl p-3 text-sm",
         tone === "danger" && "bg-destructive-soft text-destructive",
         tone === "warn" && "bg-warning-soft text-warning",
-        tone === "info" && "bg-muted text-foreground",
+        tone === "info" && "bg-brand-soft text-brand",
       )}
     >
       <span>{text}</span>

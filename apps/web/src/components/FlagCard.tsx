@@ -34,7 +34,7 @@ export function FlagCard({
       <p className={compact ? "text-sm" : ""}>{flag.message}</p>
       {flag.resolution && <p className="mt-1 text-sm text-muted-foreground">✓ {flag.resolution}</p>}
       {onSource && flag.eventIds.length > 0 && (
-        <button type="button" className="mt-1 text-sm text-primary underline underline-offset-4" onClick={() => onSource(flag.eventIds)}>
+        <button type="button" className="mt-1 text-sm text-brand underline underline-offset-4" onClick={() => onSource(flag.eventIds)}>
           {t("land.sources")} ({flag.eventIds.length})
         </button>
       )}

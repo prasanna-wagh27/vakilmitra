@@ -632,7 +632,7 @@ export function EventForm({ base, onDone, onCancel }: { base: string } & Done) {
             role="radio"
             aria-checked={kind === k}
             onClick={() => setKind(k)}
-            className={`min-h-11 rounded-lg px-1 text-sm ${kind === k ? "bg-primary text-primary-foreground" : ""}`}
+            className={`min-h-11 rounded-lg px-1 text-sm ${kind === k ? "bg-brand text-brand-foreground" : ""}`}
           >
             {t(`land.kind.${k}`)}
           </button>

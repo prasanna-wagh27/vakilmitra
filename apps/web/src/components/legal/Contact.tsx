@@ -37,7 +37,7 @@ export function ContactContent() {
         </dd>
       </dl>
       <p className="mt-8 text-sm">
-        <Link to="/privacy" className="text-primary underline underline-offset-4">
+        <Link to="/privacy" className="text-brand underline underline-offset-4">
           {t("legal.privacy")}
         </Link>
       </p>

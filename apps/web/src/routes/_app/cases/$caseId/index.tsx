@@ -118,7 +118,7 @@ function CasePage() {
             <>
               <dt className="text-muted-foreground">{t("case.client")}</dt>
               <dd>
-                <Link className="text-primary underline underline-offset-4" to="/clients/$clientId" params={{ clientId: c.client.id }}>
+                <Link className="text-brand underline underline-offset-4" to="/clients/$clientId" params={{ clientId: c.client.id }}>
                   {c.client.name}
                 </Link>
                 {c.client.phone && (

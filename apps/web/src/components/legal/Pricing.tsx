@@ -33,7 +33,7 @@ export function PricingContent() {
       />
       <p className="mt-6 text-sm text-muted-foreground">
         {t("legal.pricingNote")}{" "}
-        <Link to="/refunds" className="text-primary underline underline-offset-4">
+        <Link to="/refunds" className="text-brand underline underline-offset-4">
           {t("legal.refunds")}
         </Link>
       </p>

@@ -58,7 +58,7 @@ export function LegalPage({ title, children }: { title: string; children: ReactN
           "mt-6 max-w-3xl text-[15px] leading-7",
           "[&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:font-heading [&_h2]:text-lg [&_h2]:font-semibold",
           "[&_p]:mb-3 [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5",
-          "[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4",
+          "[&_a]:text-brand [&_a]:underline [&_a]:underline-offset-4",
         )}
       >
         {children}

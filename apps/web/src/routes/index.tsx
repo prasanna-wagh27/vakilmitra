@@ -49,7 +49,7 @@ function HomePage() {
   }, [t]);
 
   return (
-    <div className="min-h-dvh overflow-x-clip bg-white font-home text-graphite">
+    <div className="min-h-dvh overflow-x-clip bg-white text-graphite">
       <SiteHeader />
       <main>
         <Hero />
@@ -115,7 +115,7 @@ function SiteHeader() {
     <header className="fixed inset-x-4 top-4 z-30 mx-auto max-w-6xl rounded-full bg-white/85 shadow-[0_8px_30px_rgb(20_13_53/0.1)] ring-1 ring-black/5 backdrop-blur-md">
       <div className="flex h-15 items-center gap-2 ps-5 pe-2.5">
         <Link to="/" aria-label={t("app.name")} className="flex items-center gap-2">
-          <Brand compact accent />
+          <Brand compact />
           <span className="hidden text-lg font-bold tracking-tight sm:inline">{t("app.name")}</span>
         </Link>
         <nav aria-label={t("nav.main")} className="ms-8 hidden items-center gap-7 text-[15px] lg:flex">
@@ -447,7 +447,7 @@ function SiteFooter() {
     <footer className="relative overflow-hidden bg-night text-white">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-10 px-4 pt-20 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div className="col-span-2 md:col-span-1">
-          <Brand compact accent />
+          <Brand compact />
           <p className="mt-6 text-2xl leading-snug font-semibold tracking-tight">
             {t("home.footer.tag1")}
             <br />

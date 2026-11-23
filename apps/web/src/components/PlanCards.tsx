@@ -27,21 +27,21 @@ export function PlanCards({ interval, action }: { interval: BillingInterval; act
           tf("billing.featStorage", { n: fmtNumber(limits.storageBytes / GB, locale) }),
         ];
         return (
-          <Card key={p} className={cn(p === "PRO" && "ring-2 ring-primary")}>
+          <Card key={p} className={cn(p === "PRO" && "ring-2 ring-brand")}>
             <CardHeader>
               <CardTitle>{t(`billing.plan.${p}` as MessageKey)}</CardTitle>
               <CardDescription>{t(`billing.planHint.${p}` as MessageKey)}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-1 flex-col gap-4">
               <div>
-                <span className="text-3xl font-semibold tabular-nums">{rupees(amount, locale)}</span>
+                <span className="font-display text-4xl tabular-nums">{rupees(amount, locale)}</span>
                 <span className="text-sm text-muted-foreground">{t(interval === "MONTHLY" ? "billing.perMonth" : "billing.perYear")}</span>
                 <p className="text-xs text-muted-foreground">{t("billing.plusGst")}</p>
               </div>
               <ul className="flex flex-col gap-2 text-sm">
                 {feats.map((f) => (
                   <li key={f} className="flex items-center gap-2">
-                    <HugeiconsIcon icon={Tick02Icon} className="size-4 text-success" /> {f}
+                    <HugeiconsIcon icon={Tick02Icon} className="size-4 text-brand" /> {f}
                   </li>
                 ))}
               </ul>

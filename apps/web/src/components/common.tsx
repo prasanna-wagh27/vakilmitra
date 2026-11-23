@@ -29,7 +29,7 @@ export function PageHeader({
 }) {
   const { t } = useI18n();
   return (
-    <div className="mb-6">
+    <div className="mb-8">
       {back && (
         <Button asChild variant="ghost" size="sm" className="-ml-2 mb-3 text-muted-foreground">
           <Link to={back}>
@@ -41,8 +41,8 @@ export function PageHeader({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           {eyebrow && <div className="mb-1 text-sm text-muted-foreground">{eyebrow}</div>}
-          <h1 className="font-heading text-2xl leading-tight font-semibold tracking-tight break-words">{title}</h1>
-          {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+          <h1 className="font-display text-[1.75rem] leading-tight md:text-[2rem] break-words">{title}</h1>
+          {description && <p className="mt-2 text-muted-foreground">{description}</p>}
         </div>
         {action && <div className="flex shrink-0 items-center gap-2">{action}</div>}
       </div>
@@ -53,9 +53,9 @@ export function PageHeader({
 /** A titled block of a page. */
 export function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <section className="mt-8">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="font-heading text-base font-semibold">{title}</h2>
+    <section className="mt-10">
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <h2 className="font-display text-lg">{title}</h2>
         {action}
       </div>
       {children}
@@ -67,7 +67,7 @@ export function Section({ title, action, children }: { title: string; action?: R
 export function Empty({ children }: { children?: ReactNode }) {
   const { t } = useI18n();
   return (
-    <EmptyRoot className="rounded-xl border border-dashed py-8">
+    <EmptyRoot className="rounded-xl border border-dashed bg-muted/40 py-10">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <HugeiconsIcon icon={InboxIcon} />
@@ -172,10 +172,13 @@ export function Chip({ active, onClick, children }: { active: boolean; onClick: 
     <Button
       type="button"
       size="sm"
-      variant={active ? "secondary" : "ghost"}
+      variant="ghost"
       onClick={onClick}
       aria-pressed={active}
-      className={cn("shrink-0", !active && "text-muted-foreground")}
+      className={cn(
+        "shrink-0 rounded-xl",
+        active ? "bg-brand-soft text-brand hover:bg-brand-soft hover:text-brand" : "text-muted-foreground",
+      )}
     >
       {children}
     </Button>
