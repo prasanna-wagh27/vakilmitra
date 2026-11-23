@@ -27,7 +27,7 @@ export function CasesMock() {
     <div aria-hidden className="relative mx-auto max-w-4xl sm:pb-10">
       <div className="overflow-hidden rounded-2xl bg-card shadow-xl ring-1 ring-foreground/10">
         <div className="flex items-center gap-2 border-b px-4 py-3">
-          <Brand compact />
+          <Brand compact accent />
           <span className="font-medium">{t("home.mock.cases")}</span>
           <span className="ms-auto rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
             {fmtNumber(rows.length, locale)}
@@ -77,7 +77,7 @@ export function CasesMock() {
           <dd className="font-medium">{t("home.mock.surveyValue")}</dd>
           <dt className="text-muted-foreground">{t("home.mock.owner")}</dt>
           <dd className="font-medium">
-            <mark className="rounded bg-[#e6eaf3] px-1">{t("home.mock.ownerName")}</mark>
+            <mark className="rounded bg-[#e6e1fd] px-1">{t("home.mock.ownerName")}</mark>
           </dd>
           <dt className="text-muted-foreground">{t("home.mock.area")}</dt>
           <dd className="font-medium">{t("home.mock.areaValue")}</dd>
@@ -87,7 +87,7 @@ export function CasesMock() {
             <HugeiconsIcon icon={Link04Icon} className="size-3.5" />
             {t("home.mock.source")}
           </span>
-          <span className="inline-flex items-center gap-1 font-medium text-link">
+          <span className="inline-flex items-center gap-1 font-medium text-iris">
             <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-3.5" />
             {t("home.mock.checked")}
           </span>
@@ -124,7 +124,7 @@ export function TodayMock() {
           <p className="font-heading text-lg font-semibold">{t("nav.today")}</p>
           <p className="text-xs text-muted-foreground">{tf("home.demo.count", { n: fmtNumber(3, locale) })}</p>
         </div>
-        <Brand compact />
+        <Brand compact accent />
       </div>
       {groups.map((g) => (
         <div key={g.court} className="mt-4">
@@ -139,7 +139,7 @@ export function TodayMock() {
           </ul>
         </div>
       ))}
-      <div className="mt-4 flex items-center gap-2 rounded-xl bg-graphite px-3 py-2.5 text-sm text-white">
+      <div className="mt-4 flex items-center gap-2 rounded-xl bg-ink px-3 py-2.5 text-sm text-white">
         <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4 shrink-0" />
         {t("home.demo.reportReady")}
       </div>
@@ -153,7 +153,7 @@ const Done = ({ last }: { last?: boolean }) => (
   <span
     className={cn(
       "flex size-4 shrink-0 items-center justify-center rounded-[4px]",
-      last ? "bg-graphite text-white" : "bg-muted text-muted-foreground",
+      last ? "bg-iris text-white" : "bg-muted text-muted-foreground",
     )}
   >
     <HugeiconsIcon icon={Tick02Icon} className="size-3" strokeWidth={2.5} />
@@ -165,7 +165,7 @@ export function StepsMock() {
   const { t, tf, locale } = useI18n();
   const docs: MessageKey[] = ["home.doc.712", "home.doc.ferfar", "home.doc.index2"];
   return (
-    <div aria-hidden className="w-full max-w-lg rounded-xl bg-white p-5 text-sm text-neutral-700 shadow-2xl">
+    <div aria-hidden className="w-full max-w-lg rounded-2xl bg-white p-5 text-sm text-neutral-700 shadow-2xl">
       <ul className="flex flex-col gap-3.5">
         <li className="flex items-center gap-3">
           <Done />
@@ -205,7 +205,7 @@ export function StepsMock() {
 function Src({ k }: { k: MessageKey }) {
   const { t } = useI18n();
   return (
-    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-link">
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-iris">
       <HugeiconsIcon icon={Link04Icon} className="size-3" />
       {t(k)}
     </span>
@@ -216,15 +216,13 @@ function Src({ k }: { k: MessageKey }) {
 export function ReportMock() {
   const { t } = useI18n();
   return (
-    <div aria-hidden className="mx-auto max-w-2xl rounded-xl bg-white p-6 text-neutral-900 shadow-2xl sm:p-8">
+    <div aria-hidden className="mx-auto max-w-2xl rounded-2xl bg-white p-6 text-neutral-900 shadow-2xl sm:p-8">
       <div className="flex items-start justify-between gap-4 border-b border-neutral-200 pb-4">
         <div>
           <p className="font-heading text-xl font-semibold">{t("report.title")}</p>
           <p className="mt-1 text-sm text-neutral-500">{t("home.report.village")}</p>
         </div>
-        <span className="shrink-0 rounded-md border-2 border-graphite px-2 py-0.5 text-xs font-bold text-graphite">
-          {t("home.how.approved")}
-        </span>
+        <span className="shrink-0 rounded-md border-2 border-iris px-2 py-0.5 text-xs font-bold text-iris">{t("home.how.approved")}</span>
       </div>
       <p className="mt-4 text-xs font-semibold tracking-wide text-neutral-500 uppercase">{t("report.owners")}</p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">

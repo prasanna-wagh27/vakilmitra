@@ -3,8 +3,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-/** Brand: the scales mark on a primary tile, with the wordmark. */
-export function Brand({ compact = false, onDark = false }: { compact?: boolean; onDark?: boolean }) {
+/** Brand: the scales mark on a primary tile (indigo on the home page), with the wordmark. */
+export function Brand({ compact = false, accent = false }: { compact?: boolean; accent?: boolean }) {
   const { t } = useI18n();
   return (
     <span className="flex items-center gap-2">
@@ -12,7 +12,7 @@ export function Brand({ compact = false, onDark = false }: { compact?: boolean; 
         aria-hidden
         className={cn(
           "flex size-7 items-center justify-center rounded-md",
-          onDark ? "bg-white text-graphite" : "bg-primary text-primary-foreground",
+          accent ? "bg-iris text-white" : "bg-primary text-primary-foreground",
         )}
       >
         <HugeiconsIcon icon={JusticeScale01Icon} className="size-4" strokeWidth={2} />

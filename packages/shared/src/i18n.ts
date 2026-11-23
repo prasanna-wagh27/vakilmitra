@@ -725,6 +725,7 @@ export const en = {
   "home.records.title": "Records it reads",
   "home.included": "Included",
   "home.pricing.included": "What's included",
+  "home.pricing.popular": "Recommended",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -1442,6 +1443,7 @@ export const mr: Partial<Record<MessageKey, string>> = {
   "home.records.title": "वाचता येणाऱ्या नोंदी",
   "home.included": "समाविष्ट",
   "home.pricing.included": "यात काय आहे",
+  "home.pricing.popular": "शिफारस केलेला",
 };
 
 export const dictionaries: Record<Locale, Partial<Record<MessageKey, string>>> = { en, mr };

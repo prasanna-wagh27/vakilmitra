@@ -1,17 +1,16 @@
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 
 export function LanguageToggle({
   persist = false,
   compact = false,
-  onDark = false,
+  className,
 }: {
   persist?: boolean;
   compact?: boolean;
-  onDark?: boolean;
+  className?: string;
 }) {
   const { t, locale, setLocale } = useI18n();
   const choose = (l: "mr" | "en") => {
@@ -25,7 +24,7 @@ export function LanguageToggle({
       <Button
         variant="ghost"
         size="sm"
-        className={cn(onDark && "text-white hover:bg-white/10 hover:text-white")}
+        className={className}
         onClick={() => choose(other)}
         lang={other}
         aria-label={other === "en" ? "Switch to English" : "मराठीत बदला"}

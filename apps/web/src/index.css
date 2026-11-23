@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/figtree";
+@import "@fontsource-variable/inter/opsz.css";
 
 /*
  * VakilMitra theme: shadcn/ui preset b5w6CrEby (style Vega, stone, Figtree, Hugeicons,
@@ -191,31 +192,37 @@
   }
 }
 
-/* Home page: graphite and mist. */
+/* Home page: indigo and night. Inter, tight headings, warm grey cards, near-black buttons. */
 @theme {
-  --color-graphite: #17191c;
-  --color-paper: #faf9f7;
-  --color-link: #4a5aa8;
+  --font-home: "Inter Variable", "IBM Plex Sans Devanagari", system-ui, sans-serif;
+  --color-iris: #4e32d9;
+  --color-night: #140d35;
+  --color-night-2: #241a52;
+  --color-lilac: #c3b8f9;
+  --color-sand: #f4f3f0;
+  --color-ink: #1b1a18;
 }
 
-/* Soft, out-of-focus sky: blue above, sage and sand below, with one light streak. */
-@utility bg-mist {
-  background:
-    linear-gradient(160deg, transparent 42%, rgb(255 255 255 / 0.16) 52%, transparent 62%),
-    radial-gradient(120% 60% at 10% 92%, #a9b48a 0%, transparent 55%), radial-gradient(90% 55% at 88% 78%, #d8c39a 0%, transparent 60%),
-    radial-gradient(140% 75% at 50% 0%, #4f6898 0%, transparent 70%), #8796b3;
+/* Big headings: tight in English. Devanagari needs its normal spacing and more line height. */
+@utility tight {
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+  &:where(:lang(mr), :lang(mr) *) {
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
 }
 
-@utility bg-mist-dusk {
+/* The hero sky: pale lilac at the top, deepening to violet. */
+@utility bg-lilac-sky {
   background:
-    linear-gradient(150deg, transparent 35%, rgb(255 255 255 / 0.2) 48%, transparent 60%),
-    radial-gradient(110% 70% at 85% 20%, #e3c9a0 0%, transparent 60%), radial-gradient(120% 70% at 0% 100%, #9fae86 0%, transparent 60%),
-    radial-gradient(120% 80% at 20% 0%, #5a6f9a 0%, transparent 65%), #a7aebd;
+    radial-gradient(70% 45% at 75% 0%, rgb(255 255 255 / 0.35) 0%, transparent 70%),
+    linear-gradient(180deg, #b1a7ee 0%, #9886dc 30%, #7f6abf 60%, #7b65ba 100%);
 }
 
-@utility bg-mist-sage {
+/* The soft glow inside cards that hold a product picture. */
+@utility bg-lilac-glow {
   background:
-    linear-gradient(170deg, transparent 45%, rgb(255 255 255 / 0.18) 55%, transparent 65%),
-    radial-gradient(100% 70% at 15% 15%, #b9c49a 0%, transparent 60%), radial-gradient(110% 70% at 90% 90%, #6f86b3 0%, transparent 60%),
-    radial-gradient(80% 60% at 70% 20%, #e2d3b0 0%, transparent 60%), #a3ad9c;
+    radial-gradient(60% 50% at 85% 10%, #d8d0fb 0%, transparent 70%), radial-gradient(60% 50% at 0% 100%, #dfe6fb 0%, transparent 70%),
+    #f1eefc;
 }
