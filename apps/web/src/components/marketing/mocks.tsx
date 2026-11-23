@@ -27,7 +27,7 @@ export function CasesMock() {
     <div aria-hidden className="relative mx-auto max-w-4xl sm:pb-10">
       <div className="overflow-hidden rounded-2xl bg-card shadow-xl ring-1 ring-foreground/10">
         <div className="flex items-center gap-2 border-b px-4 py-3">
-          <Brand compact />
+          <Brand compact accent />
           <span className="font-medium">{t("home.mock.cases")}</span>
           <span className="ms-auto rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
             {fmtNumber(rows.length, locale)}
@@ -77,7 +77,7 @@ export function CasesMock() {
           <dd className="font-medium">{t("home.mock.surveyValue")}</dd>
           <dt className="text-muted-foreground">{t("home.mock.owner")}</dt>
           <dd className="font-medium">
-            <mark className="rounded bg-[#e6eaf3] px-1">{t("home.mock.ownerName")}</mark>
+            <mark className="rounded bg-[#e6e1fd] px-1">{t("home.mock.ownerName")}</mark>
           </dd>
           <dt className="text-muted-foreground">{t("home.mock.area")}</dt>
           <dd className="font-medium">{t("home.mock.areaValue")}</dd>
@@ -153,7 +153,7 @@ const Done = ({ last }: { last?: boolean }) => (
   <span
     className={cn(
       "flex size-4 shrink-0 items-center justify-center rounded-[4px]",
-      last ? "bg-graphite text-white" : "bg-muted text-muted-foreground",
+      last ? "bg-link text-white" : "bg-muted text-muted-foreground",
     )}
   >
     <HugeiconsIcon icon={Tick02Icon} className="size-3" strokeWidth={2.5} />
@@ -222,9 +222,7 @@ export function ReportMock() {
           <p className="font-heading text-xl font-semibold">{t("report.title")}</p>
           <p className="mt-1 text-sm text-neutral-500">{t("home.report.village")}</p>
         </div>
-        <span className="shrink-0 rounded-md border-2 border-graphite px-2 py-0.5 text-xs font-bold text-graphite">
-          {t("home.how.approved")}
-        </span>
+        <span className="shrink-0 rounded-md border-2 border-link px-2 py-0.5 text-xs font-bold text-link">{t("home.how.approved")}</span>
       </div>
       <p className="mt-4 text-xs font-semibold tracking-wide text-neutral-500 uppercase">{t("report.owners")}</p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">

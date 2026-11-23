@@ -1,13 +1,14 @@
 import {
   ArrowRight01Icon,
+  ArrowRight02Icon,
   BadgeIndianRupeeIcon,
   Calendar03Icon,
+  CheckmarkCircle01Icon,
   CourtHouseIcon,
   FileScanIcon,
   Folder01Icon,
   Search01Icon,
   SquareLock02Icon,
-  Tick02Icon,
   UserMultipleIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
@@ -48,19 +49,19 @@ function HomePage() {
   }, [t]);
 
   return (
-    <div className="min-h-dvh overflow-x-clip bg-paper text-graphite">
+    <div className="min-h-dvh overflow-x-clip bg-white font-home text-graphite">
       <SiteHeader />
       <main>
         <Hero />
         <MadeFor />
         <Features />
-        <Showcase id="how" bg="bg-mist-dusk" title={t("home.land.title")} text={t("home.land.text")}>
+        <Showcase id="how" bg="bg-lilac-deep" title={t("home.land.title")} text={t("home.land.text")}>
           <StepsMock />
         </Showcase>
-        <Showcase id="report" bg="bg-mist" title={t("home.reportH.title")} text={t("home.rules.sub")}>
+        <Showcase id="report" bg="bg-lilac" title={t("home.reportH.title")} text={t("home.rules.sub")}>
           <ReportMock />
         </Showcase>
-        <Showcase id="today" bg="bg-mist-sage" title={t("home.today.title")} text={t("home.today.text")}>
+        <Showcase id="today" bg="bg-lilac-soft" title={t("home.today.title")} text={t("home.today.text")}>
           <Phone className="w-64 translate-y-10 md:w-72 md:translate-y-16">
             <TodayMock />
           </Phone>
@@ -78,23 +79,26 @@ function HomePage() {
 // ---------- Pieces ----------
 
 const H2 = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <h2 className={cn("text-4xl leading-[1.2] font-medium tracking-tight text-balance md:text-5xl", className)}>{children}</h2>
+  <h2 className={cn("tight text-[2.5rem] font-semibold text-balance md:text-6xl", className)}>{children}</h2>
 );
 
-/** The main call to action: graphite on light ground, white on dark. */
-function TrialButton({ className, light = false }: { className?: string; light?: boolean }) {
+/** The main call to action: near-black on light ground, white on dark. */
+function TrialButton({ className, light = false, arrow = true }: { className?: string; light?: boolean; arrow?: boolean }) {
   const { t } = useI18n();
   return (
     <Button
       size="lg"
       className={cn(
-        "h-12 rounded-lg px-6 text-base",
+        "h-12 gap-2 rounded-xl px-6 text-base font-medium md:h-13",
         light ? "bg-white text-graphite hover:bg-white/90" : "bg-graphite text-white hover:bg-graphite/90",
         className,
       )}
       asChild
     >
-      <Link to="/register">{t("legal.startTrial")}</Link>
+      <Link to="/register">
+        {t("legal.startTrial")}
+        {arrow && <HugeiconsIcon icon={ArrowRight02Icon} className="size-5" />}
+      </Link>
     </Button>
   );
 }
@@ -108,25 +112,25 @@ function SiteHeader() {
     ["#faq", "home.nav.faq"],
   ] as const;
   return (
-    <header className="fixed inset-x-3 top-3 z-30 mx-auto max-w-6xl rounded-2xl bg-graphite/75 text-white shadow-lg ring-1 ring-white/10 backdrop-blur-md">
-      <div className="flex items-center gap-2 px-3 py-2">
+    <header className="fixed inset-x-4 top-4 z-30 mx-auto max-w-6xl rounded-full bg-white/85 shadow-[0_8px_30px_rgb(20_13_53/0.1)] ring-1 ring-black/5 backdrop-blur-md">
+      <div className="flex h-15 items-center gap-2 ps-5 pe-2.5">
         <Link to="/" aria-label={t("app.name")} className="flex items-center gap-2">
-          <Brand compact onDark />
-          <span className="hidden font-heading text-[15px] font-semibold tracking-tight sm:inline">{t("app.name")}</span>
+          <Brand compact accent />
+          <span className="hidden text-lg font-bold tracking-tight sm:inline">{t("app.name")}</span>
         </Link>
-        <nav aria-label={t("nav.main")} className="ms-8 hidden items-center gap-6 text-sm lg:flex">
+        <nav aria-label={t("nav.main")} className="ms-8 hidden items-center gap-7 text-[15px] lg:flex">
           {links.map(([href, key]) => (
-            <a key={href} href={href} className="text-white/70 transition-colors hover:text-white">
+            <a key={href} href={href} className="text-graphite/65 transition-colors hover:text-graphite">
               {t(key)}
             </a>
           ))}
         </nav>
         <div className="ms-auto flex items-center gap-1">
-          <LanguageToggle compact onDark />
-          <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white" asChild>
+          <LanguageToggle compact className="h-10 rounded-xl px-3 text-[15px] hover:bg-sand" />
+          <Button variant="ghost" size="sm" className="h-10 rounded-xl px-3 text-[15px] hover:bg-sand" asChild>
             <Link to="/login">{t("auth.signIn")}</Link>
           </Button>
-          <Button size="sm" className="rounded-lg bg-white text-graphite hover:bg-white/90" asChild>
+          <Button size="sm" className="h-10 rounded-xl bg-graphite px-4 text-[15px] text-white hover:bg-graphite/90" asChild>
             <Link to="/register">{t("legal.startTrial")}</Link>
           </Button>
         </div>
@@ -141,27 +145,31 @@ function Hero() {
   const { t, tf, locale } = useI18n();
   return (
     <section className="relative">
-      {/* The mist stops part-way down the product picture, so the picture sits across the edge. */}
-      <div aria-hidden className="absolute inset-x-0 top-0 bottom-32 bg-mist md:bottom-48">
-        <div className="absolute inset-0 bg-gradient-to-b from-graphite/45 via-graphite/10 to-transparent" />
+      {/* The sky stops part-way down the product picture, so the picture sits across the edge. */}
+      <div aria-hidden className="absolute inset-x-0 top-0 bottom-32 bg-lilac md:bottom-48">
+        <div className="absolute inset-0 bg-gradient-to-b from-night/40 via-night/10 to-transparent" />
       </div>
-      <div className="relative mx-auto max-w-6xl px-4 pt-28 md:pt-40">
-        <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm text-white ring-1 ring-white/25 backdrop-blur">
+      <div className="relative mx-auto max-w-6xl px-4 pt-32 md:pt-44">
+        <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-sm font-medium text-white ring-1 ring-white/25 backdrop-blur">
           <span className="size-1.5 rounded-full bg-white" />
           {tf("home.pill", { days: fmtNumber(TRIAL_DAYS, locale) })}
         </p>
-        <h1 className="mt-6 max-w-4xl text-5xl leading-[1.15] font-semibold tracking-tight text-balance text-white md:text-7xl">
+        <h1 className="tight mt-6 max-w-4xl text-[2.75rem] font-semibold text-balance text-white md:text-7xl">
           {t("home.hero1")} <span className="text-white/70">{t("home.hero2")}</span>
         </h1>
-        <p className="mt-6 max-w-xl text-lg text-white/90 text-pretty">{t("home.heroSub")}</p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <TrialButton />
-          <Button size="lg" className="h-12 rounded-lg bg-white px-6 text-base text-graphite hover:bg-white/90" asChild>
+        <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/90 text-pretty md:text-xl">{t("home.heroSub")}</p>
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+          <TrialButton className="w-full sm:w-auto" />
+          <Button
+            size="lg"
+            className="h-12 w-full rounded-xl bg-white px-6 text-base font-medium text-graphite hover:bg-white/90 sm:w-auto md:h-13"
+            asChild
+          >
             <a href="#how">{t("home.seeHow")}</a>
           </Button>
         </div>
       </div>
-      <div className="relative mx-auto mt-14 max-w-6xl px-4 md:mt-20">
+      <div className="relative mx-auto mt-16 max-w-6xl px-4 md:mt-24">
         <CasesMock />
       </div>
     </section>
@@ -169,12 +177,12 @@ function Hero() {
 }
 
 function MadeFor() {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const docs: MessageKey[] = ["home.doc.712", "home.doc.ferfar", "home.doc.index2", "home.doc.orders"];
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-12 pb-16 md:pt-16">
-      <p className={cn("text-sm text-neutral-500", locale === "en" && "font-mono")}>{t("home.madeFor")}</p>
-      <ul className="mt-6 flex flex-wrap gap-x-10 gap-y-3 text-xl font-semibold tracking-tight text-neutral-400 md:text-2xl">
+    <section className="mx-auto max-w-6xl px-4 pt-16 pb-20 md:pt-24 md:pb-28">
+      <p className="text-lg text-graphite/55">{t("home.madeFor")}</p>
+      <ul className="mt-8 flex flex-wrap gap-x-12 gap-y-4 text-2xl font-semibold tracking-tight text-graphite/35 md:text-3xl">
         {docs.map((d) => (
           <li key={d}>{t(d)}</li>
         ))}
@@ -187,12 +195,9 @@ function MadeFor() {
 
 function IconRow({ icons }: { icons: IconSvgElement[] }) {
   return (
-    <div aria-hidden className="mt-6 flex gap-2">
+    <div aria-hidden className="mt-8 flex gap-2.5">
       {icons.map((icon, i) => (
-        <span
-          key={i}
-          className="flex size-11 items-center justify-center rounded-xl bg-white text-neutral-600 shadow-xs ring-1 ring-neutral-200"
-        >
+        <span key={i} className="flex size-12 items-center justify-center rounded-2xl bg-sand text-link">
           <HugeiconsIcon icon={icon} className="size-5" />
         </span>
       ))}
@@ -208,13 +213,13 @@ function Features() {
     { n: 3, icons: [SquareLock02Icon, UserMultipleIcon], href: "#trust" },
   ];
   return (
-    <section id="features" className="mx-auto grid max-w-6xl scroll-mt-24 gap-x-10 px-4 pb-10 md:grid-cols-3">
+    <section id="features" className="mx-auto grid max-w-6xl scroll-mt-28 gap-x-12 px-4 pb-16 md:grid-cols-3">
       {items.map((x) => (
-        <div key={x.n} className="border-t border-neutral-200 py-10">
-          <h3 className="text-2xl leading-snug font-medium tracking-tight">{t(`home.f${x.n}.title` as MessageKey)}</h3>
-          <p className="mt-4 text-lg leading-relaxed text-neutral-600">{t(`home.f${x.n}.text` as MessageKey)}</p>
+        <div key={x.n} className="border-t border-black/10 py-12">
+          <h3 className="text-2xl leading-snug font-semibold tracking-tight">{t(`home.f${x.n}.title` as MessageKey)}</h3>
+          <p className="mt-4 text-lg leading-relaxed text-graphite/65">{t(`home.f${x.n}.text` as MessageKey)}</p>
           <IconRow icons={x.icons} />
-          <a href={x.href} className="mt-8 inline-flex items-center gap-1 font-medium text-link hover:underline">
+          <a href={x.href} className="mt-8 inline-flex items-center gap-1 font-semibold text-link hover:underline">
             {t("home.learnMore")}
             <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
           </a>
@@ -224,16 +229,18 @@ function Features() {
   );
 }
 
-/** A product picture on a misty panel, then a big name and a few lines about it. */
+/** A product picture on a lilac panel, then a big name and a few lines about it. */
 function Showcase({ id, bg, title, text, children }: { id: string; bg: string; title: string; text: string; children: ReactNode }) {
   return (
-    <section id={id} className="mx-auto max-w-6xl scroll-mt-24 px-4 py-12 md:py-16">
-      <div className={cn("flex min-h-80 items-center justify-center overflow-hidden rounded-2xl px-5 py-10 md:min-h-[30rem] md:p-14", bg)}>
+    <section id={id} className="mx-auto max-w-6xl scroll-mt-28 px-4 py-16 md:py-20">
+      <div
+        className={cn("flex min-h-96 items-center justify-center overflow-hidden rounded-[2rem] px-5 py-12 md:min-h-[32rem] md:p-16", bg)}
+      >
         {children}
       </div>
-      <div className="mt-10 grid gap-5 md:grid-cols-2 md:gap-12">
-        <H2 className="text-5xl md:text-6xl">{title}</H2>
-        <p className="text-lg leading-relaxed text-neutral-600 md:pt-3 md:text-xl">{text}</p>
+      <div className="mt-12 grid gap-6 md:grid-cols-2 md:gap-14">
+        <H2>{title}</H2>
+        <p className="text-lg leading-relaxed text-graphite/65 md:pt-2 md:text-xl">{text}</p>
       </div>
     </section>
   );
@@ -247,13 +254,13 @@ function Pricing() {
   const { t, tf, locale } = useI18n();
   const [interval, setInterval] = useState<BillingInterval>("YEARLY");
   return (
-    <section id="pricing" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-16 md:py-24">
+    <section id="pricing" className="mx-auto max-w-6xl scroll-mt-28 px-4 py-20 md:py-28">
       <H2>
         {tf("home.pricing.title", { price: rupees(PLANS.SOLO.price!.MONTHLY, locale) })}{" "}
-        <span className="text-neutral-400">{tf("home.pricing.free", { days: fmtNumber(TRIAL_DAYS, locale) })}</span>
+        <span className="text-link">{tf("home.pricing.free", { days: fmtNumber(TRIAL_DAYS, locale) })}</span>
       </H2>
-      <p className="mt-4 max-w-2xl text-lg text-neutral-600">{t("billing.everyPlan")}</p>
-      <div className="mt-8 flex gap-2">
+      <p className="mt-5 max-w-2xl text-lg leading-relaxed text-graphite/65 md:text-xl">{t("billing.everyPlan")}</p>
+      <div className="mt-10 flex flex-wrap gap-2">
         {(["MONTHLY", "YEARLY"] as const).map((v) => (
           <button
             key={v}
@@ -261,16 +268,18 @@ function Pricing() {
             aria-pressed={interval === v}
             onClick={() => setInterval(v)}
             className={cn(
-              "rounded-lg px-4 py-2 text-base transition-colors",
-              interval === v ? "bg-white font-medium shadow-sm ring-1 ring-neutral-200" : "text-neutral-500 hover:text-graphite",
+              "h-12 rounded-xl px-5 text-base font-medium transition-colors",
+              interval === v ? "bg-link text-white" : "bg-sand text-graphite hover:bg-sand/70",
             )}
           >
             {t(v === "MONTHLY" ? "billing.monthly" : "billing.yearly")}
-            {v === "YEARLY" && <span className="ms-2 text-sm text-link">{t("billing.yearlySave")}</span>}
+            {v === "YEARLY" && (
+              <span className={cn("ms-2 text-sm", interval === v ? "text-white/80" : "text-link")}>{t("billing.yearlySave")}</span>
+            )}
           </button>
         ))}
       </div>
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
         {PAID_PLANS.map((p) => {
           const { limits, price } = PLANS[p];
           const dark = p === "PRO";
@@ -284,23 +293,25 @@ function Pricing() {
             tf("billing.featStorage", { n: fmtNumber(limits.storageBytes / GB, locale) }),
           ];
           return (
-            <div
-              key={p}
-              className={cn("flex flex-col rounded-2xl p-6", dark ? "bg-graphite text-white" : "bg-neutral-100/70 ring-1 ring-neutral-200")}
-            >
-              <h3 className="text-2xl font-medium">{t(`billing.plan.${p}` as MessageKey)}</h3>
-              <p className={cn("mt-2", dark ? "text-white/70" : "text-neutral-600")}>{t(`billing.planHint.${p}` as MessageKey)}</p>
-              <p className="mt-10 text-4xl font-semibold tabular-nums">{rupees(price![interval], locale)}</p>
-              <p className={cn("mt-2 text-sm", dark ? "text-white/60" : "text-neutral-500")}>
+            <div key={p} className={cn("flex flex-col rounded-[2rem] p-7 md:p-8", dark ? "bg-night text-white" : "bg-sand")}>
+              <h3 className="text-2xl font-semibold tracking-tight">{t(`billing.plan.${p}` as MessageKey)}</h3>
+              <p className={cn("mt-3 text-lg", dark ? "text-lilac-text" : "text-graphite/65")}>
+                {t(`billing.planHint.${p}` as MessageKey)}
+              </p>
+              <p className="tight mt-10 text-5xl font-semibold tabular-nums md:text-6xl">{rupees(price![interval], locale)}</p>
+              <p className={cn("mt-3 text-base", dark ? "text-white/65" : "text-graphite/55")}>
                 {t(interval === "MONTHLY" ? "billing.perMonth" : "billing.perYear")} · {t("billing.plusGst")}
               </p>
-              <TrialButton light={dark} className="mt-6 w-full" />
-              <div className={cn("mt-6 border-t pt-6", dark ? "border-white/15" : "border-neutral-200")}>
-                <p className="font-medium">{t("home.pricing.included")}</p>
-                <ul className="mt-3 flex flex-col gap-2.5">
+              <TrialButton light={dark} arrow={dark} className="mt-7 w-full" />
+              <div className={cn("mt-8 border-t pt-7", dark ? "border-white/15" : "border-black/10")}>
+                <p className="font-semibold">{t("home.pricing.included")}</p>
+                <ul className="mt-4 flex flex-col gap-3">
                   {feats.map((f) => (
-                    <li key={f} className={cn("flex items-start gap-2", dark ? "text-white/85" : "text-neutral-700")}>
-                      <HugeiconsIcon icon={Tick02Icon} className="mt-1 size-4 shrink-0" />
+                    <li key={f} className="flex items-start gap-3 text-lg">
+                      <HugeiconsIcon
+                        icon={CheckmarkCircle01Icon}
+                        className={cn("mt-0.5 size-6 shrink-0", dark ? "text-lilac-text" : "text-graphite")}
+                      />
                       {f}
                     </li>
                   ))}
@@ -310,7 +321,7 @@ function Pricing() {
           );
         })}
       </div>
-      <p className="mt-6 text-sm text-neutral-500">
+      <p className="mt-8 text-graphite/55">
         {t("legal.pricingNote")}{" "}
         <Link to="/pricing" className="text-link underline underline-offset-4">
           {t("home.pricing.more")}
@@ -327,41 +338,41 @@ function Trust() {
   const items = ["encrypted", "india", "log", "share"] as const;
   const docs: MessageKey[] = ["home.doc.712", "home.doc.ferfar", "home.doc.index2", "home.doc.orders"];
   return (
-    <section id="trust" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-16 md:py-24">
-      <div className="grid gap-10 md:grid-cols-2 md:gap-16">
+    <section id="trust" className="mx-auto max-w-6xl scroll-mt-28 px-4 py-20 md:py-28">
+      <div className="grid gap-12 md:grid-cols-2 md:gap-16">
         <div>
           <H2>{t("home.trust.title")}</H2>
-          <TrialButton className="mt-8" />
+          <TrialButton className="mt-10 w-full sm:w-auto" />
           <p className="mt-6">
-            <Link to="/privacy" className="text-link underline underline-offset-4">
+            <Link to="/privacy" className="font-medium text-link underline underline-offset-4">
               {t("legal.privacy")}
             </Link>
           </p>
         </div>
-        <ul className="flex flex-col gap-7 border-s border-neutral-300 ps-6">
+        <ul className="flex flex-col gap-8 border-s border-black/10 ps-7">
           {items.map((k) => (
             <li key={k}>
-              <h3 className="font-semibold">{t(`home.t.${k}` as MessageKey)}</h3>
-              <p className="mt-1 text-neutral-600">{t(`home.t.${k}Text` as MessageKey)}</p>
+              <h3 className="text-lg font-semibold">{t(`home.t.${k}` as MessageKey)}</h3>
+              <p className="mt-1.5 text-lg text-graphite/65">{t(`home.t.${k}Text` as MessageKey)}</p>
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="mt-20">
-        <div className="flex items-center justify-between gap-4 border-b border-neutral-200 pb-4">
-          <h3 className="text-2xl font-medium tracking-tight">{t("home.records.title")}</h3>
-          <HugeiconsIcon icon={FileScanIcon} className="size-6 text-neutral-500" />
+      <div className="mt-24">
+        <div className="flex items-center justify-between gap-4 border-b border-black/10 pb-5">
+          <h3 className="text-2xl font-semibold tracking-tight">{t("home.records.title")}</h3>
+          <HugeiconsIcon icon={FileScanIcon} className="size-6 text-link" />
         </div>
-        <p className="mt-4 text-neutral-600">{t("home.reads")}</p>
+        <p className="mt-5 text-lg text-graphite/65">{t("home.reads")}</p>
         <ul className="mt-2">
           {docs.map((d) => (
-            <li key={d} className="flex items-center gap-4 border-b border-neutral-200 py-4">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600">
+            <li key={d} className="flex items-center gap-4 border-b border-black/10 py-5">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-sand text-link">
                 <HugeiconsIcon icon={FileScanIcon} className="size-5" />
               </span>
               <span className="flex-1 text-lg">{t(d)}</span>
-              <span className="rounded-md bg-neutral-100 px-2.5 py-1 text-sm text-neutral-600">{t("home.included")}</span>
+              <span className="rounded-full bg-sand px-3 py-1 text-sm font-medium text-graphite/70">{t("home.included")}</span>
             </li>
           ))}
         </ul>
@@ -373,18 +384,21 @@ function Trust() {
 function Faq() {
   const { t } = useI18n();
   return (
-    <section id="faq" className="mx-auto grid max-w-6xl scroll-mt-24 gap-8 px-4 py-16 md:grid-cols-[1fr_2fr] md:py-24">
+    <section id="faq" className="mx-auto grid max-w-6xl scroll-mt-28 gap-10 px-4 py-20 md:grid-cols-[1fr_2fr] md:py-28">
       <H2>{t("home.faq.title")}</H2>
-      <div className="border-t border-neutral-200">
+      <div className="border-t border-black/10">
         {([1, 2, 3, 4, 5, 6] as const).map((n) => (
-          <details key={n} className="group border-b border-neutral-200 py-5">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-medium [&::-webkit-details-marker]:hidden">
+          <details key={n} className="group border-b border-black/10 py-6">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold [&::-webkit-details-marker]:hidden">
               {t(`home.q${n}` as MessageKey)}
-              <span aria-hidden className="text-2xl leading-none text-neutral-400 transition-transform group-open:rotate-45">
+              <span
+                aria-hidden
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sand text-xl leading-none transition-transform group-open:rotate-45"
+              >
                 +
               </span>
             </summary>
-            <p className="mt-3 text-neutral-600">{t(`home.a${n}` as MessageKey)}</p>
+            <p className="mt-3 text-lg leading-relaxed text-graphite/65">{t(`home.a${n}` as MessageKey)}</p>
           </details>
         ))}
       </div>
@@ -395,13 +409,13 @@ function Faq() {
 function FinalCall() {
   const { t } = useI18n();
   return (
-    <section className="mx-auto max-w-6xl px-4 pb-20">
-      <div className="relative overflow-hidden rounded-2xl bg-mist px-6 py-16 text-white md:px-14 md:py-24">
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-graphite/50 to-transparent" />
+    <section className="mx-auto max-w-6xl px-4 pb-24">
+      <div className="relative overflow-hidden rounded-[2rem] bg-lilac px-6 py-16 text-white md:px-16 md:py-28">
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-night/50 to-transparent" />
         <div className="relative max-w-2xl">
-          <h2 className="text-4xl leading-[1.2] font-semibold tracking-tight text-balance md:text-6xl">{t("home.final.title")}</h2>
-          <p className="mt-4 text-lg text-white/90">{t("home.final.sub")}</p>
-          <TrialButton light className="mt-8" />
+          <h2 className="tight text-[2.5rem] font-semibold text-balance md:text-6xl">{t("home.final.title")}</h2>
+          <p className="mt-5 text-lg leading-relaxed text-white/90 md:text-xl">{t("home.final.sub")}</p>
+          <TrialButton light className="mt-10 w-full sm:w-auto" />
         </div>
       </div>
     </section>
@@ -430,20 +444,20 @@ function SiteFooter() {
     },
   ];
   return (
-    <footer className="relative overflow-hidden bg-graphite text-white">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-10 px-4 pt-16 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+    <footer className="relative overflow-hidden bg-night text-white">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-10 px-4 pt-20 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div className="col-span-2 md:col-span-1">
-          <Brand compact onDark />
-          <p className="mt-5 text-2xl leading-snug font-medium tracking-tight">
+          <Brand compact accent />
+          <p className="mt-6 text-2xl leading-snug font-semibold tracking-tight">
             {t("home.footer.tag1")}
             <br />
-            <span className="text-white/50">{t("home.footer.tag2")}</span>
+            <span className="text-lilac-text">{t("home.footer.tag2")}</span>
           </p>
         </div>
         {cols.map((c) => (
           <div key={c.title}>
             <p className="text-sm text-white/50">{t(c.title)}</p>
-            <ul className="mt-3 flex flex-col gap-2 text-sm">
+            <ul className="mt-4 flex flex-col gap-3">
               {c.links.map((l) => (
                 <li key={l.label}>
                   {l.to ? (
@@ -461,10 +475,10 @@ function SiteFooter() {
           </div>
         ))}
       </div>
-      {/* The name, big and faint, over a little of the mist. */}
+      {/* The name, big and faint, over a little indigo glow. */}
       <div aria-hidden className="relative mt-16 select-none">
-        <div className="absolute bottom-0 left-1/2 h-40 w-[70%] -translate-x-1/2 rounded-full bg-[#6f86b3]/35 blur-3xl" />
-        <p className="relative -mb-[0.12em] bg-gradient-to-b from-white/70 to-white/5 bg-clip-text pt-[0.25em] text-center text-[20vw] leading-[1.25] font-semibold tracking-tight text-transparent lg:text-[13rem]">
+        <div className="absolute bottom-0 left-1/2 h-40 w-[70%] -translate-x-1/2 rounded-full bg-link/40 blur-3xl" />
+        <p className="relative -mb-[0.12em] bg-gradient-to-b from-lilac-text/80 to-white/5 bg-clip-text pt-[0.25em] text-center text-[20vw] leading-[1.25] font-semibold tracking-tight text-transparent lg:text-[13rem]">
           {t("app.name")}
         </p>
       </div>
