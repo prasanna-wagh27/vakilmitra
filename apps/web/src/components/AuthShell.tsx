@@ -23,7 +23,7 @@ export function AuthShell({ title, children }: { title: string; children: ReactN
           <Brand />
         </Link>
         <div>
-          <h1 className="font-display mt-8 text-[1.75rem] leading-[1.15] text-balance md:mt-0 md:text-5xl md:leading-[1.05]">
+          <h1 className="font-display mt-8 text-[1.75rem] leading-[1.15] text-balance md:mt-0 md:text-5xl md:leading-[1.05] [:lang(mr)_&]:leading-[1.3]">
             {t("auth.hero")}
           </h1>
           <p className="mt-4 hidden max-w-md text-white/70 sm:block md:text-lg">{t("auth.heroSub")}</p>

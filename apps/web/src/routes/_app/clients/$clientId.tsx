@@ -43,12 +43,12 @@ function ClientPage() {
       <Card className="px-(--card-spacing) gap-3 px-(--card-spacing)">
         <div className="flex flex-wrap gap-3 text-sm">
           {c.phone && (
-            <a className="text-primary underline underline-offset-4" href={`tel:${c.phone}`}>
+            <a className="text-brand underline underline-offset-4" href={`tel:${c.phone}`}>
               {c.phone}
             </a>
           )}
           {c.email && (
-            <a className="text-primary underline underline-offset-4" href={`mailto:${c.email}`}>
+            <a className="text-brand underline underline-offset-4" href={`mailto:${c.email}`}>
               {c.email}
             </a>
           )}
@@ -61,7 +61,7 @@ function ClientPage() {
       <Section
         title={t("client.cases")}
         action={
-          <Link to="/cases/new" className="text-sm text-primary underline underline-offset-4">
+          <Link to="/cases/new" className="text-sm text-brand underline underline-offset-4">
             + {t("case.new")}
           </Link>
         }
@@ -126,7 +126,7 @@ function ClientPage() {
           <Link
             to="/fees/invoice/$clientId"
             params={{ clientId }}
-            className="mt-1 inline-block text-sm text-primary underline underline-offset-4"
+            className="mt-1 inline-block text-sm text-brand underline underline-offset-4"
           >
             {t("fees.invoice")} →
           </Link>
