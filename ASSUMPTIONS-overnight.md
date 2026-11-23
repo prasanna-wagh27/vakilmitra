@@ -13,7 +13,7 @@
 
 7. **Fonts are bundled, not loaded from Google (needs your OK).** Inter (Figtree until the indigo theme) and IBM Plex Sans Devanagari are OFL-1.1 licensed, which is not on the license gate's allowlist. I added them as a "pending owner confirmation" exception (README, "Exceptions to the standard"). If you reject this, delete the font imports in `main.tsx` and `index.css` of both apps/web and apps/admin, remove the `@fontsource*` dependencies from both package.json files, and drop the two entries in scripts/check-licenses.mjs; the apps fall back to system fonts.
 8. **Light mode only.** The earlier dark palette was removed to match the reference designs (ailawyer / Harvey). Dark mode can come back later as an opt-in.
-9. **Primary buttons are black ("ink"); blue is kept for links, focus and highlights.**
+9. **Primary buttons are black ("ink"); indigo (#4e32d9) marks links, focus and the active or selected state** (nav tab, tab, filter chip, option, checkbox, progress bar, info badge, plan ticks) and the brand tile. Plain status text stays out of indigo so it is not mistaken for a link.
 10. **The header language control is one switch** (EN / मराठी); the full two-option control remains on sign-in and in Settings.
 11. **Sign-in copy:** "Your practice, in Marathi, in your pocket." I removed an earlier draft line, "stored in India", because the hosting region is not decided yet.
 12. **Phone sign-in:** the subtitle and trust points are shortened, so the form sits near the top of the screen.

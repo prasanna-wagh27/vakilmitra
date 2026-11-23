@@ -8,6 +8,10 @@
  * page uses: Inter, near-black text and buttons, warm grey surfaces, indigo for the active,
  * selected and focused state. Marathi letters fall back to IBM Plex Sans Devanagari (Inter
  * has no Devanagari). Light only for now.
+ *
+ * The tokens below are maintained by hand. Add components with `shadcn add`, but do not run
+ * `shadcn init` or `shadcn apply`: they would overwrite this block with the preset's stone
+ * palette (components.json still names it) and drop the --brand tokens.
  */
 
 @custom-variant dark (&:is(.dark *));
@@ -41,7 +45,7 @@
   --chart-4: #4e32d9;
   --chart-5: #140d35;
   --radius: 0.875rem;
-  --sidebar: #f4f3f0;
+  --sidebar: #fafaf8;
   --sidebar-foreground: #1b1a18;
   --sidebar-primary: #4e32d9;
   --sidebar-primary-foreground: #ffffff;

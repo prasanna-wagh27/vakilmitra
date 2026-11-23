@@ -152,7 +152,9 @@ function Stat({ to, label, value, warn }: { to: string; label: string; value: st
       <Card size="sm" className="gap-1 transition-colors hover:bg-muted/40">
         <CardHeader className="gap-1">
           <CardDescription className="truncate text-xs">{label}</CardDescription>
-          <CardTitle className={cn("truncate text-2xl tabular-nums", warn && "text-warning")}>{value}</CardTitle>
+          <CardTitle className={cn("truncate text-2xl tabular-nums group-data-[size=sm]/card:text-2xl", warn && "text-warning")}>
+            {value}
+          </CardTitle>
         </CardHeader>
       </Card>
     </Link>
