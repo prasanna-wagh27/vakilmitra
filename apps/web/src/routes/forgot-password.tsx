@@ -47,7 +47,7 @@ function ForgotPassword() {
         </form>
       )}
       <p className="mt-6 text-center text-sm">
-        <Link to="/login" className="font-medium text-primary underline underline-offset-4">
+        <Link to="/login" className="font-medium text-brand underline underline-offset-4">
           {t("auth.backToSignIn")}
         </Link>
       </p>

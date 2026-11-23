@@ -104,7 +104,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
       <p className="mt-6 text-center text-sm text-muted-foreground">
         {mode === "login" ? t("auth.noAccount") : t("auth.haveAccount")}{" "}
         <Link
-          className="font-medium text-primary underline underline-offset-4"
+          className="font-medium text-brand underline underline-offset-4"
           to={mode === "login" ? "/register" : "/login"}
           search={{ next }}
         >

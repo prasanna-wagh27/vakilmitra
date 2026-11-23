@@ -33,14 +33,23 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <header className="no-print sticky top-0 z-40 border-b bg-background/80 backdrop-blur-lg">
-        <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4">
+      <header className="no-print sticky top-0 z-40 border-b border-black/5 bg-white/85 backdrop-blur-lg">
+        <div className="mx-auto flex h-16 max-w-5xl items-center gap-2 px-4">
           <Link to="/today" aria-label={t("app.name")} className="mr-4">
             <Brand />
           </Link>
           <nav className="hidden items-center gap-1 md:flex" aria-label={t("nav.main")}>
             {NAV.map((n) => (
-              <Button key={n.to} asChild variant={active(n.to) ? "secondary" : "ghost"} size="sm">
+              <Button
+                key={n.to}
+                asChild
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-9 rounded-xl px-3.5 text-[15px]",
+                  active(n.to) ? "bg-brand-soft text-brand hover:bg-brand-soft hover:text-brand" : "text-foreground/65",
+                )}
+              >
                 <Link to={n.to} aria-current={active(n.to) ? "page" : undefined}>
                   {t(n.key)}
                 </Link>
@@ -48,7 +57,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-1">
-            <LanguageToggle persist compact />
+            <LanguageToggle persist compact className="rounded-xl" />
             <Button asChild variant="ghost" size="icon">
               <Link to="/search" aria-label={t("nav.search")}>
                 <HugeiconsIcon icon={Search01Icon} />
@@ -63,13 +72,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main key={pathname} className="page-enter mx-auto max-w-5xl px-4 pt-6 pb-28 md:pb-12">
+      <main key={pathname} className="page-enter mx-auto max-w-5xl px-4 pt-8 pb-28 md:pt-10 md:pb-16">
         {!pathname.startsWith("/billing") && <PlanBanner />}
         {children}
       </main>
 
       <nav
-        className="no-print fixed inset-x-0 bottom-0 z-40 border-t bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
+        className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-black/5 bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
         aria-label={t("nav.main")}
       >
         <ul className="grid grid-cols-5">
@@ -82,10 +91,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                   aria-current={on ? "page" : undefined}
                   className={cn(
                     "flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
-                    on ? "text-foreground" : "text-muted-foreground",
+                    on ? "text-brand" : "text-muted-foreground",
                   )}
                 >
-                  <span className={cn("flex h-7 w-12 items-center justify-center rounded-full transition-colors", on && "bg-secondary")}>
+                  <span className={cn("flex h-7 w-12 items-center justify-center rounded-full transition-colors", on && "bg-brand-soft")}>
                     <HugeiconsIcon icon={n.icon} className="size-5" strokeWidth={on ? 2 : 1.6} />
                   </span>
                   {t(n.key)}

@@ -55,7 +55,7 @@ function DiaryPage() {
       ) : (
         [...byDay].map(([day, hs]) => (
           <div key={day} className="mb-4">
-            <h3 className={`mb-2 text-sm font-semibold ${day === istDate() ? "text-primary" : "text-muted-foreground"}`}>
+            <h3 className={`mb-2 text-sm font-semibold ${day === istDate() ? "text-brand" : "text-muted-foreground"}`}>
               {fmtDay(day, locale)} · {hs.length}
             </h3>
             <div className="list">

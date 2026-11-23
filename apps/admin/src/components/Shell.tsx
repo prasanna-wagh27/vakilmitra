@@ -36,16 +36,24 @@ export function Shell({ staff, children }: { staff: Staff; children: ReactNode }
   return (
     <div className="min-h-svh md:grid md:grid-cols-[15rem_1fr]">
       <aside className="flex flex-col border-b bg-sidebar md:sticky md:top-0 md:h-svh md:border-r md:border-b-0">
-        <div className="flex h-14 items-center gap-2 px-4">
-          <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <HugeiconsIcon icon={JusticeScale01Icon} className="size-4" />
+        <div className="flex h-16 items-center gap-2 px-4">
+          <span className="flex size-7 items-center justify-center rounded-md bg-brand text-brand-foreground">
+            <HugeiconsIcon icon={JusticeScale01Icon} className="size-4" strokeWidth={2} />
           </span>
-          <span className="font-semibold">VakilMitra</span>
+          <span className="font-semibold tracking-[-0.02em]">VakilMitra</span>
           <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">Admin</span>
         </div>
         <nav aria-label="Main" className="flex gap-1 overflow-x-auto px-2 pb-2 md:flex-col md:overflow-visible">
           {NAV.map((n) => (
-            <Button key={n.to} asChild variant={active(n.to) ? "secondary" : "ghost"} className="justify-start">
+            <Button
+              key={n.to}
+              asChild
+              variant="ghost"
+              className={cn(
+                "justify-start rounded-xl",
+                active(n.to) ? "bg-brand-soft text-brand hover:bg-brand-soft hover:text-brand" : "text-foreground/70",
+              )}
+            >
               <Link to={n.to} aria-current={active(n.to) ? "page" : undefined}>
                 <HugeiconsIcon icon={n.icon} data-icon="inline-start" />
                 {n.label}
@@ -63,7 +71,7 @@ export function Shell({ staff, children }: { staff: Staff; children: ReactNode }
           </Button>
         </div>
       </aside>
-      <main className={cn("mx-auto w-full max-w-6xl px-4 py-6 md:px-8")}>
+      <main className={cn("mx-auto w-full max-w-6xl px-4 py-8 md:px-10 md:py-10")}>
         {children}
         <Button variant="ghost" size="sm" className="mt-8 md:hidden" onClick={signOut}>
           <HugeiconsIcon icon={Logout01Icon} data-icon="inline-start" /> Sign out ({staff.name})

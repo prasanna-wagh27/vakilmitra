@@ -11,7 +11,7 @@
 
 ## UI refresh (feat/ui-refresh)
 
-7. **Fonts are bundled, not loaded from Google (needs your OK).** Figtree (from the owner's shadcn preset) and IBM Plex Sans Devanagari are OFL-1.1 licensed, which is not on the license gate's allowlist. I added them as a "pending owner confirmation" exception (README, "Exceptions to the standard"). If you reject this, delete the font imports at the top of apps/web/src/main.tsx and the two entries in scripts/check-licenses.mjs; the app falls back to system fonts.
+7. **Fonts are bundled, not loaded from Google (needs your OK).** Inter (Figtree until the indigo theme) and IBM Plex Sans Devanagari are OFL-1.1 licensed, which is not on the license gate's allowlist. I added them as a "pending owner confirmation" exception (README, "Exceptions to the standard"). If you reject this, delete the font imports at the top of apps/web/src/main.tsx and the two entries in scripts/check-licenses.mjs; the app falls back to system fonts.
 8. **Light mode only.** The earlier dark palette was removed to match the reference designs (ailawyer / Harvey). Dark mode can come back later as an opt-in.
 9. **Primary buttons are black ("ink"); blue is kept for links, focus and highlights.**
 10. **The header language control is one switch** (EN / मराठी); the full two-option control remains on sign-in and in Settings.

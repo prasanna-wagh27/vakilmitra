@@ -27,10 +27,10 @@ function LoginPage() {
   });
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
+    <div className="flex min-h-svh items-center justify-center bg-muted p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <span className="mb-2 flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <span className="mb-2 flex size-9 items-center justify-center rounded-md bg-brand text-brand-foreground">
             <HugeiconsIcon icon={JusticeScale01Icon} className="size-5" />
           </span>
           <CardTitle className="text-xl">VakilMitra Admin</CardTitle>

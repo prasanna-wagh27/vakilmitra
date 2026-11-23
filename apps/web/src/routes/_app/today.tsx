@@ -42,9 +42,7 @@ function TodayPage() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-sm text-muted-foreground">{fmtDay(today, locale)}</p>
-          <h1 className="font-heading mt-1 text-2xl leading-tight font-semibold tracking-tight">
-            {tf("today.greeting", { name: advocate.name })}
-          </h1>
+          <h1 className="font-display text-[1.75rem] leading-tight md:text-[2rem] mt-1">{tf("today.greeting", { name: advocate.name })}</h1>
         </div>
         <Button asChild className="shrink-0">
           <Link to="/cases/new">
@@ -154,7 +152,7 @@ function Stat({ to, label, value, warn }: { to: string; label: string; value: st
       <Card size="sm" className="gap-1 transition-colors hover:bg-muted/40">
         <CardHeader className="gap-1">
           <CardDescription className="truncate text-xs">{label}</CardDescription>
-          <CardTitle className={cn("truncate text-xl font-semibold tabular-nums", warn && "text-amber-700")}>{value}</CardTitle>
+          <CardTitle className={cn("truncate text-2xl tabular-nums", warn && "text-warning")}>{value}</CardTitle>
         </CardHeader>
       </Card>
     </Link>

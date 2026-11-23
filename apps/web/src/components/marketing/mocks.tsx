@@ -27,7 +27,7 @@ export function CasesMock() {
     <div aria-hidden className="relative mx-auto max-w-4xl sm:pb-10">
       <div className="overflow-hidden rounded-2xl bg-card shadow-xl ring-1 ring-foreground/10">
         <div className="flex items-center gap-2 border-b px-4 py-3">
-          <Brand compact accent />
+          <Brand compact />
           <span className="font-medium">{t("home.mock.cases")}</span>
           <span className="ms-auto rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
             {fmtNumber(rows.length, locale)}
