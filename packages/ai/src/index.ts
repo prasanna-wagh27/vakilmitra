@@ -9,7 +9,7 @@
  * `run` tries the task's models in order and moves to the next one if a call fails (outage,
  * rate limit), and says which model answered, for the audit log.
  */
-import type { LanguageModel } from "ai";
+import type { LanguageModel, LanguageModelUsage, streamText as StreamText } from "ai";
 import { type AiConfig, type AiTask, type DataLocation, dataLocation, type ModelSpec, specId } from "./config.js";
 import { createModel } from "./providers.js";
 
@@ -77,6 +77,24 @@ export class Ai {
     return { model: this.modelFor(spec), info: this.models(task)[0]! };
   }
 
+  /**
+   * Streams from the task's models: a model that fails before writing anything (outage, rate
+   * limit) is skipped for the next one; once text has started, the stream stays on that model.
+   * `start` calls streamText with the model given.
+   */
+  async stream(task: AiTask, start: (model: LanguageModel, info: ModelInfo) => StreamResult): Promise<AiStream> {
+    return this.run(task, async (model, info) => {
+      const result = start(model, info);
+      const parts = textParts(result)[Symbol.asyncIterator]();
+      const first = await parts.next(); // throws if the model failed before any text
+      async function* text() {
+        if (!first.done) yield first.value;
+        for (let p = await parts.next(); !p.done; p = await parts.next()) yield p.value;
+      }
+      return { text: text(), usage: result.usage, model: info };
+    }).then((r) => r.result);
+  }
+
   /** Calls `fn` with each of the task's models in turn until one succeeds. A cancelled call is not retried. */
   async run<T>(task: AiTask, fn: (model: LanguageModel, info: ModelInfo) => Promise<T>): Promise<{ result: T; model: ModelInfo }> {
     const specs = this.cfg.tasks[task];
@@ -92,5 +110,24 @@ export class Ai {
       }
     }
     throw new AiFailedError(task, errors);
+  }
+}
+
+type StreamResult = ReturnType<typeof StreamText>;
+
+export interface AiStream {
+  /** The text as it is written. Throws if the model fails partway. */
+  text: AsyncGenerator<string>;
+  /** Token counts, once the stream has finished. */
+  usage: PromiseLike<LanguageModelUsage>;
+  model: ModelInfo;
+}
+
+/** The text of a stream, throwing the model's error (the SDK's textStream just ends on one). */
+async function* textParts(result: StreamResult): AsyncGenerator<string> {
+  for await (const part of result.fullStream) {
+    if (part.type === "text-delta") yield part.text;
+    else if (part.type === "error") throw part.error;
+    else if (part.type === "abort") throw Object.assign(new Error("The AI request was cancelled"), { name: "AbortError" });
   }
 }

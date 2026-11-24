@@ -13,6 +13,7 @@ import type {
   ClientTotals,
   DocumentDetail,
   DocumentSummary,
+  Draft,
   Extraction,
   FeeAgreement,
   FeeTotals,
@@ -44,6 +45,9 @@ export const aiQuery = queryOptions({
 /** The one summary shown to the advocate: India only when every model processes data in India. */
 export const aiWhere = (models: AiStatus[keyof AiStatus]["models"]): AiDataLocation =>
   models.every((m) => m.dataLocation === "india") ? "india" : models.some((m) => m.dataLocation === "abroad") ? "abroad" : "unknown";
+
+export const draftQuery = (id: string) =>
+  queryOptions({ queryKey: ["draft", id], queryFn: () => api<{ draft: Draft }>(`/drafts/${id}`).then((r) => r.draft) });
 
 export const casesQuery = (q: string, status: CaseStatus | "") =>
   queryOptions({

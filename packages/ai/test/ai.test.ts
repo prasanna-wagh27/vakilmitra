@@ -1,5 +1,5 @@
-import { generateText, type LanguageModel, Output } from "ai";
-import { MockLanguageModelV4 } from "ai/test";
+import { generateText, type LanguageModel, Output, streamText } from "ai";
+import { MockLanguageModelV4, simulateReadableStream } from "ai/test";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
@@ -119,5 +119,54 @@ describe("running a task", () => {
       generateText({ model: m, prompt: "7/12", output: Output.object({ schema: z.object({ marathi: z.string() }) }) }),
     );
     expect(result.output).toEqual({ marathi: "सातबारा" });
+  });
+});
+
+describe("streaming", () => {
+  const streaming = (chunks: string[], modelId = "mock") =>
+    new MockLanguageModelV4({
+      modelId,
+      doStream: async () => ({
+        stream: simulateReadableStream({
+          chunks: [
+            { type: "text-start" as const, id: "1" },
+            ...chunks.map((delta) => ({ type: "text-delta" as const, id: "1", delta })),
+            { type: "text-end" as const, id: "1" },
+            { type: "finish" as const, finishReason: { unified: "stop" as const, raw: "stop" }, usage },
+          ],
+        }),
+      }),
+    });
+  const brokenStream = () =>
+    new MockLanguageModelV4({
+      doStream: async () => {
+        throw new Error("overloaded");
+      },
+    });
+  const cfg = aiConfigFromEnv({ AI_MODEL_DRAFTING: "openai:a, anthropic:b", OPENAI_API_KEY: "o", ANTHROPIC_API_KEY: "a" });
+  const collect = async (it: AsyncIterable<string>) => {
+    let s = "";
+    for await (const c of it) s += c;
+    return s;
+  };
+
+  it("streams the first model's text and its usage", async () => {
+    const ai = new Ai(cfg, (spec) => streaming(["नोटीस ", "देण्यात येते"], spec.model));
+    const s = await ai.stream("drafting", (model) => streamText({ model, prompt: "x" }));
+    expect(s.model.id).toBe("openai:a");
+    expect(await collect(s.text)).toBe("नोटीस देण्यात येते");
+    expect((await s.usage).outputTokens).toBe(2);
+  });
+
+  it("moves to the next model when one fails before writing anything", async () => {
+    const ai = new Ai(cfg, (spec) => (spec.model === "a" ? brokenStream() : streaming(["ok"], spec.model)));
+    const s = await ai.stream("drafting", (model) => streamText({ model, prompt: "x", maxRetries: 0 }));
+    expect(s.model.id).toBe("anthropic:b");
+    expect(await collect(s.text)).toBe("ok");
+  });
+
+  it("fails with every model's error when none can start", async () => {
+    const ai = new Ai(cfg, () => brokenStream());
+    await expect(ai.stream("drafting", (model) => streamText({ model, prompt: "x", maxRetries: 0 }))).rejects.toThrow(AiFailedError);
   });
 });

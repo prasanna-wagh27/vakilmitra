@@ -52,23 +52,38 @@ export async function runAi<T>(
     await recordAiUse(req, task, ownerId, model, result.usage);
     return { value: result.value, model };
   } catch (err) {
-    if (err instanceof AiUnavailableError) throw aiOff();
-    if (err instanceof AiFailedError) throw aiFailed(req, err);
-    throw err;
+    throw aiHttpError(req, err);
   }
 }
 
 /** Counts one call and names the model in this request's audit entry. */
 export async function recordAiUse(req: FastifyRequest, task: AiTask, ownerId: string, model: ModelInfo, usage?: LanguageModelUsage) {
+  noteAiModel(req, model);
+  await countAiUse(req.advocateId, task, ownerId, model, usage);
+}
+
+/** Names the model and where it processed the data in this request's audit entry. */
+export function noteAiModel(req: FastifyRequest, model: ModelInfo) {
+  req.audit.details = { ...req.audit.details, model: model.id, dataLocation: model.dataLocation };
+}
+
+/** One ai_usage row (no text), charged to the account that owns the case. */
+export async function countAiUse(advocateId: string, task: AiTask, ownerId: string, model: ModelInfo, usage?: LanguageModelUsage) {
   await db.insert(aiUsage).values({
     ownerId,
-    advocateId: req.advocateId,
+    advocateId,
     task,
     model: model.id,
     inputTokens: usage?.inputTokens ?? null,
     outputTokens: usage?.outputTokens ?? null,
   });
-  req.audit.details = { ...req.audit.details, model: model.id, dataLocation: model.dataLocation };
+}
+
+/** Maps the AI package's errors to answers; anything else is rethrown as is. */
+export function aiHttpError(req: FastifyRequest, err: unknown) {
+  if (err instanceof AiUnavailableError) return aiOff();
+  if (err instanceof AiFailedError) return aiFailed(req, err);
+  return err;
 }
 
 /** Every model failed: report it (model ids and error kinds only, never text) and answer 502. */

@@ -26,3 +26,35 @@ export async function api<T = unknown>(path: string, init: { method?: string; bo
   if (!res.ok) throw new ApiError(res.status, data.error ?? "error", data.message ?? res.statusText, data.details);
   return data as T;
 }
+
+/**
+ * POST and read a streamed text answer as it arrives (AI drafting). `onText` gets the whole text
+ * so far. Resolves with the response headers once the stream ends; an error before the stream
+ * starts is an ApiError, as with api().
+ */
+export async function apiStream(
+  path: string,
+  body: unknown,
+  onText: (text: string) => void,
+  opts: { signal?: AbortSignal; onStart?: (headers: Headers) => void } = {},
+): Promise<Headers> {
+  const res = await fetch(`${API_BASE}/api${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    credentials: "include",
+    signal: opts.signal,
+  });
+  if (!res.ok || !res.body) {
+    const data = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, data.error ?? "error", data.message ?? res.statusText, data.details);
+  }
+  opts.onStart?.(res.headers);
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+  let text = "";
+  for (let r = await reader.read(); !r.done; r = await reader.read()) {
+    text += r.value;
+    onText(text);
+  }
+  return res.headers;
+}

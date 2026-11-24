@@ -27,6 +27,7 @@ import { caseRoutes } from "./routes/cases.js";
 import { clientRoutes } from "./routes/clients.js";
 import { diaryRoutes } from "./routes/diary.js";
 import { documentRoutes } from "./routes/documents.js";
+import { draftRoutes } from "./routes/drafts.js";
 import { factRoutes } from "./routes/facts.js";
 import { feeRoutes } from "./routes/fees.js";
 import { landRoutes } from "./routes/land.js";
@@ -204,6 +205,7 @@ export async function buildApp() {
     await authed.register(billingRoutes, { prefix: "/api/billing" });
     await authed.register(accountRoutes, { prefix: "/api/me" });
     await authed.register(aiRoutes, { prefix: "/api/ai" });
+    await authed.register(draftRoutes, { prefix: "/api" });
     await authed.register(activityRoutes, { prefix: "/api/activity" });
     await authed.register(clientRoutes, { prefix: "/api/clients" });
     await authed.register(caseRoutes, { prefix: "/api/cases" });
