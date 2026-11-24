@@ -78,6 +78,7 @@ export function PolicyFooter({ className }: { className?: string }) {
           </Link>
         ))}
       </nav>
+      <p className="-mt-2 pb-5 text-center text-xs text-muted-foreground">{t("legal.madeBy")}</p>
     </footer>
   );
 }

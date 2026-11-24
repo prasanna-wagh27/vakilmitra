@@ -12,7 +12,7 @@ import { planInvoiceQuery } from "@/lib/queries";
 
 export const Route = createFileRoute("/_app/billing/invoices/$invoiceId")({ component: PlanInvoicePage });
 
-/** GST tax invoice for a plan payment, printable. */
+/** Printable invoice for a plan payment: a GST tax invoice if we were registered when it was issued, else a receipt. */
 function PlanInvoicePage() {
   const { invoiceId } = Route.useParams();
   const { t, tf, locale } = useI18n();
@@ -21,21 +21,25 @@ function PlanInvoicePage() {
   if (error || !data) return <ErrorBox error={error} onRetry={() => refetch()} />;
   const { invoice: i, supplier: s } = data;
   const money = (p: number) => rupees(p, locale);
-  const rows: [string, number][] = [
-    [t("billing.taxable"), i.amountPaise],
-    ...(i.igstPaise
-      ? ([[t("billing.igst"), i.igstPaise]] as [string, number][])
-      : ([
-          [t("billing.cgst"), i.cgstPaise],
-          [t("billing.sgst"), i.sgstPaise],
-        ] as [string, number][])),
-  ];
+  const tax = i.supplierGstin !== null;
+  const title = t(tax ? "billing.invoice" : "billing.receipt");
+  const rows: [string, number][] = !tax
+    ? []
+    : [
+        [t("billing.taxable"), i.amountPaise],
+        ...(i.igstPaise
+          ? ([[t("billing.igst"), i.igstPaise]] as [string, number][])
+          : ([
+              [t("billing.cgst"), i.cgstPaise],
+              [t("billing.sgst"), i.sgstPaise],
+            ] as [string, number][])),
+      ];
 
   return (
     <>
       <div className="no-print">
         <PageHeader
-          title={t("billing.invoice")}
+          title={title}
           back="/billing"
           action={
             <Button onClick={() => window.print()}>
@@ -52,7 +56,7 @@ function PlanInvoicePage() {
             {s.gstin && <p>GSTIN: {s.gstin}</p>}
           </div>
           <div className="text-right">
-            <p className="font-semibold">{t("billing.invoice")}</p>
+            <p className="font-semibold">{title}</p>
             {i.status === "REFUNDED" && <Badge tone="neutral">{t("billing.refunded")}</Badge>}
           </div>
         </header>
@@ -62,10 +66,10 @@ function PlanInvoicePage() {
             <p className="text-muted-foreground">{t("billing.billTo")}</p>
             <p className="font-medium">{i.billingName}</p>
             {i.billingState && <p>{INDIAN_STATES[i.billingState] ?? i.billingState}</p>}
-            {i.gstin && <p>GSTIN: {i.gstin}</p>}
+            {tax && i.gstin && <p>GSTIN: {i.gstin}</p>}
           </div>
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 sm:justify-self-end">
-            <dt className="text-muted-foreground">{t("billing.invoiceNo")}</dt>
+            <dt className="text-muted-foreground">{t(tax ? "billing.invoiceNo" : "billing.receiptNo")}</dt>
             <dd>{i.number}</dd>
             <dt className="text-muted-foreground">{t("billing.date")}</dt>
             <dd>{fmtDate(i.createdAt, locale)}</dd>

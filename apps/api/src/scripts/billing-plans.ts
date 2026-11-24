@@ -1,9 +1,10 @@
 /**
  * Creates the three monthly plans in Razorpay (test or live, depending on the keys) and prints
  * the env lines to add. Run once per Razorpay account: pnpm --filter @vakilmitra/api billing:plans
- * Razorpay charges the plan amount as is, so it includes GST.
+ * Razorpay charges the plan amount as is, so it includes GST when we are registered (GST_REGISTERED).
+ * Run it again after registering for GST, and replace the plan ids.
  */
-import { GST_RATE, PAID_PLANS, PLANS } from "@vakilmitra/shared";
+import { GST_REGISTERED, gstFor, PAID_PLANS, PLANS } from "@vakilmitra/shared";
 
 const id = process.env.RAZORPAY_KEY_ID;
 const secret = process.env.RAZORPAY_KEY_SECRET;
@@ -22,7 +23,13 @@ for (const plan of PAID_PLANS) {
     body: JSON.stringify({
       period: "monthly",
       interval: 1,
-      item: { name: names[plan], amount: base + Math.round(base * GST_RATE), currency: "INR", description: "Monthly, including 18% GST" },
+      item: {
+        name: names[plan],
+        // The total is the same inside and outside Maharashtra (CGST + SGST or IGST).
+        amount: gstFor(base, null, GST_REGISTERED).totalPaise,
+        currency: "INR",
+        description: GST_REGISTERED ? "Monthly, including 18% GST" : "Monthly",
+      },
       notes: { plan },
     }),
   });

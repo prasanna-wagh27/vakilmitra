@@ -2,7 +2,14 @@ import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { type BillingInterval, type BillingStatus, type Checkout, INDIAN_STATES, type PaidPlanId } from "@vakilmitra/shared";
+import {
+  type BillingInterval,
+  type BillingStatus,
+  type Checkout,
+  GST_REGISTERED,
+  INDIAN_STATES,
+  type PaidPlanId,
+} from "@vakilmitra/shared";
 import { useEffect, useState } from "react";
 import { Empty, ErrorBox, Field, Loading, PageHeader, Section } from "@/components/common";
 import { PlanCards } from "@/components/PlanCards";
@@ -224,10 +231,10 @@ function BillingDetails({ b }: { b: BillingStatus }) {
     { onSuccess: (r) => qc.setQueryData(billingQuery.queryKey, r.billing) },
   );
   return (
-    <Section title={t("billing.details")}>
+    <Section title={t(GST_REGISTERED ? "billing.details" : "billing.detailsReceipt")}>
       <Card className="px-(--card-spacing)">
         <form
-          className="grid gap-3 sm:grid-cols-3"
+          className={GST_REGISTERED ? "grid gap-3 sm:grid-cols-3" : "grid gap-3 sm:grid-cols-2"}
           onSubmit={(e) => {
             e.preventDefault();
             save.mutate(undefined);
@@ -243,9 +250,12 @@ function BillingDetails({ b }: { b: BillingStatus }) {
               onChange={(e) => setV({ ...v, billingName: e.target.value })}
             />
           </Field>
-          <Field id="gstin" label={t("billing.gstin")}>
-            <Input id="gstin" value={v.gstin} maxLength={15} onChange={(e) => setV({ ...v, gstin: e.target.value.toUpperCase() })} />
-          </Field>
+          {/* A customer's GSTIN only matters on our tax invoices, so it is asked for once we are registered. */}
+          {GST_REGISTERED && (
+            <Field id="gstin" label={t("billing.gstin")}>
+              <Input id="gstin" value={v.gstin} maxLength={15} onChange={(e) => setV({ ...v, gstin: e.target.value.toUpperCase() })} />
+            </Field>
+          )}
           <Field id="billingState" label={t("billing.state")}>
             <NativeSelect id="billingState" value={v.billingState} onChange={(e) => setV({ ...v, billingState: e.target.value })}>
               {Object.entries(INDIAN_STATES).map(([code, name]) => (
@@ -255,7 +265,7 @@ function BillingDetails({ b }: { b: BillingStatus }) {
               ))}
             </NativeSelect>
           </Field>
-          <div className="sm:col-span-3">
+          <div className="sm:col-span-full">
             <ErrorBox error={save.error} />
             <Button type="submit" disabled={save.isPending}>
               {save.isSuccess ? "✓" : t("common.save")}
@@ -271,13 +281,13 @@ function Invoices() {
   const { t, locale } = useI18n();
   const invoices = useQuery(planInvoicesQuery);
   return (
-    <Section title={t("billing.invoices")}>
+    <Section title={t(GST_REGISTERED ? "billing.invoices" : "billing.receipts")}>
       {invoices.isPending ? (
         <Loading rows={2} />
       ) : invoices.error ? (
         <ErrorBox error={invoices.error} onRetry={() => invoices.refetch()} />
       ) : invoices.data.length === 0 ? (
-        <Empty>{t("billing.noInvoices")}</Empty>
+        <Empty>{t(GST_REGISTERED ? "billing.noInvoices" : "billing.noReceipts")}</Empty>
       ) : (
         <Card className="gap-0 py-0">
           <div className="divide-y">

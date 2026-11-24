@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { GRACE_DAYS, TRIAL_DAYS } from "@vakilmitra/shared";
+import { GRACE_DAYS, GST_REGISTERED, TRIAL_DAYS } from "@vakilmitra/shared";
 import { fmtNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { LEGAL } from "@/lib/legal";
@@ -60,15 +60,16 @@ function En() {
       <ul>
         <li>
           A new account gets a free trial of {TRIAL_DAYS} days with no payment details needed. After that you can choose a paid plan on the{" "}
-          <Link to="/pricing">Pricing</Link> page. Prices are in Indian rupees and exclude GST, which is added at 18%.
+          <Link to="/pricing">Pricing</Link> page. Prices are in Indian rupees.{" "}
+          {GST_REGISTERED ? "They exclude GST, which is added at 18%." : "They are final; no GST is charged."}
         </li>
         <li>
           Monthly plans renew automatically each month through Razorpay until you stop renewal in the app. Yearly plans are paid once per
           year and do not renew automatically.
         </li>
         <li>
-          Payments are processed by Razorpay; we never see or store your card, UPI or bank details. A GST invoice is issued for every
-          payment.
+          Payments are processed by Razorpay; we never see or store your card, UPI or bank details.{" "}
+          {GST_REGISTERED ? "A GST invoice is issued for every payment." : "A receipt is issued for every payment."}
         </li>
         <li>
           If a plan or trial ends and is not renewed, your account stays fully usable for {GRACE_DAYS} more days and then becomes read-only:
@@ -186,13 +187,17 @@ function Mr() {
       <ul>
         <li>
           नवीन खात्याला {n(TRIAL_DAYS)} दिवसांची मोफत चाचणी मिळते; पेमेंटचे तपशील लागत नाहीत. त्यानंतर <Link to="/pricing">किंमत</Link> पानावरून सशुल्क
-          योजना निवडता येते. किमती भारतीय रुपयांत आहेत आणि त्यात जीएसटी समाविष्ट नाही; तो {n(18)}% दराने वेगळा लागतो.
+          योजना निवडता येते. किमती भारतीय रुपयांत आहेत.{" "}
+          {GST_REGISTERED ? <>त्यात जीएसटी समाविष्ट नाही; तो {n(18)}% दराने वेगळा लागतो.</> : "त्या अंतिम आहेत; त्यावर जीएसटी लागत नाही."}
         </li>
         <li>
           मासिक योजना रेझरपेमार्फत दर महिन्याला आपोआप नूतनीकृत होतात, जोपर्यंत तुम्ही ॲपमधून नूतनीकरण थांबवत नाही. वार्षिक योजना वर्षातून एकदा भरायच्या असतात
           आणि आपोआप नूतनीकृत होत नाहीत.
         </li>
-        <li>पेमेंट रेझरपेमार्फत होते; तुमचे कार्ड, यूपीआय किंवा बँकेचे तपशील आम्ही कधीही पाहत किंवा साठवत नाही. प्रत्येक पेमेंटसाठी जीएसटी बीजक दिले जाते.</li>
+        <li>
+          पेमेंट रेझरपेमार्फत होते; तुमचे कार्ड, यूपीआय किंवा बँकेचे तपशील आम्ही कधीही पाहत किंवा साठवत नाही.{" "}
+          {GST_REGISTERED ? "प्रत्येक पेमेंटसाठी जीएसटी बीजक दिले जाते." : "प्रत्येक पेमेंटसाठी पावती दिली जाते."}
+        </li>
         <li>
           योजना किंवा चाचणी संपल्यावर नूतनीकरण न केल्यास, खाते आणखी {n(GRACE_DAYS)} दिवस पूर्णपणे वापरता येते आणि नंतर फक्त वाचण्यासाठी राहते: सर्व काही
           उघडता, वाचता व निर्यात करता येते, पण नवीन काम जोडता येत नाही. योजना निवडल्यावर पूर्ण वापर पुन्हा सुरू होतो. योजना संपली म्हणून आम्ही तुमची माहिती

@@ -518,7 +518,10 @@ export const checkouts = pgTable(
 /** Sequential invoice numbers (GST invoices need a unique serial per financial year). */
 export const invoiceNumberSeq = pgSequence("invoice_number_seq");
 
-/** GST tax invoice for every successful charge. One per Razorpay payment (webhooks are idempotent on it). */
+/**
+ * Invoice for every successful charge: a GST tax invoice when supplierGstin is set (we were registered
+ * when it was issued), otherwise a plain receipt. One per Razorpay payment (webhooks are idempotent on it).
+ */
 export const invoices = pgTable(
   "invoice",
   {
@@ -539,6 +542,7 @@ export const invoices = pgTable(
     billingEmail: text("billing_email").notNull(),
     gstin: text("gstin"),
     billingState: text("billing_state"),
+    supplierGstin: text("supplier_gstin"),
     status: text("status").notNull().default("PAID"), // PAID | REFUNDED
     razorpayPaymentId: text("razorpay_payment_id").notNull().unique(),
     createdAt: createdAt(),

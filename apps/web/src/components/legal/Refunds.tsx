@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { GRACE_DAYS, TRIAL_DAYS } from "@vakilmitra/shared";
+import { GRACE_DAYS, GST_REGISTERED, TRIAL_DAYS } from "@vakilmitra/shared";
 import { fmtNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { LEGAL } from "@/lib/legal";
@@ -41,7 +41,8 @@ function En() {
       <ul>
         <li>Yearly plans are paid once and do not renew automatically, so there is nothing to cancel.</li>
         <li>
-          <strong>7-day refund:</strong> if you ask within 7 days of paying for a yearly plan, we refund the full amount, including GST.
+          <strong>7-day refund:</strong> if you ask within 7 days of paying for a yearly plan, we refund the full amount
+          {GST_REGISTERED ? ", including GST" : ""}.
         </li>
         <li>After 7 days, yearly payments are not refunded, and the plan stays active until the end of the paid year.</li>
       </ul>
@@ -65,10 +66,10 @@ function En() {
 
       <h2>6. How to ask for a refund</h2>
       <p>
-        Email <Fill v={LEGAL.supportEmail} /> from the address on your account, with the invoice number (it starts with "VM/") and the
-        reason. We reply within 2 working days. An approved refund is sent through Razorpay to the card, UPI account or bank account you
-        paid from, and usually reaches you within 5 to 7 working days, depending on your bank. We issue a credit note against the GST
-        invoice.
+        Email <Fill v={LEGAL.supportEmail} /> from the address on your account, with the receipt or invoice number (it starts with "VM/")
+        and the reason. We reply within 2 working days. An approved refund is sent through Razorpay to the card, UPI account or bank account
+        you paid from, and usually reaches you within 5 to 7 working days, depending on your bank.
+        {GST_REGISTERED && " We issue a credit note against the GST invoice."}
       </p>
 
       <h2>7. Payment problems</h2>
@@ -108,7 +109,8 @@ function Mr() {
       <ul>
         <li>वार्षिक योजना एकदाच भरायच्या असतात आणि आपोआप नूतनीकृत होत नाहीत, त्यामुळे रद्द करण्यासारखे काही नसते.</li>
         <li>
-          <strong>{n(7)} दिवसांत परतावा:</strong> वार्षिक योजनेचे पैसे भरल्यापासून {n(7)} दिवसांत मागितल्यास, जीएसटीसह संपूर्ण रक्कम परत केली जाते.
+          <strong>{n(7)} दिवसांत परतावा:</strong> वार्षिक योजनेचे पैसे भरल्यापासून {n(7)} दिवसांत मागितल्यास, {GST_REGISTERED ? "जीएसटीसह " : ""}संपूर्ण
+          रक्कम परत केली जाते.
         </li>
         <li>{n(7)} दिवसांनंतर वार्षिक पेमेंट परत केले जात नाही, आणि भरलेले वर्ष संपेपर्यंत योजना चालू राहते.</li>
       </ul>
@@ -132,9 +134,10 @@ function Mr() {
 
       <h2>६. परतावा कसा मागावा</h2>
       <p>
-        खात्यावरील ईमेल पत्त्यावरून <Fill v={LEGAL.supportEmail} /> वर बीजक क्रमांक (तो बीजकाच्या वरच्या भागात छापलेला असतो) आणि कारण लिहून पाठवा. आम्ही{" "}
-        {n(2)} कामकाजाच्या दिवसांत उत्तर देतो. मंजूर परतावा रेझरपेमार्फत तुम्ही ज्या कार्ड, यूपीआय खाते किंवा बँक खात्यातून पैसे भरले त्यावर पाठवला जातो, आणि तुमच्या
-        बँकेनुसार साधारण {n(5)} ते {n(7)} कामकाजाच्या दिवसांत जमा होतो. जीएसटी बीजकावर आम्ही जमा टीप (क्रेडिट नोट) देतो.
+        खात्यावरील ईमेल पत्त्यावरून <Fill v={LEGAL.supportEmail} /> वर पावती किंवा बीजक क्रमांक (तो वरच्या भागात छापलेला असतो) आणि कारण लिहून पाठवा.
+        आम्ही {n(2)} कामकाजाच्या दिवसांत उत्तर देतो. मंजूर परतावा रेझरपेमार्फत तुम्ही ज्या कार्ड, यूपीआय खाते किंवा बँक खात्यातून पैसे भरले त्यावर पाठवला जातो, आणि
+        तुमच्या बँकेनुसार साधारण {n(5)} ते {n(7)} कामकाजाच्या दिवसांत जमा होतो.
+        {GST_REGISTERED && " जीएसटी बीजकावर आम्ही जमा टीप (क्रेडिट नोट) देतो."}
       </p>
 
       <h2>७. पेमेंटमधील अडचणी</h2>

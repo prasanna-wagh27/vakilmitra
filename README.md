@@ -86,12 +86,13 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 
 ## Plans and billing
 
-- Plans live in `packages/shared/src/billing.ts`: a 14-day free trial, then Solo, Pro and Chamber, monthly or yearly (yearly = 10 months' price). Prices exclude 18% GST. Every plan has every feature; plans differ in junior seats, pages scanned per month and storage.
+- Plans live in `packages/shared/src/billing.ts`: a 14-day free trial, then Solo, Pro and Chamber, monthly or yearly (yearly = 10 months' price). Every plan has every feature; plans differ in junior seats, pages scanned per month and storage.
 - Payments use Razorpay. Monthly plans are Razorpay Subscriptions (UPI Autopay, cards); yearly plans are one-off orders, because RBI rules need extra authentication for each auto-debit above ₹15,000.
 - Setup: put the keys in `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`, run `pnpm --filter @vakilmitra/api billing:plans` once to create the monthly plans and copy the printed ids into env, and add a webhook to `<API_URL>/api/webhooks/razorpay` with secret `RAZORPAY_WEBHOOK_SECRET` (events listed in `apps/api/.env.example`). Use `rzp_test_` keys until going live.
 - After a trial or paid period ends there are 7 days of grace, then the account turns read-only: everything stays readable and exportable, and nothing is ever deleted for non-payment. Juniors on a senior's paid plan are covered by it.
-- Every payment gets a GST tax invoice (CGST + SGST inside Maharashtra, IGST outside), numbered `VM/<financial year>/<serial>`. Set the seller details (`BILLING_SUPPLIER_*`, `BILLING_SAC`) before going live.
-- Each payment emails a receipt with a link to its GST invoice, in the advocate's language.
+- GST: we are not registered, so `GST_REGISTERED` in `packages/shared/src/billing.ts` is `false`. Prices are final, nothing is added, and every payment gets a plain receipt numbered `VM/<financial year>/<serial>`. The seller name on receipts is `BILLING_SUPPLIER_NAME` (Outgrid Labs).
+- After registering for GST (compulsory once a year's turnover passes ₹20 lakh): set `GST_REGISTERED = true`, set `BILLING_SUPPLIER_GSTIN`, `BILLING_SUPPLIER_ADDRESS` and `BILLING_SAC`, and run `billing:plans` again to get monthly plans that include GST. From then on every payment gets a GST tax invoice (CGST + SGST inside Maharashtra, IGST outside) and customers can add their GSTIN. Each invoice stores our GSTIN as issued, so older receipts stay receipts.
+- Each payment emails a receipt with a link to it, in the advocate's language.
 - Not done yet: proration when switching plans mid-period (a switch starts a fresh period today).
 
 ## Policy pages

@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { GST_REGISTERED } from "@vakilmitra/shared";
 import { useI18n } from "@/lib/i18n";
 import { LEGAL } from "@/lib/legal";
 import { Fill, LegalPage } from "./LegalPage";
@@ -23,8 +24,9 @@ function En() {
           Settings, Plan and billing.
         </li>
         <li>
-          A receipt with a link to the GST invoice is emailed to the address on your account. Invoices can also be viewed and printed in the
-          app at any time.
+          {GST_REGISTERED
+            ? "A receipt with a link to the GST invoice is emailed to the address on your account. Invoices can also be viewed and printed in the app at any time."
+            : "A receipt is emailed to the address on your account. Receipts can also be viewed and printed in the app at any time."}
         </li>
       </ul>
       <h2>If something goes wrong</h2>
@@ -48,7 +50,11 @@ function Mr() {
       <ul>
         <li>नोंदणी करताच मोफत चाचणीसह तुमचे खाते तयार होते.</li>
         <li>योजनेचे पैसे भरताच ती तुमच्या खात्यावर लगेच, साधारण काही सेकंदांत, लागू होते आणि सेटिंग्ज, प्लॅन व बिलिंग येथे दिसते.</li>
-        <li>जीएसटी बीजकाच्या लिंकसह पावती तुमच्या खात्यावरील ईमेल पत्त्यावर पाठवली जाते. बीजके ॲपमध्येही कधीही पाहता व प्रिंट करता येतात.</li>
+        <li>
+          {GST_REGISTERED
+            ? "जीएसटी बीजकाच्या लिंकसह पावती तुमच्या खात्यावरील ईमेल पत्त्यावर पाठवली जाते. बीजके ॲपमध्येही कधीही पाहता व प्रिंट करता येतात."
+            : "पावती तुमच्या खात्यावरील ईमेल पत्त्यावर पाठवली जाते. पावत्या ॲपमध्येही कधीही पाहता व प्रिंट करता येतात."}
+        </li>
       </ul>
       <h2>काही अडचण आल्यास</h2>
       <p>
