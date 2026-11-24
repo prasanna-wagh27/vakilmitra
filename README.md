@@ -76,11 +76,36 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - **Search:** trigram (`pg_trgm`) substring search over OCR text, which works for Devanagari where word tokenisers struggle.
 - **Deletes:** deleting a page, document, case or account removes its encrypted files as well as its rows.
 
-## Deployment notes
+## Deployment
 
-- The web app calls the API at `VITE_API_URL`. Put both on the same site, e.g. `app.` and `api.` subdomains of one domain, so the session cookie works. Add the web origin to `WEB_ORIGIN` on the API.
-- Prototype tier: Neon/Supabase Postgres, API + worker on Railway/Render/Coolify, Valkey container, SPA on Cloudflare Pages.
-- Files must stay in India: set `STORAGE_DRIVER=s3` with an India-region S3-compatible bucket (for example AWS S3 `ap-south-1`). Keep `STORAGE_MASTER_KEYS` in the host's secret store, never in the bucket's account.
+Everything runs on one server in Mumbai with Docker Compose (`deploy/compose.yml`): Postgres 16, Valkey, a one-off `migrate` step, the API, the worker, and Caddy, which serves the web app and admin panel over HTTPS and passes `/api` to the API. Client files and backups go to S3 buckets in Mumbai.
+
+- **Addresses:** `https://DOMAIN` is the site and web app, with the API at `/api` on the same origin, so the sign-in cookie needs no cross-site settings. `https://admin.DOMAIN` is the admin panel, and `www.DOMAIN` redirects. Caddy gets and renews the HTTPS certificates itself.
+- **Images:** the `Dockerfile` builds two images from one build:
+  - `server`: the API, the worker and the migrations. It is built on the official Postgres 16 image, so the backups' `pg_dump` always matches the database.
+  - `web`: Caddy, with both static sites built in.
+- **Pipeline** (`.github/workflows/deploy.yml`): after CI passes on `main`, it builds both images and pushes them to GitHub Container Registry, tagged with the commit. When the server settings are present, it then runs these steps on the server over SSH:
+  1. copies the compose file
+  2. pulls the new images
+  3. runs migrations
+  4. restarts the services and waits until they are healthy
+  5. checks `https://DOMAIN/api/health`
+
+  Without the server settings it only builds and pushes. It can also be started by hand from the Actions tab. CI builds both images on every pull request too, without pushing them.
+- **Rolling back:** on the server, run `IMAGE_TAG=<older commit> docker compose up -d`. Migrations only ever add, so an older image runs against a newer database.
+- **One-time server setup** (Ubuntu 24.04 with 2 vCPU and 8 GB RAM is enough to start):
+  1. Install Docker and add a deploy user to the `docker` group.
+  2. Create `/opt/vakilmitra`, copy `deploy/.env.example` there as `.env` with `chmod 600`, and fill it in.
+  3. Point `DOMAIN`, `www.DOMAIN` and `admin.DOMAIN` at the server, and open ports 80 and 443.
+  4. In the repository's Actions settings, add the variables `DEPLOY_HOST`, `DEPLOY_USER` and `DEPLOY_DOMAIN`, the secrets `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS`, and optionally the variable `VITE_SENTRY_DSN`.
+  5. Run the Deploy workflow.
+- **Keys:** keep an offline copy of `STORAGE_MASTER_KEYS`. Without it, client files and backups cannot be read. The keys live only in the server's `.env`, never in a bucket's account.
+- **Files must stay in India:** use `STORAGE_DRIVER=s3` with a bucket in `ap-south-1` (or another India-region, S3-compatible store), and a second bucket in another account for backups. `STORAGE_DRIVER=fs` keeps files in a Docker volume on the server, which is fine for a trial but is not backed up off the machine beyond the nightly backup.
+- **Error reports (Sentry):**
+  - They are off until `SENTRY_DSN` is set on the server and the `VITE_SENTRY_DSN` variable is set in the pipeline.
+  - They contain only what is needed to find a bug: the API and worker report unexpected failures (5xx, and jobs that fail after their last retry), and the browsers report crashes.
+  - Before sending, `scrubEvent` in `packages/shared/src/sentry.ts` removes request bodies, cookies, query strings, names, emails, IP addresses and console output; only the account id stays.
+  - Use Sentry's EU region (`de.sentry.io`), and keep `SENTRY_TRACES_SAMPLE_RATE=0` (errors only) unless performance traces are needed.
 - The worker is CPU-bound (about 1 s per page per core); set `OCR_CONCURRENCY` to the number of cores.
 - Cloud reads run on their own queue (`ocr-cloud`, limit `OCR_CLOUD_CONCURRENCY`, default 4), so a slow cloud call (Sarvam polls for up to 2 minutes) never holds a Tesseract slot. The local job saves Tesseract's reading first (route `local:cloud-queued`), so the advocate sees text at once; the cloud job then replaces it. Just before sending, the cloud job re-checks that the page is still the version it was queued for (version and image size, read again after fetching the image) and that the owner still consents, and it writes the audit row before sending. After its last retry, the local reading stays (route `local:cloud-failed`).
 
@@ -207,9 +232,10 @@ point `DATABASE_URL` at it; start the API, which applies any newer migrations.
 - [x] Hosting tier and project type picked (Prototype, web SPA; mobile app after the web app)
 - [x] Monorepo: pnpm, Turborepo, Biome, Vitest, GitHub Actions
 - [ ] Cloud, domain, app store and API accounts in the client's name
-- [ ] Staging and production with separate databases and keys
+- [x] Production server packaged (Docker Compose) with a deploy pipeline; no staging copy for now (owner's decision)
 - [x] Env vars validated with Zod at boot; no secrets in git
-- [ ] Sentry, PostHog; Langfuse when AI work starts
+- [x] Sentry error reports (scrubbed; on once a DSN is set)
+- [ ] PostHog usage analytics; Langfuse when AI work starts
 - [x] CI license check passes (no banned licenses)
 - [ ] Real-record eval set (at least 20 real, labelled 7/12, Ferfar and Index-II pages) before extraction is switched on for clients. Both harnesses are ready (`packages/ocr/eval` for OCR, `apps/api/test/extract.eval.test.ts` for extraction); today they run on synthetic pages only.
 - [ ] Daily backups running and a restore tested

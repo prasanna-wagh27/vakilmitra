@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { createDb } from "@vakilmitra/db";
 import {
   BACKUP_SCHEDULE,
@@ -13,7 +14,7 @@ import {
 } from "@vakilmitra/jobs";
 import { ocrEnv, policyFromEnv } from "@vakilmitra/ocr";
 import { backupStorageConfigFromEnv, createBlobStore, createStorage, parseMasterKeys, storageConfigFromEnv } from "@vakilmitra/storage";
-import { Worker } from "bullmq";
+import { type Job, Worker } from "bullmq";
 import pino from "pino";
 import { checkRestore, runBackup } from "./backup.js";
 import { loadEnv } from "./env.js";
@@ -21,6 +22,16 @@ import { markCloudFailed, markFailed, processCloudPage, processPage } from "./pr
 import { pruneActivity } from "./retention.js";
 
 const env = loadEnv();
+
+/** Sends a job's failure to Sentry once its last retry has failed (no-op without SENTRY_DSN). */
+const reportFailure = (queue: string) => (job: Job | undefined, err: Error) => {
+  if (job && job.attemptsMade < (job.opts.attempts ?? 1)) return;
+  Sentry.withScope((scope) => {
+    scope.setTag("queue", queue);
+    if (job?.name) scope.setTag("job", job.name);
+    Sentry.captureException(err);
+  });
+};
 // OCR settings (including OCR_CONCURRENCY, which sizes both the job concurrency and the Tesseract pool).
 const ocr = ocrEnv(process.env);
 const policy = policyFromEnv(ocr);
@@ -79,6 +90,7 @@ const cloudWorker = cloudOn
     )
   : null;
 cloudWorker?.on("error", (err) => log.error({ err }, "cloud worker error"));
+cloudWorker?.on("failed", reportFailure(QUEUES.ocrCloud));
 
 // Nightly backup, then the restore check. Off until BACKUP_STORAGE_DRIVER is set.
 const backupQueue = backupCfg ? createBackupQueue(env.VALKEY_URL) : null;
@@ -100,7 +112,10 @@ const backupWorker = backupCfg
       { connection: connectionFromUrl(env.VALKEY_URL), concurrency: 1, lockDuration: 10 * 60_000 },
     )
   : null;
-backupWorker?.on("failed", (_job, err) => log.error({ err }, "nightly backup failed"));
+backupWorker?.on("failed", (job, err) => {
+  log.error({ err }, "nightly backup failed");
+  reportFailure(QUEUES.backup)(job, err);
+});
 if (backupQueue) {
   await backupQueue.upsertJobScheduler("nightly-backup", BACKUP_SCHEDULE, { name: "backup" });
   if (!env.BACKUP_RESTORE_CHECK_URL) log.warn("BACKUP_RESTORE_CHECK_URL is not set: backups are taken but never test-restored");
@@ -118,23 +133,27 @@ const housekeepingWorker = new Worker(
   },
   { connection: connectionFromUrl(env.VALKEY_URL), concurrency: 1, lockDuration: 10 * 60_000 },
 );
-housekeepingWorker.on("failed", (_job, err) => log.error({ err }, "daily clean-up failed"));
+housekeepingWorker.on("failed", (job, err) => {
+  log.error({ err }, "daily clean-up failed");
+  reportFailure(QUEUES.housekeeping)(job, err);
+});
 await housekeepingQueue.upsertJobScheduler("daily-housekeeping", HOUSEKEEPING_SCHEDULE, { name: "housekeeping" });
 
-worker.on("ready", () =>
-  log.info(
-    {
-      local: policy.local.name,
-      cloud: policy.cloud?.name ?? "none",
-      mode: policy.mode,
-      below: policy.below,
-      concurrency: ocr.OCR_CONCURRENCY,
-      cloudConcurrency: cloudOn ? ocr.OCR_CLOUD_CONCURRENCY : 0,
-    },
-    "OCR worker ready",
-  ),
+// Logged once connected; listening for the "ready" event here would miss it, since it fires during the awaits above.
+await worker.waitUntilReady();
+log.info(
+  {
+    local: policy.local.name,
+    cloud: policy.cloud?.name ?? "none",
+    mode: policy.mode,
+    below: policy.below,
+    concurrency: ocr.OCR_CONCURRENCY,
+    cloudConcurrency: cloudOn ? ocr.OCR_CLOUD_CONCURRENCY : 0,
+  },
+  "OCR worker ready",
 );
 worker.on("error", (err) => log.error({ err }, "worker error"));
+worker.on("failed", reportFailure(QUEUES.ocr));
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, async () => {
@@ -144,6 +163,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
     await policy.local.close();
     await policy.cloud?.close();
     await pool.end();
+    await Sentry.close(2000);
     process.exit(0);
   });
 }

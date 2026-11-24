@@ -2,6 +2,7 @@ import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import multipart from "@fastify/multipart";
 import swagger from "@fastify/swagger";
+import * as Sentry from "@sentry/node";
 import { PAGE_UPLOAD } from "@vakilmitra/shared";
 import { fromNodeHeaders } from "better-auth/node";
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyRequest } from "fastify";
@@ -126,6 +127,12 @@ export async function buildApp() {
       return reply.code((err as FastifyError).statusCode!).send({ error: "bad_request", message: err.message });
     }
     req.log.error(err);
+    // Only unexpected failures are reported; the route pattern, not the URL, names the place.
+    Sentry.withScope((scope) => {
+      scope.setTag("route", req.routeOptions.url ?? "unknown");
+      if (req.advocateId) scope.setUser({ id: req.advocateId });
+      Sentry.captureException(err);
+    });
     return reply.code(500).send({ error: "internal", message: "Something went wrong" });
   });
 

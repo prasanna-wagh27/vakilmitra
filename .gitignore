@@ -12,3 +12,4 @@ dist
 /eval-data
 packages/ocr/eval/out
 shots/
+dump.rdb

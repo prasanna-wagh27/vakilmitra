@@ -1,0 +1,19 @@
+# Build context for the Dockerfile: sources only; dependencies and outputs are made inside.
+**/node_modules
+**/dist
+**/.turbo
+**/.data
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+**/*.tsbuildinfo
+.git
+.github
+eval-data
+packages/ocr/eval/out
+shots
+docs
+dump.rdb
+deploy
+!deploy/Caddyfile
