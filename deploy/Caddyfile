@@ -1,0 +1,45 @@
+# One server, HTTPS certificates from Let's Encrypt, renewed automatically.
+#   DOMAIN          the web app and marketing site; /api goes to the API (same origin, so the
+#                   sign-in cookie needs no cross-site settings)
+#   www.DOMAIN      redirects to DOMAIN
+#   admin.DOMAIN    the staff admin panel; its /api goes to the same API
+{
+	email {$ACME_EMAIL}
+}
+
+(static) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), microphone=(), camera=(self)"
+		-Server
+	}
+	handle /api/* {
+		reverse_proxy api:4000
+	}
+	handle {
+		# File names under /assets carry a content hash, so they can be cached for a year;
+		# everything else (index.html) is checked on every visit so a deploy shows at once.
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+		@pages not path /assets/*
+		header @pages Cache-Control "no-cache"
+		root * /srv/{args[0]}
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+{$DOMAIN} {
+	import static web
+}
+
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}
+
+admin.{$DOMAIN} {
+	import static admin
+}

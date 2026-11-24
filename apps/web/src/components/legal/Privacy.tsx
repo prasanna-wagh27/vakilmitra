@@ -80,6 +80,10 @@ function En() {
         <li>Razorpay, to take payments;</li>
         <li>an email delivery provider, to send account emails;</li>
         <li>
+          an error-reporting service (Sentry), which receives technical details when something breaks, such as the page and the error
+          message. Files, case details, names and email addresses are removed before anything is sent;
+        </li>
+        <li>
           cloud OCR (Sarvam AI, in India; Google Cloud Vertex AI, Mumbai region), <strong>only if you turn on</strong> "Read hard pages with
           cloud OCR" in Settings. It is off by default. When on, only pages our own reader finds hard to read are sent, each one is recorded
           in your access log, and you can turn it off at any time.
@@ -207,6 +211,10 @@ function Mr() {
         <li>सेवा चालवण्यासाठी आणि तुमच्या फाइल्स ठेवण्यासाठी भारतातील क्लाउड होस्टिंग व साठवण;</li>
         <li>पेमेंट घेण्यासाठी रेझरपे;</li>
         <li>खात्याचे ईमेल पाठवण्यासाठी ईमेल वितरण सेवा;</li>
+        <li>
+          त्रुटी नोंदवणारी सेवा (सेंट्री): काही बिघडल्यास तांत्रिक तपशील, जसे की पान आणि त्रुटीचा संदेश, तिला मिळतात. फाइल, प्रकरणाचे तपशील, नावे आणि ईमेल पत्ते
+          पाठवण्यापूर्वी काढून टाकले जातात;
+        </li>
         <li>
           क्लाउड ओसीआर (सर्वम एआय, भारतात; गूगल क्लाउड व्हर्टेक्स एआय, मुंबई विभाग), <strong>फक्त तुम्ही</strong> सेटिंग्जमध्ये "कठीण पाने क्लाउड ओसीआर ने वाचा"{" "}
           <strong>चालू केल्यास</strong>. हे मूलतः बंद असते. चालू केल्यावर, आमच्या स्वतःच्या वाचकाला कठीण वाटलेलीच पाने पाठवली जातात, प्रत्येक पान तुमच्या प्रवेश

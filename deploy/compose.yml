@@ -1,0 +1,102 @@
+# VakilMitra on one server: docker compose --env-file .env up -d
+# Images come from GitHub Container Registry; IMAGE_TAG picks the version (a commit sha, or latest).
+# Settings live in .env next to this file (copy .env.example and fill it in).
+name: vakilmitra
+
+x-server: &server
+  image: ${IMAGE_REPO:-ghcr.io/prasanna-wagh27/vakilmitra}-server:${IMAGE_TAG:-latest}
+  restart: unless-stopped
+  env_file: .env
+  environment: &server-env
+    NODE_ENV: production
+    DATABASE_URL: postgresql://vakilmitra:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/vakilmitra
+    VALKEY_URL: redis://valkey:6379
+    API_URL: https://${DOMAIN:?set DOMAIN in .env}
+    WEB_ORIGIN: https://${DOMAIN}
+    ADMIN_ORIGIN: https://admin.${DOMAIN}
+    STORAGE_DIR: /data/blobs
+    BACKUP_RESTORE_CHECK_URL: postgresql://vakilmitra:${POSTGRES_PASSWORD}@postgres:5432/vakilmitra_restore_check
+  volumes:
+    # Used only with STORAGE_DRIVER=fs; with S3 the files live in the bucket.
+    - blobs:/data/blobs
+  logging: &logging
+    driver: local
+    options: { max-size: 20m, max-file: "5" }
+
+services:
+  postgres:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vakilmitra
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: vakilmitra
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vakilmitra -d vakilmitra"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *logging
+
+  valkey:
+    image: valkey/valkey:8-bookworm
+    restart: unless-stopped
+    # Queued OCR and backup jobs must survive a restart and must never be evicted (BullMQ).
+    command: ["valkey-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes: [valkeydata:/data]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *logging
+
+  migrate:
+    <<: *server
+    restart: "no"
+    working_dir: /app/packages/db
+    command: ["node", "dist/migrate-cli.js"]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api:
+    <<: *server
+    working_dir: /app/apps/api
+    command: ["node", "--import", "./dist/instrument.js", "dist/index.js"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      valkey: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  worker:
+    <<: *server
+    working_dir: /app/apps/worker
+    command: ["node", "--import", "./dist/instrument.js", "dist/index.js"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      valkey: { condition: service_healthy }
+
+  web:
+    image: ${IMAGE_REPO:-ghcr.io/prasanna-wagh27/vakilmitra}-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes: [caddy_data:/data, caddy_config:/config]
+    depends_on:
+      api: { condition: service_healthy }
+    logging: *logging
+
+volumes:
+  pgdata:
+  valkeydata:
+  blobs:
+  caddy_data:
+  caddy_config:
