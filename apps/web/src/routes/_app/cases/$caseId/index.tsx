@@ -2,7 +2,7 @@ import { Add01Icon, Cancel01Icon, FileUploadIcon, ScanIcon } from "@hugeicons/co
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { type Hearing, istDate } from "@vakilmitra/shared";
+import { DRAFT_KINDS, type DraftKind, type DraftSummary, type Hearing, istDate } from "@vakilmitra/shared";
 import { useState } from "react";
 import { Empty, ErrorBox, Loading, PageHeader, Section } from "@/components/common";
 import { FlagCard } from "@/components/FlagCard";
@@ -14,7 +14,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { api } from "@/lib/api";
 import { fmtDate, rupees } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import { caseQuery, documentsQuery, useApiMutation } from "@/lib/queries";
+import { aiQuery, caseQuery, documentsQuery, useApiMutation } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 import { OcrBadge } from "./documents/$documentId";
 
@@ -32,6 +32,46 @@ function AddButton({ onClick }: { onClick: () => void }) {
     <Button variant="outline" size="sm" onClick={onClick}>
       <HugeiconsIcon icon={Add01Icon} /> {t("common.add")}
     </Button>
+  );
+}
+
+/** AI drafts on this case. Shown once there is a draft, or drafting is set up and the advocate can add. */
+function DraftsSection({ caseId, drafts, canEdit }: { caseId: string; drafts: DraftSummary[]; canEdit: boolean }) {
+  const { t, locale } = useI18n();
+  const ai = useQuery(aiQuery);
+  const canDraft = canEdit && !!ai.data?.drafting.enabled;
+  if (!drafts.length && !canDraft) return null;
+  const kind = (k: string) => t(`draft.kind.${(DRAFT_KINDS as readonly string[]).includes(k) ? (k as DraftKind) : "OTHER"}`);
+  return (
+    <Section
+      title={t("case.drafts")}
+      action={
+        canDraft && (
+          <Button asChild variant="outline" size="sm">
+            <Link to="/cases/$caseId/drafts/new" params={{ caseId }}>
+              <HugeiconsIcon icon={Add01Icon} /> {t("draft.new")}
+            </Link>
+          </Button>
+        )
+      }
+    >
+      {drafts.length === 0 ? (
+        <Empty>{t("draft.none")}</Empty>
+      ) : (
+        <ul className="space-y-2">
+          {drafts.map((d) => (
+            <li key={d.id}>
+              <Link to="/cases/$caseId/drafts/$draftId" params={{ caseId, draftId: d.id }} className="row-card block p-4">
+                <p className="font-semibold">{d.title}</p>
+                <p className="text-sm text-muted-foreground">
+                  {kind(d.template)} · {fmtDate(d.updatedAt, locale)}
+                </p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
   );
 }
 
@@ -196,6 +236,8 @@ function CasePage() {
           <Empty>{t("doc.none")}</Empty>
         )}
       </Section>
+
+      <DraftsSection caseId={caseId} drafts={c.drafts} canEdit={canEdit} />
 
       <Section title={t("case.hearings")} action={canEdit && <AddButton onClick={() => setSheet({ kind: "hearing" })} />}>
         {c.hearings.length === 0 ? (

@@ -498,7 +498,7 @@ export interface CaseDetail extends CaseRef {
   hearings: Hearing[];
   flags: Flag[];
   feeAgreements: FeeAgreement[];
-  drafts: { id: string; title: string; status: "DRAFT" | "APPROVED"; language: Locale; updatedAt: string }[];
+  drafts: DraftSummary[];
   grants: { id: string; role: CaseRole; advocate: { id: string; name: string; email: string } }[];
 }
 export interface ClientTotals {
@@ -630,6 +630,49 @@ export interface TitleReportResponse {
 }
 
 export const reportDraftInput = z.object({ opinion: z.string().max(20_000), language: z.enum(LOCALES) });
+
+// ---------- AI drafting ----------
+
+/** What the advocate can ask AI to draft. Each has its own guidance in apps/api/src/ai/draft.ts. */
+export const DRAFT_KINDS = ["PUBLIC_NOTICE", "LEGAL_NOTICE", "NOTICE_REPLY", "AFFIDAVIT", "APPLICATION", "OTHER"] as const;
+export type DraftKind = (typeof DRAFT_KINDS)[number];
+
+export const draftGenerateInput = z.object({
+  kind: z.enum(DRAFT_KINDS),
+  language: z.enum(LOCALES),
+  /** The advocate's instructions: facts, what is wanted, anything to include. */
+  instructions: z.string().trim().min(10).max(6_000),
+  /** Give the model this case's court, parties and properties. */
+  useCaseDetails: z.boolean().default(true),
+});
+
+export const draftUpdateInput = z.object({
+  title: z.string().trim().min(1).max(200).optional(),
+  body: z.string().max(60_000).optional(),
+});
+
+export interface Draft {
+  id: string;
+  caseId: string;
+  kind: DraftKind;
+  language: Locale;
+  title: string;
+  body: string;
+  /** The instructions it was drafted from. */
+  instructions: string | null;
+  /** "<provider>:<model id>" that wrote the first version. */
+  model: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface DraftSummary {
+  id: string;
+  template: string;
+  title: string;
+  language: Locale;
+  updatedAt: string;
+}
 
 export interface Extraction {
   /** The record kind used, or null when the document could not be identified. */

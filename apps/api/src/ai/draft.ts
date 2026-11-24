@@ -1,0 +1,122 @@
+/**
+ * Drafting legal documents for an advocate in Maharashtra: public notices, legal notices and
+ * replies, affidavits and applications. The model writes a first draft from the advocate's
+ * instructions and (if asked) the case's own details; the advocate edits and signs it.
+ */
+import type { DraftKind, Locale } from "@vakilmitra/shared";
+
+const LANGUAGE: Record<Locale, string> = {
+  mr: "Marathi (Devanagari script), in the formal register used in Maharashtra courts and revenue offices",
+  en: "English, in the formal register used in Indian courts",
+};
+
+const KIND: Record<DraftKind, string> = {
+  PUBLIC_NOTICE: [
+    "A public notice (जाहीर नोटीस) for a newspaper, issued by the advocate before a client buys, takes a mortgage on, or develops land.",
+    "Describe the property fully (village, taluka, district, survey / gat / hissa numbers, area) and name the present owner(s).",
+    "Invite anyone with a right, title, interest, claim or encumbrance (sale, gift, mortgage, lease, lien, inheritance, agreement, court order) to object in writing with documentary proof to the advocate's office within [14] days.",
+    "State that after that period the transaction will be completed as if there were no claims, and any claim made later will be treated as waived.",
+  ].join(" "),
+  LEGAL_NOTICE: [
+    "A legal notice sent by the advocate on behalf of the client to the other party.",
+    "Begin 'Under instructions from and on behalf of my client ...'. Set out the facts in numbered paragraphs, then the demand, the time given to comply (15 days unless the instructions say otherwise), and that the client will take legal proceedings at the addressee's risk as to costs if they do not.",
+    "Include the addressee's name and address, the mode of sending (e.g. by RPAD / email), and a line that a copy is kept for further action.",
+  ].join(" "),
+  NOTICE_REPLY: [
+    "A reply, sent by the advocate on behalf of the client, to a notice the client received.",
+    "Refer to the notice by date. State that every allegation not specifically admitted is denied. Reply paragraph-wise in numbered paragraphs, set out the client's true version, and call on the sender to withdraw the notice.",
+    "Reserve the client's rights to take any action, and say a copy is kept for record.",
+  ].join(" "),
+  AFFIDAVIT: [
+    "An affidavit (प्रतिज्ञापत्र) to be sworn by the deponent and filed.",
+    "Give the cause title (court and case number) if known, the deponent's name, age, occupation and address, then numbered statements made on solemn affirmation, the verification clause (true to the deponent's own knowledge / information and belief), place and date, the deponent's signature, and identification by the advocate.",
+  ].join(" "),
+  APPLICATION: [
+    "An application (अर्ज) to a court or authority, such as for adjournment, exemption from appearance, condonation of delay, production of documents or a certified copy.",
+    "Give the cause title, the provision it is made under if the instructions name one, the grounds in numbered paragraphs, the prayer clause, place and date, and the signature of the advocate for the applicant.",
+  ].join(" "),
+  OTHER: "The document the advocate's instructions describe.",
+};
+
+export function draftPrompt(kind: DraftKind, language: Locale) {
+  return [
+    "You draft legal documents for an advocate practising in Maharashtra, India.",
+    `Write in ${LANGUAGE[language]}.`,
+    `What to draft: ${KIND[kind]}`,
+    "Rules:",
+    "- Use only the facts in the instructions and case details. Where a fact the document needs is missing, leave a placeholder in square brackets, such as [address] or [दिनांक]. Never invent names, dates, amounts, survey numbers, sections of law or case citations.",
+    "- Do not cite judgments. Name a statute or section only if the instructions name it.",
+    "- Write the complete document, ready for the advocate to review and sign: no explanations before or after, no notes to the advocate, no alternatives.",
+    "- Plain text only: no Markdown, no asterisks or # headings. Put headings on their own lines and number the paragraphs.",
+    "- Sign it off with the advocate's name and details as given.",
+  ].join("\n");
+}
+
+export interface CaseContext {
+  title: string;
+  kind: string;
+  court: string | null;
+  caseNumber: string | null;
+  filedOn: Date | null;
+  client: { name: string; address: string | null } | null;
+  parties: { name: string; role: string; isOurClient: boolean; address: string | null; opposingCounsel: string | null }[];
+  properties: {
+    surveyNo: string | null;
+    gatNo: string | null;
+    hissaNo: string | null;
+    village: string | null;
+    taluka: string | null;
+    district: string | null;
+  }[];
+}
+
+export interface Advocate {
+  name: string;
+  barCouncilNo: string | null;
+  phone: string | null;
+}
+
+const line = (label: string, value: string | null | undefined) => (value ? `${label}: ${value}` : null);
+
+/** The user message: the advocate's details, the case's details (if asked), then the instructions. */
+export function draftMessage(instructions: string, advocate: Advocate, ctx: CaseContext | null) {
+  const out = [
+    "Advocate (for the signature block):",
+    line("Name", advocate.name),
+    line("Bar Council enrolment no.", advocate.barCouncilNo),
+    line("Phone", advocate.phone),
+  ];
+  if (ctx) {
+    out.push(
+      "",
+      "Case details:",
+      line("Title", ctx.title),
+      line("Type", ctx.kind),
+      line("Court", ctx.court),
+      line("Case no.", ctx.caseNumber),
+      line("Filed on", ctx.filedOn?.toISOString().slice(0, 10)),
+      line("Client", ctx.client && [ctx.client.name, ctx.client.address].filter(Boolean).join(", ")),
+    );
+    for (const p of ctx.parties) {
+      out.push(
+        `Party: ${p.name} (${p.role.toLowerCase()}${p.isOurClient ? ", our client" : ""})${p.address ? `, ${p.address}` : ""}${p.opposingCounsel ? `; their advocate: ${p.opposingCounsel}` : ""}`,
+      );
+    }
+    for (const p of ctx.properties) {
+      const ids = [p.surveyNo && `survey no. ${p.surveyNo}`, p.gatNo && `gat no. ${p.gatNo}`, p.hissaNo && `hissa no. ${p.hissaNo}`];
+      const place = [p.village && `village ${p.village}`, p.taluka && `taluka ${p.taluka}`, p.district && `district ${p.district}`];
+      out.push(`Property: ${[...ids, ...place].filter(Boolean).join(", ")}`);
+    }
+  }
+  out.push("", "Instructions from the advocate:", instructions);
+  return out.filter((l) => l !== null).join("\n");
+}
+
+/** Models sometimes wrap their answer in Markdown despite the rules; the draft is plain text. */
+export function plainText(s: string) {
+  return s
+    .replace(/^```[a-z]*\n?|\n?```$/g, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .trim();
+}
