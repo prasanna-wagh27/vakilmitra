@@ -245,14 +245,21 @@ point `DATABASE_URL` at it; start the API, which applies any newer migrations.
   - Labels that are also ordinary words need a ":" or "-" after them.
   - Owners and parties may continue on the following lines, one per line.
   - Heirship Ferfars are also read from prose ("मयत X यांचे वारस A, B").
+- **Table-layout 7/12s.** Most 7/12 extracts are tables, not "label : value" forms. A row of column headings (खाते क्रमांक | भोगवटादाराचे नाव | क्षेत्र | आकार | फेरफार क्र., or भूमापन क्रमांक | भूधारणा पद्धती) starts a table, and each cell of the rows below goes to the heading it lies under.
+  - Cells are split at gaps wider than a word space, or at ruled lines OCR reads as "|". Headings that wrap onto a second line ("भोगवटादाराचे" over "नाव") are allowed.
+  - Each owner row gives one owner (an account number in the same cell is dropped; the "एकूण" total row is not an owner). The tenant column (कुळाचे नाव) and the इतर हक्क box become other rights.
+  - The area is the total row, or the only area in the table; owners' shares alone are not taken as the land's area. The ferfar number is the highest in the column (the latest change).
+  - A table ends at the next heading row, at a "label : value" line, or at a large gap.
+  - An area whose digits OCR garbled ("0.3¢.00") is left blank rather than guessed.
 - **Values are normalised.** Areas become square metres (hectares, H.R.Sqm triples, ares, acres, gunthas). Dates become ISO. Land class becomes Class-I/II. Devanagari digits become ASCII.
 - **Nothing is final until reviewed.**
   - Each fact shows its source crop and its weakest word's OCR confidence; below 80% it is marked "unclear".
   - A corrected fact keeps what was read (`original_value`).
   - Reading a document again replaces only facts that have not been checked.
   - A document joins a property's timeline only once every fact is checked. Blank property details are filled from it; differing ones are reported, never overwritten.
-- **Eval.** `apps/api/test/extract.eval.test.ts` scores 24 synthetic records (10 7/12s, 8 Ferfars, 6 Index-IIs) read by real Tesseract, against the spec's field targets. The records vary in layout and digit script, and half are degraded like phone photos. The OCR output is stored as fixtures, so CI runs it without OCR; regenerate with `npx tsx apps/api/eval/make-extract-set.mts`.
-  - Every group currently scores 100%. That shows the parser copes with OCR noise on these layouts. It is **not** a measure of accuracy on real government records: real 7/12s are tables, often handwritten or faded.
+- **Eval.** `apps/api/test/extract.eval.test.ts` scores 36 synthetic records (10 label-layout and 12 table-layout 7/12s, 8 Ferfars, 6 Index-IIs) read by real Tesseract, against the spec's field targets. The records vary in layout and digit script, and half are degraded like phone photos. The OCR output is stored as fixtures, so CI runs it without OCR; regenerate with `npx tsx apps/api/eval/make-extract-set.mts`.
+  - A value the OCR lost entirely (not in the OCR text at all) is reported as an OCR miss and not charged to the extractor; the eval fails if more than 2% of values are lost that way. One is now: a total area whose Devanagari digits Tesseract misread.
+  - Every group currently scores 100%. That shows the parser copes with OCR noise on these layouts. It is **not** a measure of accuracy on real government records, which are often handwritten or faded.
   - The real-record eval (20+ labelled real pages) is still on the checklist below.
 - **Limits.** Prose Ferfars other than heirship (sale narratives, orders) yield their number, date and type, but not the parties; the advocate adds those with "Add a missing detail". Table-layout 7/12s, where values sit under column headings rather than after a label, are not read yet.
 
