@@ -104,7 +104,7 @@ const LABELS: Label[] = [
   L("owners", "भोगवटादाराचे नाव"),
   L("owners", "भोगवटादारांची नावे"),
   L("owners", "खातेदाराचे नाव"),
-  L("area", "एकूण क्षेत्र"),
+  L("area", "एकूण क्षेत्र", false), // the area box of a table-layout 7/12: "एकूण क्षेत्र 0.81.00"
   L("area", "क्षेत्र"),
   L("land_class_raw", "भूधारणा पद्धती"),
   L("land_class_raw", "भोगवटादार वर्ग", false), // "भोगवटादार वर्ग -2": the class follows with no separator
@@ -175,11 +175,15 @@ function findHits(lines: Line[]): Hit[] {
 /** "0.81 हेक्टर", "०.८१.०० हे.आर", "81 आर", "8100 चौ.मी." -> square metres. */
 export function parseAreaSqm(raw: string): number | null {
   const s = clean(raw).toLowerCase();
-  const hra = s.match(/(\d+)\.(\d{1,2})\.(\d{1,2})/); // हे.आर.चौ.मी. triple
-  if (hra) return Number(hra[1]) * 10_000 + Number(hra[2]) * 100 + Number(hra[3]);
-  const n = s.match(/\d+(?:\.\d+)?/);
-  if (!n) return null;
-  const v = Number(n[0]);
+  // A number OCR garbled ("0.3¢.00" for "०.२८.००") is no reading: better blank than wrong.
+  const garbled = (m: RegExpMatchArray) => /^[^\s\p{L}\p{M}.,:;)\]/-]/u.test(s.slice((m.index ?? 0) + m[0].length));
+  const hra = s.match(/(\d+)[.,](\d{1,2})[.,](\d{1,2})(?!\d)/); // हे.आर.चौ.मी. triple (a comma is a misread dot)
+  if (hra) return garbled(hra) ? null : Number(hra[1]) * 10_000 + Number(hra[2]) * 100 + Number(hra[3]);
+  const n = s.match(/\d+(?:[.,]\d+)*/);
+  if (!n || garbled(n)) return null;
+  // "8,100" is grouped thousands; any other comma is a misread decimal point.
+  const v = Number(/^\d{1,3}(?:,\d{2})*,\d{3}$/.test(n[0]) ? n[0].replace(/,/g, "") : n[0].replace(",", "."));
+  if (Number.isNaN(v)) return null;
   // The unit is the first word after the number; "हे.आर.चौ.मी." (a column header) starts with hectares.
   const unit = s.slice((n.index ?? 0) + n[0].length).trim();
   if (/^(हे|hect|ha\b)/.test(unit)) return Math.round(v * 10_000);
@@ -317,6 +321,224 @@ const KIND_FIELDS: Record<RecordKind, Set<Label["field"]>> = {
 };
 const MULTI = new Set<Label["field"]>(["owners", "other_rights", "from_parties", "to_parties"]);
 
+// ---------- tables ----------
+
+/**
+ * Most 7/12 extracts are not "label : value" forms but tables: a row of column headings
+ * (खाते क्रमांक | भोगवटादाराचे नाव | क्षेत्र | आकार | पो.ख. | फेरफार क्र.) with one row per
+ * owner below, and smaller boxes such as भूमापन क्रमांक | भूधारणा पद्धती with the value under
+ * its heading. A table is read by finding a heading row, taking each heading's position on the
+ * page as its column, and giving each cell of the rows below to the column it lies under.
+ */
+type Column = Label["field"] | "tenant" | "ignore";
+
+const H = (col: Column, phrase: string) => ({ col, words: key(phrase).split(" ") });
+/** Column headings, longest first. Columns with no fact ("ignore") still claim their cells. */
+const HEADINGS = [
+  H("owners", "भोगवटादाराचे नाव"),
+  H("owners", "भोगवटादारांची नावे"),
+  H("owners", "खातेदाराचे नाव"),
+  H("owners", "खातेदारांची नावे"),
+  H("owners", "भोगवटादाराचे"),
+  H("area", "एकूण क्षेत्र"),
+  H("area", "क्षेत्र"),
+  H("survey_no", "भूमापन क्रमांक व उपविभाग"),
+  H("survey_no", "भूमापन क्रमांक"),
+  H("survey_no", "सर्वे नंबर"),
+  H("survey_no", "सर्व्हे नंबर"),
+  H("survey_no", "स.नं."),
+  H("gat_no", "गट क्रमांक"),
+  H("gat_no", "गट नंबर"),
+  H("gat_no", "गट नं."),
+  H("gat_no", "गट क्र."),
+  H("hissa_no", "हिस्सा क्रमांक"),
+  H("hissa_no", "हिस्सा नंबर"),
+  H("hissa_no", "हि.नं."),
+  H("land_class_raw", "भूधारणा पद्धती"),
+  H("other_rights", "इतर अधिकार"),
+  H("other_rights", "इतर हक्क"),
+  H("tenant", "कुळाचे नाव"),
+  H("ferfar_no", "फेरफार नोंद क्रमांक"),
+  H("ferfar_no", "फेरफार क्रमांक"),
+  H("ferfar_no", "फेरफार क्र."),
+  H("ferfar_no", "फेरफार नं."),
+  H("ignore", "खाते क्रमांक"),
+  H("ignore", "खाता क्रमांक"),
+  H("ignore", "खाते क्र."),
+  H("ignore", "खाते नं."),
+  H("ignore", "आकारणी"),
+  H("ignore", "आकार"),
+  H("ignore", "पोटखराब"),
+  H("ignore", "पो.ख."),
+  H("ignore", "जुडी"),
+].sort((a, b) => b.words.length - a.words.length);
+
+/** Words of a heading that wraps onto a second line ("भोगवटादाराचे" over "नाव"). */
+const HEADING_TAIL = new Set(["नाव", "नावे", "क्रमांक", "क्र.", "नं.", "व", "उपविभाग", "पद्धती", "क्षेत्र"]);
+
+interface TableColumn {
+  col: Column;
+  x0: number;
+  x1: number;
+}
+
+/**
+ * The columns of a heading row, or null when the line is not one. A heading row has no numbers
+ * and no "label :" separators, and is mostly heading words: one lone heading counts only when it
+ * is the whole line (prose that mentions "क्षेत्र" is not a table).
+ */
+export function headingRow(line: Line): TableColumn[] | null {
+  if (line.some((t) => /\d/.test(t.k) || isSep(t.k) || /[:：]$/.test(t.k))) return null;
+  const cols: TableColumn[] = [];
+  let used = 0;
+  for (let i = 0; i < line.length; i++) {
+    const h = HEADINGS.find((h) => h.words.every((w, j) => line[i + j]?.k === w));
+    if (!h) continue;
+    const toks = line.slice(i, i + h.words.length);
+    cols.push({ col: h.col, x0: toks[0].b[0], x1: toks[toks.length - 1].b[2] });
+    used += toks.length;
+    i += h.words.length - 1;
+  }
+  if (!cols.length) return null;
+  if (cols.length === 1 ? used < line.length : used < line.length * 0.6) return null;
+  return cols;
+}
+
+/** Grid lines and brackets Tesseract reads as words; they separate cells. */
+const isRule = (k: string) => /^[|│¦[\]_]+$/.test(k);
+
+/** Split a row into cells at gaps wider than a word space (or at a ruled line). */
+function cells(line: Line): Tok[][] {
+  const h = [...line.map((t) => t.b[3] - t.b[1])].sort((a, b) => a - b)[Math.floor(line.length / 2)] ?? 0;
+  const out: Tok[][] = [];
+  let cur: Tok[] = [];
+  let gap = false;
+  for (const t of line) {
+    if (isRule(t.k)) {
+      gap = true;
+      continue;
+    }
+    const prev = cur[cur.length - 1];
+    if (prev && (gap || t.b[0] - prev.b[2] > h * 0.8)) {
+      out.push(cur);
+      cur = [];
+    }
+    cur.push(t);
+    gap = false;
+  }
+  if (cur.length) out.push(cur);
+  return out;
+}
+
+/** The column a cell lies under: most horizontal overlap, where each column reaches halfway to the next heading. */
+function columnOf(cols: TableColumn[], cell: Tok[]): TableColumn {
+  const [x0, , x1] = unionBox(cell);
+  let best = cols[0];
+  let bestScore = Number.NEGATIVE_INFINITY;
+  cols.forEach((c, i) => {
+    const lo = i === 0 ? Number.NEGATIVE_INFINITY : (cols[i - 1].x1 + c.x0) / 2;
+    const hi = i === cols.length - 1 ? Number.POSITIVE_INFINITY : (c.x1 + cols[i + 1].x0) / 2;
+    const overlap = Math.min(x1, hi) - Math.max(x0, lo);
+    // No overlap anywhere: the nearest column wins (a negative overlap is the distance to it).
+    if (overlap > bestScore) {
+      bestScore = overlap;
+      best = c;
+    }
+  });
+  return best;
+}
+
+/** A row that totals the table ("एकूण"), not an owner. */
+const isTotalRow = (row: Tok[]) => row.some((t) => t.k === "एकूण");
+
+export interface TableCell {
+  col: Column;
+  toks: Tok[];
+}
+
+/**
+ * The tables on a page: each heading row with the cells of the rows under it. A table ends at the
+ * next heading row, at a "label : value" line, or at a gap of more than four blank rows.
+ */
+export function readTables(lines: Line[], isLabelLine: (li: number) => boolean): { heading: number; rows: TableCell[][] }[] {
+  const tables: { heading: number; rows: TableCell[][] }[] = [];
+  for (let li = 0; li < lines.length; li++) {
+    const cols = headingRow(lines[li]);
+    if (!cols) continue;
+    cols.sort((a, b) => a.x0 - b.x0);
+    const rows: TableCell[][] = [];
+    let bottom = Math.max(...lines[li].map((t) => t.b[3]));
+    let j = li + 1;
+    // The second line of headings that wrap ("नाव" under "भोगवटादाराचे").
+    if (lines[j]?.every((t) => HEADING_TAIL.has(t.k))) bottom = Math.max(...lines[j++].map((t) => t.b[3]));
+    for (; j < lines.length && rows.length < 40; j++) {
+      const line = lines[j];
+      const height = Math.max(...line.map((t) => t.b[3] - t.b[1]));
+      if (headingRow(line) || isLabelLine(j) || line[0].b[1] - bottom > height * 5) break;
+      bottom = Math.max(...line.map((t) => t.b[3]));
+      const row = cells(line).map((toks) => ({ col: columnOf(cols, toks).col, toks }));
+      if (row.length) rows.push(row);
+    }
+    tables.push({ heading: li, rows });
+    li = j - 1;
+  }
+  return tables;
+}
+
+type Push = (field: FactField, value: string, toks: Tok[]) => void;
+
+/** Facts from a page's tables, for the fields the record kind carries. */
+function tableFacts(kind: RecordKind, tables: ReturnType<typeof readTables>, push: Push) {
+  const carries = (col: Column) => col !== "ignore" && KIND_FIELDS[kind].has(col === "tenant" ? "other_rights" : col);
+  const text = (toks: Tok[]) => toks.map((t) => t.t).join(" ");
+  for (const { rows } of tables) {
+    const areas: { sqm: number; toks: Tok[]; total: boolean }[] = [];
+    const ferfars: { no: number; toks: Tok[] }[] = [];
+    for (const row of rows) {
+      const total = isTotalRow(row.flatMap((c) => c.toks));
+      for (const { col, toks } of row) {
+        if (!carries(col)) continue;
+        const raw = text(toks);
+        switch (col) {
+          case "owners":
+            // An account number sometimes shares the owner's cell ("123 सुरेश जाधव").
+            if (!total) for (const n of splitNames(clean(raw).replace(/^\d+[\s.)-]*/, ""))) push("owner", n, toks);
+            break;
+          case "tenant":
+            for (const n of splitNames(raw)) push("other_right", `कुळ: ${n}`, toks);
+            break;
+          case "other_rights":
+            for (const r of raw.split(";").map(clean).filter(Boolean)) push("other_right", r, toks);
+            break;
+          case "area": {
+            const sqm = parseAreaSqm(raw);
+            if (sqm !== null) areas.push({ sqm, toks, total });
+            break;
+          }
+          case "ferfar_no":
+            for (const m of clean(raw).matchAll(/\d+/g)) ferfars.push({ no: Number(m[0]), toks });
+            break;
+          case "land_class_raw": {
+            const c = parseLandClass(raw);
+            if (c) push("land_class", c, toks);
+            break;
+          }
+          default: {
+            const num = firstNumberish(raw);
+            if (num) push(col as FactField, num, toks);
+          }
+        }
+      }
+    }
+    // The land's area is the total row, or the only area in the table; owners' shares are not it.
+    const area = areas.find((a) => a.total) ?? (areas.length === 1 ? areas[0] : undefined);
+    if (area) push("area", String(area.sqm), area.toks);
+    // A 7/12 lists the mutation behind each entry; the latest (highest) is the one it was last changed by.
+    const latest = ferfars.sort((a, b) => b.no - a.no)[0];
+    if (latest) push("ferfar_no", String(latest.no), latest.toks);
+  }
+}
+
 /**
  * Extract the facts on one page. Single-valued fields keep their first, most confident reading.
  * Multi-valued fields (owners, other rights, parties) also take the following unlabelled lines.
@@ -328,7 +550,7 @@ export function extractPage(kind: RecordKind, words: OcrWord[]): ExtractedFact[]
   // Lines that start a new labelled entry, of any kind, or carry a "label : value" separator.
   const labelled = new Set([
     ...allHits.map((x) => x.line),
-    ...lines.flatMap((l, li) => (l.some((t) => isSep(t.k) || /[:：]$/.test(t.k)) ? [li] : [])),
+    ...lines.flatMap((l, li) => (l.some((t) => isSep(t.k) || /[:：]$/.test(t.k)) || headingRow(l) ? [li] : [])),
   ]);
   const facts: ExtractedFact[] = [];
   const count = new Map<FactField, number>();
@@ -421,6 +643,16 @@ export function extractPage(kind: RecordKind, words: OcrWord[]): ExtractedFact[]
       }
     }
   });
+
+  // Table-layout records: cells under column headings.
+  // A table ends at a "label : value" line: a known label, or any words before a free-standing ":".
+  // (A colon glued to a word, as in "कुळ: गणपत मोरे", can be a cell of the table.)
+  const strongLabel = new Set(allHits.filter((x) => x.label.needsSep).map((x) => x.line));
+  tableFacts(
+    kind,
+    readTables(lines, (li) => strongLabel.has(li) || lines[li].slice(1).some((t) => isSep(t.k))),
+    push,
+  );
 
   // Facts read from the whole page rather than a labelled field.
   const text = key(lines.map((l) => l.map((t) => t.t).join(" ")).join("\n"));
