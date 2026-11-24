@@ -203,7 +203,12 @@ export const draftRoutes: FastifyPluginAsyncZod = async (app) => {
     const d = await draftWithAccess(req.advocateId, req.params.id);
     logAccess(req, "draft.export", "draft", d.id);
     const file = await draftDocx(d.title, d.body, d.language);
-    const name = `${d.title.replace(/[^\p{L}\p{M}\p{N} ._-]+/gu, " ").replace(/\s+/g, " ").trim() || "draft"}.docx`;
+    const name = `${
+      d.title
+        .replace(/[^\p{L}\p{M}\p{N} ._-]+/gu, " ")
+        .replace(/\s+/g, " ")
+        .trim() || "draft"
+    }.docx`;
     return reply
       .header("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
       .header("Content-Disposition", `attachment; filename="draft.docx"; filename*=UTF-8''${encodeURIComponent(name)}`)
