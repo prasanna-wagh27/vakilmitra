@@ -176,7 +176,7 @@ ol.steps > li b { display: block; }
   <p>A status report on the web app: what is built, what isn't yet, what we need to put it online for a pilot with Maharashtra advocates, and the cheapest way to host it while keeping client files in India.</p>
   <div class="meta">
     <span>Date <b>24 November 2026</b></span>
-    <span>Code state <b>main @ 92395a7</b></span>
+    <span>Code state <b>main @ c6b9a7b</b></span>
     <span>Stage <b>Pilot (under 1,000 users)</b></span>
   </div>
 </header>
@@ -184,13 +184,13 @@ ol.steps > li b { display: block; }
 <div class="stats">
   <div class="stat brand"><div class="v">Ready</div><div class="k">Web app built for a pilot. Not online yet.</div></div>
   <div class="stat"><div class="v">≈ ₹1,000</div><div class="k">per month to run the pilot, all in India (option A)</div></div>
-  <div class="stat"><div class="v">3 of 8</div><div class="k">spec features not started: drafting, translation, WhatsApp</div></div>
+  <div class="stat"><div class="v">1 of 8</div><div class="k">spec features not started: WhatsApp reminders</div></div>
   <div class="stat"><div class="v">14</div><div class="k">items waiting on the owner before launch</div></div>
 </div>
 
 <div class="callout brand">
   <b>In one paragraph</b>
-  <p>The advocate's web app, the staff admin panel, billing and the public website are built, tested on every change, and reviewed. Nothing is online yet. Before launch we need a few days of setup work (server packaging, deployment, monitoring) and, mostly, business inputs from the owner: legal business details, GST status, Razorpay KYC, a domain, a lawyer's look at the policies, and real 7/12 pages to test the reader on. The cheapest sensible setup is one Mumbai VPS plus Mumbai file storage, about ₹1,000 a month.</p>
+  <p>The advocate's web app, the staff admin panel, billing and the public website are built, tested on every change, and reviewed. Since the first report, AI translation and drafting, table-layout 7/12 reading, search-engine-ready public pages, server packaging with a deploy pipeline, and error reports have been added, and GST is switched off until registration. Nothing is online yet. What is left is a day or two of server setup and, mostly, business inputs from the owner: legal business details, Razorpay KYC, a domain, a lawyer's look at the policies, AI model choices, and real 7/12 pages to test the reader on. The cheapest sensible setup is one Mumbai VPS plus Mumbai file storage, about ₹1,000 a month.</p>
 </div>
 
 <div class="toc">
@@ -224,7 +224,7 @@ ol.steps > li b { display: block; }
     <ul>
       <li>In-app <b>scanner</b>: finds page edges, flattens, uploads in the background with retries; photos never land in the phone gallery. PDF and image import.</li>
       <li><b>Marathi + English OCR</b> on our own server (Tesseract); optional cloud reading (Sarvam or Gemini) only with the advocate's consent.</li>
-      <li>Reads <b>7/12, Ferfar and Index-II</b> details; the advocate checks every fact.</li>
+      <li>Reads <b>7/12, Ferfar and Index-II</b> details, including 7/12s printed as <b>tables</b> (owners row by row, total area, latest ferfar, tenants, other rights); the advocate checks every fact.</li>
       <li><b>Red-flag rules</b> on the ownership chain, an ownership timeline, and a <b>title search report</b> exported to Word.</li>
       <li>Full-text search across scanned pages.</li>
     </ul>
@@ -232,10 +232,10 @@ ol.steps > li b { display: block; }
   <div class="card">
     <h3><span class="dot"></span>Business side</h3>
     <ul>
-      <li><b>Plans</b>: 14-day trial, then Solo ₹399, Pro ₹899, Chamber ₹2,499 a month (yearly = 10 months), plus GST.</li>
-      <li><b>Razorpay</b> payments: UPI Autopay and cards monthly; one-off yearly orders. GST tax invoices, receipts by email.</li>
+      <li><b>Plans</b>: 14-day trial, then Solo ₹399, Pro ₹899, Chamber ₹2,499 a month (yearly = 10 months). <b>No GST</b> is charged until the business registers; prices are final.</li>
+      <li><b>Razorpay</b> payments: UPI Autopay and cards monthly; one-off yearly orders. Receipts by email, issued by Outgrid Labs; GST tax invoices switch on after registration.</li>
       <li>7-day grace, then read-only. Nothing is deleted for non-payment.</li>
-      <li><b>Public website</b>: home page, pricing, terms, privacy, refunds, delivery, contact, in full Marathi and English.</li>
+      <li><b>Public website</b>: home page, pricing, terms, privacy, refunds, delivery, contact, in full Marathi and English. Built as ready-made pages for Google and WhatsApp previews: home page at <code>/</code> (Marathi) and <code>/en</code> (English), sitemap, share card, product and FAQ data for search results.</li>
       <li>Account emails: password reset, address check, payment receipts.</li>
     </ul>
   </div>
@@ -249,51 +249,65 @@ ol.steps > li b { display: block; }
       <li><b>Admin panel</b> for staff: password + authenticator code, MRR and sign-up dashboard, trials, free plans, refunds. Staff never see client content.</li>
     </ul>
   </div>
+  <div class="card">
+    <h3><span class="dot"></span>AI (off until a model is chosen)</h3>
+    <ul>
+      <li><b>Translation</b> of any scanned page between Marathi and English, marked as a machine translation to check against the scan.</li>
+      <li><b>Drafting</b> of public notices, legal notices, replies, affidavits and applications from the advocate's instructions and the case's details; edit, copy or download as Word. No invented names, dates or citations: gaps are left as [placeholders].</li>
+      <li><b>Any provider</b>: Claude, GPT, Gemini (also on Google Cloud Mumbai), Sarvam or any compatible endpoint, chosen per task by a setting, with fallbacks. An India-only switch refuses models outside India.</li>
+      <li>The advocate turns AI on in Settings; each plan has a monthly AI limit; every call is in the audit log, and no client text is stored with usage counts.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3><span class="dot"></span>Ready to deploy</h3>
+    <ul>
+      <li><b>Docker images</b> for the server (API, worker, migrations) and the websites (Caddy, automatic HTTPS), with one compose file for the whole Mumbai server.</li>
+      <li><b>Deploy pipeline</b>: after checks pass on <code>main</code>, images are built, pushed and rolled out over SSH, then health-checked. Rollback is one command.</li>
+      <li><b>Error reports</b> (Sentry) from the server and browsers, scrubbed of client content before sending; off until a Sentry address is set.</li>
+    </ul>
+  </div>
 </div>
 
 <h3>Quality checks in place</h3>
 <table>
   <thead><tr><th>Check</th><th>What it covers</th><th>Status</th></tr></thead>
   <tbody>
-    <tr><td>Automated tests</td><td>25 test files: API routes, access rules, billing, backups, audit log, red-flag rules, land-record extraction</td><td><span class="pill ok">Passing</span></td></tr>
-    <tr><td>Licence gate</td><td>398 packages checked; fails the build on a banned licence</td><td><span class="pill ok">Passing</span></td></tr>
+    <tr><td>Automated tests</td><td>32 test files, 310 tests: API routes, access rules, billing, backups, audit log, red-flag rules, land-record extraction, AI translation and drafting, error-report scrubbing, the public pages built for search engines</td><td><span class="pill ok">Passing</span></td></tr>
+    <tr><td>Licence gate</td><td>423 packages checked; fails the build on a banned licence</td><td><span class="pill ok">Passing</span></td></tr>
     <tr><td>Screen check</td><td>17 screens on phone (Marathi) and desktop (English): no overflow, no page errors</td><td><span class="pill ok">Passing</span></td></tr>
-    <tr><td>Extraction eval</td><td>24 synthetic records score 100%. <b>Not</b> a measure of accuracy on real government records.</td><td><span class="pill warn">Needs real pages</span></td></tr>
+    <tr><td>Extraction eval</td><td>36 synthetic pages, including 12 table-layout 7/12s (half made to look like phone photos), read by real OCR: every field group scores 100%. <b>Not</b> a measure of accuracy on real government records.</td><td><span class="pill warn">Needs real pages</span></td></tr>
     <tr><td>Design</td><td>Indigo theme and Inter type across web and admin, reviewed twice</td><td><span class="pill ok">Done</span></td></tr>
   </tbody>
 </table>
 
 <!-- ===================== 2. NOT DONE ===================== -->
 <h2 id="notdone"><span class="num">2</span>What is not done</h2>
-<p class="lede">Split into three kinds: product features still to build, setup work needed to go online, and inputs only the owner can give.</p>
+<p class="lede">Split into three kinds: product features still to build, setup work needed to go online, and inputs only the owner can give. Drafting, translation, table-layout 7/12s and the search-engine home page, all open in the first report, are now built (section 1).</p>
 
 <h3>2a. Product features not built yet</h3>
 <table>
   <thead><tr><th>Feature</th><th>Where it stands</th><th>Needed for pilot?</th></tr></thead>
   <tbody>
-    <tr><td>Drafting (spec 4)</td><td>The database table exists; no screens or logic. Needs an AI provider decision.</td><td><span class="pill grey">No</span></td></tr>
-    <tr><td>Translation (spec 5)</td><td>Not started. Needs an AI provider decision.</td><td><span class="pill grey">No</span></td></tr>
     <tr><td>WhatsApp reminders (spec 8)</td><td>MSG91 adapter and client opt-in flag exist; sending does not. Needs WhatsApp Business approval.</td><td><span class="pill grey">No</span></td></tr>
-    <tr><td>Table-layout 7/12s</td><td>Only "label : value" layouts are read; advocates add other details by hand.</td><td><span class="pill warn">Nice to have</span></td></tr>
     <tr><td>Plan change proration</td><td>Switching plan mid-period starts a fresh period today.</td><td><span class="pill grey">No</span></td></tr>
-    <tr><td>Home page for search engines</td><td>The home page renders in the browser; pre-rendering for Google is not set up.</td><td><span class="pill warn">Nice to have</span></td></tr>
+    <tr><td>English policy pages for search</td><td>Policy and pricing pages are built for search in Marathi only; English readers switch language on the page.</td><td><span class="pill grey">No</span></td></tr>
     <tr><td>Dark mode</td><td>Removed with the redesign; can return as an option.</td><td><span class="pill grey">No</span></td></tr>
     <tr><td>Mobile app (Expo)</td><td>On hold by rule until the web app is done and the owner says start.</td><td><span class="pill grey">No</span></td></tr>
   </tbody>
 </table>
 
-<h3>2b. Setup work to go online (engineering, about 2–4 days)</h3>
+<h3>2b. Setup work to go online (engineering, about 1–2 days left)</h3>
 <table>
   <thead><tr><th>Task</th><th>Why</th><th>Status</th></tr></thead>
   <tbody>
-    <tr><td>Server packaging</td><td>Docker images for the API and the OCR worker (with Postgres 16 dump tools for backups), and one compose file with Postgres, Valkey and an HTTPS proxy.</td><td><span class="pill no">Not started</span></td></tr>
-    <tr><td>Deploy pipeline</td><td>Push to <code>main</code> → build → deploy; web and admin sites built with the live API address.</td><td><span class="pill no">Not started</span></td></tr>
+    <tr><td>Server packaging</td><td>Docker images for the API and the OCR worker (with Postgres 16 dump tools for backups), and one compose file with Postgres, Valkey and an HTTPS proxy.</td><td><span class="pill ok">Done</span></td></tr>
+    <tr><td>Deploy pipeline</td><td>Push to <code>main</code> → build → deploy. Runs once the server's address and SSH key are added to the repository settings.</td><td><span class="pill ok">Done</span></td></tr>
     <tr><td>Staging copy</td><td>A separate test site with its own database and keys, so changes are tried before advocates see them.</td><td><span class="pill no">Not started</span></td></tr>
-    <tr><td>Error and usage tracking</td><td>Sentry (errors) and PostHog (usage), set up to send no client content.</td><td><span class="pill no">Not started</span></td></tr>
+    <tr><td>Error and usage tracking</td><td>Sentry (errors) is built in and scrubs client content; it needs a Sentry address. PostHog (usage) is not started.</td><td><span class="pill warn">Sentry done</span></td></tr>
     <tr><td>Uptime alert</td><td>A free monitor on <code>/api/health</code> that emails or texts when the site is down.</td><td><span class="pill no">Not started</span></td></tr>
     <tr><td>Email sender setup</td><td>SPF, DKIM and DMARC records so receipts and reset links don't land in spam.</td><td><span class="pill warn">Needs domain</span></td></tr>
     <tr><td>First live setup</td><td>Create staff accounts, create Razorpay plans, add the webhook, turn on backups, run a restore drill.</td><td><span class="pill warn">Needs accounts</span></td></tr>
-    <tr><td>README hosting note</td><td>The README suggests Neon, Railway and Render; these don't guarantee data stays in India. Update it to match the choice below.</td><td><span class="pill no">To fix</span></td></tr>
+    <tr><td>README hosting note</td><td>The README now describes the one-server Mumbai setup in section 4, option A.</td><td><span class="pill ok">Done</span></td></tr>
   </tbody>
 </table>
 
@@ -301,29 +315,29 @@ ol.steps > li b { display: block; }
 <table>
   <thead><tr><th>#</th><th>What we need</th><th>Blocks</th></tr></thead>
   <tbody>
-    <tr><td>1</td><td><b>Legal business details</b>: legal name (proprietor, LLP or company), address with PIN, support email and phone, Grievance Officer name and email, courts' city. Goes in <code>apps/web/src/lib/legal.ts</code>.</td><td><span class="pill no">Launch</span></td></tr>
-    <tr><td>2</td><td><b>GST status</b>: GSTIN, address and SAC code for invoices. If not GST-registered, the app must not add 18% GST; tell us and we'll switch it off.</td><td><span class="pill no">Payments</span></td></tr>
-    <tr><td>3</td><td><b>Razorpay account</b> with KYC done; live keys go into the server's secret settings (never in chat or email).</td><td><span class="pill no">Payments</span></td></tr>
-    <tr><td>4</td><td><b>Lawyer review</b> of Terms, Privacy, Refunds and Delivery (drafts in both languages are ready).</td><td><span class="pill no">Launch</span></td></tr>
-    <tr><td>5</td><td><b>Domain</b>, e.g. <code>vakilmitra.in</code>, with access to its DNS.</td><td><span class="pill no">Launch</span></td></tr>
-    <tr><td>6</td><td><b>Hosting choice</b> (section 4) and cloud accounts opened in the business's name.</td><td><span class="pill no">Launch</span></td></tr>
-    <tr><td>7</td><td><b>Email provider</b>: Amazon SES (Mumbai) is the suggestion.</td><td><span class="pill no">Launch</span></td></tr>
-    <tr><td>8</td><td><b>Backup bucket</b> in a second cloud account, and an offline copy of the master encryption keys.</td><td><span class="pill no">Launch</span></td></tr>
-    <tr><td>9</td><td><b>20+ real labelled pages</b> (7/12, Ferfar, Index-II) to measure the reader before advocates rely on it.</td><td><span class="pill warn">Extraction</span></td></tr>
+    <tr><td>1</td><td><b>Legal business details</b>: the operator is named (Outgrid Labs); still needed are the address with PIN, support email and phone, Grievance Officer name and email, and courts' city. Goes in <code>apps/web/src/lib/legal.ts</code>.</td><td><span class="pill no">Launch</span></td></tr>
+    <tr><td>2</td><td><b>Razorpay account</b> with KYC done; live keys go into the server's secret settings (never in chat or email).</td><td><span class="pill no">Payments</span></td></tr>
+    <tr><td>3</td><td><b>Lawyer review</b> of Terms, Privacy, Refunds and Delivery (drafts in both languages are ready).</td><td><span class="pill no">Launch</span></td></tr>
+    <tr><td>4</td><td><b>Domain</b>, e.g. <code>vakilmitra.in</code>, with access to its DNS. It also becomes the <code>DEPLOY_DOMAIN</code> setting, which gives search engines the site's full addresses.</td><td><span class="pill no">Launch</span></td></tr>
+    <tr><td>5</td><td><b>Hosting choice</b> (section 4) and cloud accounts opened in the business's name.</td><td><span class="pill no">Launch</span></td></tr>
+    <tr><td>6</td><td><b>Email provider</b>: Amazon SES (Mumbai) is the suggestion.</td><td><span class="pill no">Launch</span></td></tr>
+    <tr><td>7</td><td><b>Backup bucket</b> in a second cloud account, and an offline copy of the master encryption keys.</td><td><span class="pill no">Launch</span></td></tr>
+    <tr><td>8</td><td><b>20+ real labelled pages</b> (7/12 in both layouts, Ferfar, Index-II) to measure the reader before advocates rely on it.</td><td><span class="pill warn">Extraction</span></td></tr>
+    <tr><td>9</td><td><b>AI choices</b>: which model does translation and which does drafting (an India-only setup is possible), the monthly AI limits per plan (now 30 trial, 200 Solo, 800 Pro, 2,500 Chamber), and the privacy-policy wording that client text is never used to train models.</td><td><span class="pill warn">AI features</span></td></tr>
     <tr><td>10</td><td><b>Licence approvals</b>: the Inter and IBM Plex Sans Devanagari fonts (OFL-1.1) and nodemailer (MIT-0).</td><td><span class="pill warn">Release</span></td></tr>
     <tr><td>11</td><td><b>Refund terms</b> to confirm in the Refunds policy.</td><td><span class="pill warn">Release</span></td></tr>
     <tr><td>12</td><td><b>Staff audit retention</b>: how long to keep staff records (today: forever).</td><td><span class="pill grey">Later</span></td></tr>
     <tr><td>13</td><td><b>Testimonials</b> for the home page, with permission.</td><td><span class="pill grey">Later</span></td></tr>
-    <tr><td>14</td><td><b>AI and WhatsApp providers</b> for drafting, translation and reminders.</td><td><span class="pill grey">Later</span></td></tr>
+    <tr><td>14</td><td><b>WhatsApp provider</b> and WhatsApp Business approval for reminders.</td><td><span class="pill grey">Later</span></td></tr>
   </tbody>
 </table>
 
 <!-- ===================== 3. DEPLOYMENT ===================== -->
-<h2 id="deploy"><span class="num">3</span>What deployment needs</h2>
-<p class="lede">Five running pieces, all small. Client data (database, files, backups) stays in India; the two websites are plain static files and can be served from anywhere.</p>
+<h2 id="deploy" class="pb"><span class="num">3</span>What deployment needs</h2>
+<p class="lede">One Mumbai server runs everything with Docker Compose; Caddy on it serves the two websites over HTTPS and passes <code>/api</code> to the API. Client data (database, files, backups) stays in India.</p>
 
 <div class="diagram">
-<svg viewBox="0 0 820 330" role="img" aria-label="Deployment layout: advocates' browsers reach the web and admin sites on Cloudflare Pages and the API on a Mumbai server; the API and OCR worker share Postgres and Valkey on that server; files go to an India bucket; backups to a second India bucket.">
+<svg viewBox="0 0 820 330" role="img" aria-label="Deployment layout: advocates' browsers reach the web and admin sites and the API through Caddy on one Mumbai server; the API and OCR worker share Postgres and Valkey on that server; files go to an India bucket; backups to a second India bucket.">
   <defs>
     <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6b6862"/></marker>
   </defs>
@@ -343,9 +357,9 @@ ol.steps > li b { display: block; }
 
   <!-- static -->
   <rect class="zone" x="180" y="14" width="200" height="120" rx="14"/>
-  <text class="z" x="194" y="34">STATIC SITES · ANYWHERE</text>
+  <text class="z" x="194" y="34">WEBSITES · CADDY, SAME SERVER</text>
   <rect class="bx" x="196" y="46" width="168" height="36" rx="9"/>
-  <text class="t" x="208" y="69">app.  web app + home</text>
+  <text class="t" x="208" y="69">domain  web app + home</text>
   <rect class="bx" x="196" y="88" width="168" height="36" rx="9"/>
   <text class="t" x="208" y="111">admin.  staff panel</text>
 
@@ -353,8 +367,8 @@ ol.steps > li b { display: block; }
   <rect class="zone" x="180" y="150" width="400" height="168" rx="14"/>
   <text class="z" x="194" y="170">ONE SERVER · MUMBAI</text>
   <rect class="bx-b" x="196" y="182" width="170" height="52" rx="10"/>
-  <text class="t" x="208" y="204">api.  API (Fastify)</text>
-  <text class="s" x="208" y="222">HTTPS proxy in front</text>
+  <text class="t" x="208" y="204">/api  API (Fastify)</text>
+  <text class="s" x="208" y="222">behind Caddy (HTTPS)</text>
   <rect class="bx-b" x="396" y="182" width="170" height="52" rx="10"/>
   <text class="t" x="408" y="204">OCR worker</text>
   <text class="s" x="408" y="222">reading, backups, clean-up</text>
@@ -381,7 +395,7 @@ ol.steps > li b { display: block; }
   <rect class="bx" x="436" y="46" width="112" height="36" rx="9"/><text class="t" x="448" y="69">Razorpay</text>
   <rect class="bx" x="556" y="46" width="112" height="36" rx="9"/><text class="t" x="568" y="69">Email (SES)</text>
   <rect class="bx" x="676" y="46" width="118" height="36" rx="9"/><text class="t" x="688" y="69">Sentry</text>
-  <rect class="bx" x="436" y="88" width="232" height="36" rx="9"/><text class="t" x="448" y="111">Cloud OCR (optional, consent)</text>
+  <rect class="bx" x="436" y="88" width="232" height="36" rx="9"/><text class="t" x="448" y="111">Cloud OCR · AI models (consent)</text>
   <rect class="bx" x="676" y="88" width="118" height="36" rx="9"/><text class="t" x="688" y="111">Uptime alert</text>
 
   <!-- arrows -->
@@ -401,18 +415,18 @@ ol.steps > li b { display: block; }
 <table>
   <thead><tr><th>Piece</th><th>Needs</th><th>Size for the pilot</th></tr></thead>
   <tbody>
-    <tr><td>API</td><td>Node 22; database and Valkey addresses; auth secret; storage keys; Razorpay, email and site addresses</td><td>Under 0.5 GB RAM</td></tr>
+    <tr><td>API</td><td>Node 22; database and Valkey addresses; auth secret; storage keys; Razorpay, email and site addresses; AI model keys if AI is on</td><td>Under 0.5 GB RAM</td></tr>
     <tr><td>OCR worker</td><td>Same database, storage and keys; Postgres 16 dump tools for backups</td><td>About 1 second per page per CPU core; 1–2 GB RAM</td></tr>
     <tr><td>PostgreSQL 16</td><td>Daily backup (built in), disk with room to grow</td><td>A few GB for the first year</td></tr>
     <tr><td>Valkey</td><td>Small queue store</td><td>Under 100 MB</td></tr>
-    <tr><td>Web + admin sites</td><td>Static hosting with HTTPS; build with the API address</td><td>Free tier</td></tr>
+    <tr><td>Web + admin sites</td><td>Caddy on the same server; HTTPS certificates are fetched and renewed automatically</td><td>Included</td></tr>
     <tr><td>Files bucket</td><td>S3-compatible, Indian region</td><td>Roughly 0.3–1 MB per page; 20 GB holds ~30,000 pages</td></tr>
     <tr><td>Backup bucket</td><td>Separate account, Indian region</td><td>About the size of the files bucket</td></tr>
   </tbody>
 </table>
 
 <h3>Addresses</h3>
-<p>All on one domain so the sign-in cookie works: <code>app.</code> (advocates), <code>api.</code> (server), <code>admin.</code> (staff), and the bare domain for the public home page.</p>
+<p>All on one domain so the sign-in cookie works: the bare domain is the public site and the advocates' app, with the API at <code>/api</code> on the same address; <code>admin.</code> is the staff panel; <code>www.</code> redirects to the bare domain.</p>
 
 <h3>Secrets and settings to prepare</h3>
 <table>
@@ -422,9 +436,12 @@ ol.steps > li b { display: block; }
     <tr><td><code>STORAGE_MASTER_KEYS</code></td><td>Encrypts every file and backup. <b>Lose it and the data is unreadable.</b> Keep an offline copy.</td><td>We generate; owner stores offline</td></tr>
     <tr><td><code>S3_*</code>, <code>BACKUP_S3_*</code></td><td>Bucket names, region, access keys</td><td>Cloud accounts</td></tr>
     <tr><td><code>RAZORPAY_*</code></td><td>Key id, secret, webhook secret, three plan ids</td><td>Razorpay dashboard</td></tr>
-    <tr><td><code>BILLING_SUPPLIER_*</code>, <code>BILLING_SAC</code></td><td>Seller name, address, GSTIN on invoices</td><td>Owner</td></tr>
+    <tr><td><code>BILLING_SUPPLIER_*</code>, <code>BILLING_SAC</code></td><td>Seller name on receipts (Outgrid Labs, set); GSTIN, address and SAC only after GST registration</td><td>Owner</td></tr>
     <tr><td><code>SMTP_URL</code>, <code>MAIL_FROM</code></td><td>Email sending</td><td>SES or other provider</td></tr>
-    <tr><td><code>WEB_ORIGIN</code>, <code>ADMIN_ORIGIN</code>, <code>API_URL</code></td><td>Site addresses</td><td>Domain</td></tr>
+    <tr><td><code>DOMAIN</code>, <code>ACME_EMAIL</code></td><td>Site address, and the email for HTTPS certificate notices</td><td>Domain</td></tr>
+    <tr><td><code>AI_MODEL_*</code> and provider keys</td><td>Which model does translation and drafting; off until set</td><td>Owner's choice of provider</td></tr>
+    <tr><td><code>SENTRY_DSN</code>, <code>VITE_SENTRY_DSN</code></td><td>Where error reports go; off until set</td><td>Sentry account</td></tr>
+    <tr><td><code>DEPLOY_*</code> (GitHub settings)</td><td>Server address, SSH user and key, and domain for the deploy pipeline</td><td>Server and domain</td></tr>
     <tr><td><code>OCR_CLOUD_*</code></td><td>Optional cloud reading; off by default</td><td>Sarvam or Google Cloud, later</td></tr>
   </tbody>
 </table>
@@ -456,7 +473,7 @@ ol.steps > li b { display: block; }
       <li>Hostinger KVM 2 in Mumbai (2 CPU, 8 GB): ₹799/month intro, paid upfront; roughly double on renewal</li>
       <li>Everything server-side runs on it with Docker</li>
       <li>Files and backups on S3 Mumbai, pay per GB</li>
-      <li>Static sites free on Cloudflare Pages</li>
+      <li>The two websites are served from the same server (Caddy, free HTTPS)</li>
     </ul>
     <div class="for">Good for: the pilot and the first few hundred advocates.</div>
   </div>
@@ -479,7 +496,7 @@ ol.steps > li b { display: block; }
   <thead><tr><th>Item</th><th>Cheapest pick</th><th>Alternatives</th><th class="money">Per month</th></tr></thead>
   <tbody>
     <tr><td>Server</td><td>Hostinger KVM 2, Mumbai: API, worker, Postgres, Valkey, HTTPS</td><td>DigitalOcean Bangalore ($4–6 entry, more for 8 GB); Lightsail Mumbai $12 (2 GB)</td><td class="money">₹799</td></tr>
-    <tr><td>Web + admin sites</td><td>Cloudflare Pages</td><td>Netlify or the same VPS</td><td class="money">₹0</td></tr>
+    <tr><td>Web + admin sites</td><td>The same VPS (Caddy)</td><td>Cloudflare Pages or Netlify</td><td class="money">₹0</td></tr>
     <tr><td>Files</td><td>AWS S3 Mumbai, about $0.025/GB; 20 GB costs ~$0.50</td><td>E2E Networks: $10 flat for up to 250 GB (Indian company)</td><td class="money">≈ ₹50–100</td></tr>
     <tr><td>Backups</td><td>S3 Mumbai in a second AWS account</td><td>E2E Networks bucket</td><td class="money">≈ ₹50–100</td></tr>
     <tr><td>Email</td><td>Amazon SES Mumbai, $0.10 per 1,000 emails</td><td>Brevo free (300 a day); Zoho ZeptoMail ~$2.50 per 10,000</td><td class="money">≈ ₹10</td></tr>
@@ -487,6 +504,7 @@ ol.steps > li b { display: block; }
     <tr><td>Errors and usage</td><td>Sentry Developer (5,000 errors a month), PostHog (1M events a month)</td><td>—</td><td class="money">₹0</td></tr>
     <tr><td>Uptime alert</td><td>Any free monitor</td><td>—</td><td class="money">₹0</td></tr>
     <tr><td>Cloud OCR</td><td>Off by default; costs only if turned on</td><td>Sarvam Vision, Gemini on Vertex Mumbai</td><td class="money">₹0</td></tr>
+    <tr><td>AI models</td><td>Off until a model is set; then paid per use, capped by each plan's monthly AI limit</td><td>Sarvam, Gemini on Vertex Mumbai, Claude, GPT</td><td class="money">₹0 until on</td></tr>
   </tbody>
   <tfoot><tr><td colspan="3">Total for the pilot</td><td class="money">≈ ₹1,000–1,100</td></tr></tfoot>
 </table>
@@ -495,7 +513,7 @@ ol.steps > li b { display: block; }
 <ul class="tight">
   <li>No setup or yearly fee. Standard fee about <b>2% per payment + 18% GST</b> on that fee; subscriptions (UPI Autopay, cards) use the same rate.</li>
   <li>New merchants activated after 1 July 2026 get <b>0% for the first 90 days or ₹5 lakh</b> of payments, whichever comes first. Check eligibility when signing up.</li>
-  <li>Example: a Pro subscription of ₹899 + GST = ₹1,061 costs about ₹25 in fees.</li>
+  <li>Example: a Pro subscription of ₹899 (no GST added while unregistered) costs about ₹21 in fees.</li>
   <li>Razorpay checks the public policy pages before turning on live payments; they are ready once the business details are filled in.</li>
 </ul>
 
@@ -519,10 +537,10 @@ ol.steps > li b { display: block; }
 <ol class="steps">
   <li><b>Decide the business basics <span class="pill grey who">Owner</span></b>Legal entity, GST registration (yes or no), business address, support contact and Grievance Officer. Fill them in and send to the lawyer.</li>
   <li><b>Open accounts in the business's name <span class="pill grey who">Owner</span></b>Domain, Hostinger (or the chosen host), two AWS accounts (files, backups), Razorpay (start KYC early; it takes days), Sentry, PostHog.</li>
-  <li><b>Package and deploy <span class="pill brand who">Engineering</span></b>Docker images, compose file, deploy pipeline, staging copy, HTTPS, uptime alert, Sentry and PostHog wiring. About 2–4 days.</li>
-  <li><b>Wire the live services <span class="pill brand who">Engineering</span></b>Email records (SPF, DKIM, DMARC), Razorpay test keys and webhook, backups on, first restore drill, staff accounts with authenticator codes.</li>
+  <li><b>Set up the server <span class="pill brand who">Engineering</span></b>Docker images, compose file, deploy pipeline and Sentry wiring are done. Left: prepare the server, run the first deploy, a staging copy, an uptime alert and PostHog. About 1–2 days.</li>
+  <li><b>Wire the live services <span class="pill brand who">Engineering</span></b>Email records (SPF, DKIM, DMARC), Razorpay test keys and webhook, backups on, first restore drill, staff accounts with authenticator codes. Add the site to Google Search Console and submit its sitemap.</li>
   <li><b>Test with real pages <span class="pill grey who">Owner</span> <span class="pill brand who">Engineering</span></b>Owner supplies 20+ labelled real 7/12, Ferfar and Index-II pages; we measure the reader and fix what it misses.</li>
-  <li><b>Pilot with a few advocates <span class="pill grey who">Owner</span></b>Free trial accounts for 5–10 advocates on the live site; collect feedback and testimonials.</li>
+  <li><b>Pilot with a few advocates <span class="pill grey who">Owner</span></b>Free trial accounts for 5–10 advocates on the live site; collect feedback and testimonials. Choose the AI models first if translation and drafting are part of the pilot.</li>
   <li><b>Switch on live payments <span class="pill grey who">Owner</span> <span class="pill brand who">Engineering</span></b>After the lawyer's sign-off and Razorpay KYC: live keys, live plans, one real ₹1 test refund.</li>
 </ol>
 
