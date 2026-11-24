@@ -14,6 +14,7 @@ packages/db       Drizzle schema + migrations (PostgreSQL, pg_trgm)
 packages/shared   Zod schemas, enums, response types, IST date helpers, Marathi/English strings
 packages/storage  Encrypted file storage (envelope AES-256-GCM) over local disk or any S3-compatible bucket
 packages/ocr      OCR adapter: Tesseract Marathi + English, on our own servers
+packages/ai       AI models per task (drafting, translation) behind one interface; the provider is a setting
 packages/jobs     Queue definitions shared by API and worker (BullMQ on Valkey)
 scripts/          license gate
 ```
@@ -108,6 +109,31 @@ Everything runs on one server in Mumbai with Docker Compose (`deploy/compose.yml
   - Use Sentry's EU region (`de.sentry.io`), and keep `SENTRY_TRACES_SAMPLE_RATE=0` (errors only) unless performance traces are needed.
 - The worker is CPU-bound (about 1 s per page per core); set `OCR_CONCURRENCY` to the number of cores.
 - Cloud reads run on their own queue (`ocr-cloud`, limit `OCR_CLOUD_CONCURRENCY`, default 4), so a slow cloud call (Sarvam polls for up to 2 minutes) never holds a Tesseract slot. The local job saves Tesseract's reading first (route `local:cloud-queued`), so the advocate sees text at once; the cloud job then replaces it. Just before sending, the cloud job re-checks that the page is still the version it was queued for (version and image size, read again after fetching the image) and that the owner still consents, and it writes the audit row before sending. After its last retry, the local reading stays (route `local:cloud-failed`).
+
+## AI models
+
+AI features never import a provider's SDK. They ask `packages/ai` for their task's model and use the Vercel AI SDK (`generateText`, `streamText`, structured output) with it, so which company's model does which job is a setting, changed without touching code.
+
+- **One setting per task:** `AI_MODEL_DRAFTING`, `AI_MODEL_TRANSLATION`, and `AI_MODEL_DEFAULT` for any task not set. A model is written `<provider>:<model id>`, e.g. `anthropic:claude-sonnet-5-5`, `vertex:gemini-3.5-flash` or `sarvam:<model id>`. A task with no model is off.
+- **Fallbacks:** several models, comma-separated, are tried in order. If one fails (outage, rate limit), `ai.run(task, fn)` moves to the next and reports which model answered, for the audit log. Streaming uses the first model only.
+- **Providers:**
+  - `anthropic` (Claude)
+  - `openai` (GPT)
+  - `google` (Gemini API)
+  - `vertex` (Gemini on Google Cloud)
+  - `vertex-anthropic` (Claude on Google Cloud)
+  - `sarvam` (Sarvam's OpenAI-format chat API)
+  - `compatible`: any OpenAI-compatible endpoint, such as Azure OpenAI's v1 API, a self-hosted model or another Indian provider
+
+  Another provider is one case in `packages/ai/src/providers.ts`.
+- **Where data goes:** each model reports where it processes data:
+  - `india`: Sarvam, and Vertex in `asia-south1`/`asia-south2`
+  - `abroad`: the direct Anthropic, OpenAI and Gemini APIs
+  - `unknown`: a compatible endpoint, unless `AI_COMPATIBLE_IN_INDIA=true`
+
+  `AI_INDIA_ONLY=true` refuses any other model at start-up. Client documents are confidential, so features that send client text to a model must ask the advocate's consent and record each call in the audit log, as cloud OCR already does.
+- **Checked at start-up:** an unknown provider, a malformed model or a missing key stops the API with a plain message, and the API logs which model serves each task.
+- Tests use the AI SDK's mock models, so no feature test needs a key or the network.
 
 ## Plans and billing
 
