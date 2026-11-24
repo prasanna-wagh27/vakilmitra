@@ -1,6 +1,8 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   Advocate,
+  AiDataLocation,
+  AiStatus,
   BillingStatus,
   CaseAccessLevel,
   CaseDetail,
@@ -31,6 +33,17 @@ export const meQuery = queryOptions({
   staleTime: 5 * 60_000,
   retry: false,
 });
+
+/** Which AI tasks are set up on the server, and where their models process data. */
+export const aiQuery = queryOptions({
+  queryKey: ["ai"],
+  queryFn: () => api<{ ai: AiStatus }>("/ai").then((r) => r.ai),
+  staleTime: 30 * 60_000,
+});
+
+/** The one summary shown to the advocate: India only when every model processes data in India. */
+export const aiWhere = (models: AiStatus[keyof AiStatus]["models"]): AiDataLocation =>
+  models.every((m) => m.dataLocation === "india") ? "india" : models.some((m) => m.dataLocation === "abroad") ? "abroad" : "unknown";
 
 export const casesQuery = (q: string, status: CaseStatus | "") =>
   queryOptions({

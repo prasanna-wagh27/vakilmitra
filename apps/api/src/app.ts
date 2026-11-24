@@ -21,6 +21,7 @@ import { HttpError } from "./lib/http.js";
 import { accountRoutes } from "./routes/account.js";
 import { activityRoutes } from "./routes/activity.js";
 import { adminRoutes } from "./routes/admin.js";
+import { aiRoutes } from "./routes/ai.js";
 import { billingRoutes, razorpayWebhook } from "./routes/billing.js";
 import { caseRoutes } from "./routes/cases.js";
 import { clientRoutes } from "./routes/clients.js";
@@ -202,6 +203,7 @@ export async function buildApp() {
     });
     await authed.register(billingRoutes, { prefix: "/api/billing" });
     await authed.register(accountRoutes, { prefix: "/api/me" });
+    await authed.register(aiRoutes, { prefix: "/api/ai" });
     await authed.register(activityRoutes, { prefix: "/api/activity" });
     await authed.register(clientRoutes, { prefix: "/api/clients" });
     await authed.register(caseRoutes, { prefix: "/api/cases" });

@@ -134,10 +134,12 @@ AI features never import a provider's SDK. They ask `packages/ai` for their task
   `AI_INDIA_ONLY=true` refuses any other model at start-up. Client documents are confidential, so features that send client text to a model must ask the advocate's consent and record each call in the audit log, as cloud OCR already does.
 - **Checked at start-up:** an unknown provider, a malformed model or a missing key stops the API with a plain message, and the API logs which model serves each task.
 - Tests use the AI SDK's mock models, so no feature test needs a key or the network.
+- **Every AI feature** goes through `apps/api/src/lib/ai.ts`: the case owner must have turned on "Use AI for translation and drafting" in Settings (off by default, every change logged), the owner's plan must have AI requests left this month (`aiPerMonth`, juniors use the senior's), and each call is counted in `ai_usage` (model and tokens, never text) and named in the audit log with its model and data location.
+- **Translation:** each scanned page can be translated between Marathi and English (`POST /api/documents/:id/pages/:pageId/translate`). The answer is saved per page and language and shown again for free until the page is read again; the screen marks it as a machine translation to check against the scan.
 
 ## Plans and billing
 
-- Plans live in `packages/shared/src/billing.ts`: a 14-day free trial, then Solo, Pro and Chamber, monthly or yearly (yearly = 10 months' price). Every plan has every feature; plans differ in junior seats, pages scanned per month and storage.
+- Plans live in `packages/shared/src/billing.ts`: a 14-day free trial, then Solo, Pro and Chamber, monthly or yearly (yearly = 10 months' price). Every plan has every feature; plans differ in junior seats, pages scanned per month, storage and AI requests per month.
 - Payments use Razorpay. Monthly plans are Razorpay Subscriptions (UPI Autopay, cards); yearly plans are one-off orders, because RBI rules need extra authentication for each auto-debit above ₹15,000.
 - Setup: put the keys in `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`, run `pnpm --filter @vakilmitra/api billing:plans` once to create the monthly plans and copy the printed ids into env, and add a webhook to `<API_URL>/api/webhooks/razorpay` with secret `RAZORPAY_WEBHOOK_SECRET` (events listed in `apps/api/.env.example`). Use `rzp_test_` keys until going live.
 - After a trial or paid period ends there are 7 days of grace, then the account turns read-only: everything stays readable and exportable, and nothing is ever deleted for non-payment. Juniors on a senior's paid plan are covered by it.

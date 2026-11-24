@@ -1,6 +1,7 @@
 import { accessLogs, advocates, and, eq } from "@vakilmitra/db";
 import { updateProfileInput } from "@vakilmitra/shared";
 import { fromNodeHeaders } from "better-auth/node";
+import type { FastifyRequest } from "fastify";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { auth } from "../auth.js";
@@ -17,8 +18,14 @@ const profile = {
   locale: true,
   cloudOcrConsent: true,
   cloudOcrConsentAt: true,
+  aiConsent: true,
+  aiConsentAt: true,
   createdAt: true,
 } as const;
+
+type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+const logConsent = (tx: Tx, req: FastifyRequest, action: string) =>
+  tx.insert(accessLogs).values({ advocateId: req.advocateId, action, entityType: "advocate", entityId: req.advocateId, ip: req.ip });
 
 export const accountRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", async (req) => {
@@ -28,25 +35,26 @@ export const accountRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.patch("/", { schema: { body: updateProfileInput } }, async (req) => {
-    const { cloudOcrConsent, ...rest } = req.body;
+    const { cloudOcrConsent, aiConsent, ...rest } = req.body;
     await db.transaction(async (tx) => {
       if (Object.keys(rest).length) await tx.update(advocates).set(rest).where(eq(advocates.id, req.advocateId));
-      if (cloudOcrConsent === undefined) return;
       // Only a real change moves the consent date and is logged: repeating "on" keeps the date consent was first given.
-      const changed = await tx
-        .update(advocates)
-        .set({ cloudOcrConsent, cloudOcrConsentAt: cloudOcrConsent ? new Date() : null })
-        .where(and(eq(advocates.id, req.advocateId), eq(advocates.cloudOcrConsent, !cloudOcrConsent)))
-        .returning({ id: advocates.id });
       // Same transaction: consent never changes without its audit row (DPDP).
-      if (changed.length) {
-        await tx.insert(accessLogs).values({
-          advocateId: req.advocateId,
-          action: `consent.cloud_ocr.${cloudOcrConsent ? "on" : "off"}`,
-          entityType: "advocate",
-          entityId: req.advocateId,
-          ip: req.ip,
-        });
+      if (cloudOcrConsent !== undefined) {
+        const changed = await tx
+          .update(advocates)
+          .set({ cloudOcrConsent, cloudOcrConsentAt: cloudOcrConsent ? new Date() : null })
+          .where(and(eq(advocates.id, req.advocateId), eq(advocates.cloudOcrConsent, !cloudOcrConsent)))
+          .returning({ id: advocates.id });
+        if (changed.length) await logConsent(tx, req, `consent.cloud_ocr.${cloudOcrConsent ? "on" : "off"}`);
+      }
+      if (aiConsent !== undefined) {
+        const changed = await tx
+          .update(advocates)
+          .set({ aiConsent, aiConsentAt: aiConsent ? new Date() : null })
+          .where(and(eq(advocates.id, req.advocateId), eq(advocates.aiConsent, !aiConsent)))
+          .returning({ id: advocates.id });
+        if (changed.length) await logConsent(tx, req, `consent.ai.${aiConsent ? "on" : "off"}`);
       }
     });
     const advocate = await db.query.advocates.findFirst({ where: eq(advocates.id, req.advocateId), columns: profile });

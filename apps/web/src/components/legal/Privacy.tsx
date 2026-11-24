@@ -37,7 +37,7 @@ function En() {
         <li>
           Account: name, email address, password (stored only as a secure hash), and optionally phone and Bar Council enrolment number.
         </li>
-        <li>Preferences: language and whether you allow cloud OCR.</li>
+        <li>Preferences: language, and whether you allow cloud OCR and AI.</li>
         <li>
           Billing: plan, payment dates and amounts, billing name{GST_REGISTERED ? ", GSTIN" : ""} and state, and the receipts and invoices
           we issue. Card, UPI and bank details go directly to Razorpay and never reach us.
@@ -88,6 +88,13 @@ function En() {
           cloud OCR" in Settings. It is off by default. When on, only pages our own reader finds hard to read are sent, each one is recorded
           in your access log, and you can turn it off at any time.
         </li>
+        <li>
+          an AI model provider (such as Google Cloud Vertex AI, Sarvam AI, Anthropic or OpenAI), <strong>only if you turn on</strong> "Use
+          AI for translation and drafting" in Settings. It is off by default. When on, text is sent only when you ask for a translation or a
+          draft, and only that page's text or your drafting notes. Settings shows whether the provider processes it in India or abroad. We
+          use only business AI services whose terms do not let them train their models on your text. Each request is recorded in your access
+          log, and you can turn it off at any time.
+        </li>
       </ul>
       <p>We may also disclose data where Indian law requires it, for example on a lawful order of a court or authority.</p>
 
@@ -117,7 +124,7 @@ function En() {
         <li>get a summary of your personal data and how it is processed;</li>
         <li>correct or update it (most of it directly in Settings);</li>
         <li>have it erased: Settings, "Delete account", removes everything except the records the law requires us to keep;</li>
-        <li>withdraw a consent you gave (such as cloud OCR) as easily as you gave it;</li>
+        <li>withdraw a consent you gave (such as cloud OCR or AI) as easily as you gave it;</li>
         <li>nominate a person to exercise these rights if you die or become unable to;</li>
         <li>complain to us, and then to the Data Protection Board of India.</li>
       </ul>
@@ -170,7 +177,7 @@ function Mr() {
       <h2>२. आम्ही कोणती माहिती घेतो</h2>
       <ul>
         <li>खाते: नाव, ईमेल पत्ता, पासवर्ड (फक्त सुरक्षित हॅश स्वरूपात साठवला जातो), आणि ऐच्छिकपणे फोन व बार कौन्सिल नोंदणी क्रमांक.</li>
-        <li>पसंती: भाषा, आणि क्लाउड ओसीआर वापरण्याची परवानगी दिली आहे का.</li>
+        <li>पसंती: भाषा, आणि क्लाउड ओसीआर व एआय वापरण्याची परवानगी दिली आहे का.</li>
         <li>
           बिलिंग: योजना, पेमेंटच्या तारखा व रकमा, बिलावरील नाव{GST_REGISTERED ? ", जीएसटीआयएन" : ""} व राज्य, आणि आम्ही दिलेल्या पावत्या व बीजके. कार्ड,
           यूपीआय आणि बँकेचे तपशील थेट रेझरपेकडे जातात; ते आमच्यापर्यंत कधीही पोहोचत नाहीत.
@@ -220,6 +227,12 @@ function Mr() {
           <strong>चालू केल्यास</strong>. हे मूलतः बंद असते. चालू केल्यावर, आमच्या स्वतःच्या वाचकाला कठीण वाटलेलीच पाने पाठवली जातात, प्रत्येक पान तुमच्या प्रवेश
           नोंदीत नोंदवले जाते, आणि तुम्ही ते कधीही बंद करू शकता.
         </li>
+        <li>
+          एआय मॉडेल सेवा (उदा. गूगल क्लाउड व्हर्टेक्स एआय, सर्वम एआय, अँथ्रॉपिक किंवा ओपनएआय), <strong>फक्त तुम्ही</strong> सेटिंग्जमध्ये "भाषांतर व मसुद्यासाठी
+          एआय वापरा" <strong>चालू केल्यास</strong>. हे मूलतः बंद असते. चालू केल्यावर, तुम्ही भाषांतर किंवा मसुदा मागितला तरच, त्या पानाचा मजकूर किंवा तुमच्या
+          मसुद्याच्या टिपा पाठवल्या जातात. सेवा भारतात की परदेशात प्रक्रिया करते हे सेटिंग्जमध्ये दिसते. ज्या व्यावसायिक एआय सेवांच्या अटी तुमच्या मजकुरावर त्यांचे
+          मॉडेल प्रशिक्षित करू देत नाहीत, त्याच आम्ही वापरतो. प्रत्येक विनंती तुमच्या प्रवेश नोंदीत नोंदवली जाते, आणि तुम्ही ते कधीही बंद करू शकता.
+        </li>
       </ul>
       <p>भारतीय कायद्याने आवश्यक असल्यास, उदा. न्यायालय किंवा प्राधिकरणाच्या कायदेशीर आदेशावर, आम्ही माहिती उघड करू शकतो.</p>
 
@@ -246,7 +259,7 @@ function Mr() {
         <li>तुमच्या वैयक्तिक माहितीचा आणि ती कशी हाताळली जाते याचा सारांश मागू शकता;</li>
         <li>ती दुरुस्त किंवा अद्ययावत करू शकता (बहुतेक थेट सेटिंग्जमध्ये);</li>
         <li>ती हटवू शकता: सेटिंग्जमधील "खाते हटवा" कायद्याने ठेवाव्या लागणाऱ्या नोंदी सोडून सर्व काही काढून टाकते;</li>
-        <li>दिलेली संमती (उदा. क्लाउड ओसीआर) दिली तितक्याच सहजपणे मागे घेऊ शकता;</li>
+        <li>दिलेली संमती (उदा. क्लाउड ओसीआर किंवा एआय) दिली तितक्याच सहजपणे मागे घेऊ शकता;</li>
         <li>तुमचा मृत्यू झाल्यास किंवा तुम्ही असमर्थ झाल्यास हे हक्क वापरण्यासाठी एखाद्या व्यक्तीला नामनिर्देशित करू शकता;</li>
         <li>आमच्याकडे, आणि त्यानंतर भारतीय डेटा संरक्षण मंडळाकडे तक्रार करू शकता.</li>
       </ul>

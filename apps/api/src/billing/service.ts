@@ -5,6 +5,7 @@
 import {
   accessLogs,
   advocates,
+  aiUsage,
   and,
   caseAccess,
   cases,
@@ -14,6 +15,7 @@ import {
   type Db,
   documents,
   eq,
+  gte,
   inArray,
   invoices,
   pages,
@@ -123,7 +125,11 @@ export async function usageOf(ownerId: string, now = new Date()): Promise<Billin
     .from(caseAccess)
     .innerJoin(cases, eq(cases.id, caseAccess.caseId))
     .where(eq(cases.advocateId, ownerId));
-  return { pagesThisMonth: p?.month ?? 0, storageBytes: Number(p?.storage ?? 0), juniors: j?.n ?? 0 };
+  const [a] = await db
+    .select({ n: count() })
+    .from(aiUsage)
+    .where(and(eq(aiUsage.ownerId, ownerId), gte(aiUsage.createdAt, istMonthStart(now))));
+  return { pagesThisMonth: p?.month ?? 0, storageBytes: Number(p?.storage ?? 0), juniors: j?.n ?? 0, aiThisMonth: a?.n ?? 0 };
 }
 
 const limitError = (message: string, details: Record<string, unknown>) => new HttpError(402, "plan_limit", message, details);
@@ -141,6 +147,19 @@ export async function assertPageQuota(ownerId: string, addBytes: number) {
   }
   if (u.storageBytes + addBytes > limits.storageBytes) {
     throw limitError("Storage for the plan is full. Upgrade the plan for more space.", { limit: "storageBytes", max: limits.storageBytes });
+  }
+}
+
+/** Called before an AI request charged to the account owned by `ownerId`. */
+export async function assertAiQuota(ownerId: string) {
+  const sub = await ensureSubscription(ownerId);
+  const { limits } = PLANS[sub.plan];
+  const u = await usageOf(ownerId);
+  if (u.aiThisMonth + 1 > limits.aiPerMonth) {
+    throw limitError("This month's AI limit for the plan is used up. Upgrade the plan for more.", {
+      limit: "aiPerMonth",
+      max: limits.aiPerMonth,
+    });
   }
 }
 

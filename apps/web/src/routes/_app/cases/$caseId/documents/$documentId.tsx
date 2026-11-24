@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Empty, ErrorBox, Field, FormActions, Loading, PageHeader } from "@/components/common";
 import { FactsPanel } from "@/components/FactsPanel";
+import { PageTranslation, TranslateAll } from "@/components/PageTranslation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Input, NativeSelect } from "@/components/ui/input";
@@ -42,7 +43,19 @@ export function OcrBadge({ status }: { status: OcrStatus }) {
   );
 }
 
-function PageCard({ documentId, page, outline, canEdit }: { documentId: string; page: PageDetail; outline: boolean; canEdit: boolean }) {
+function PageCard({
+  documentId,
+  page,
+  outline,
+  canEdit,
+  isOwner,
+}: {
+  documentId: string;
+  page: PageDetail;
+  outline: boolean;
+  canEdit: boolean;
+  isOwner: boolean;
+}) {
   const { t } = useI18n();
   const retry = useApiMutation(() => api(`/documents/${documentId}/pages/${page.id}/ocr`, { method: "POST" }));
   const remove = useApiMutation(() => api(`/documents/${documentId}/pages/${page.id}`, { method: "DELETE" }));
@@ -119,6 +132,7 @@ function PageCard({ documentId, page, outline, canEdit }: { documentId: string; 
           <p className="mt-2 text-sm text-muted-foreground">{t("doc.noText")}</p>
         )}
       </details>
+      <PageTranslation documentId={documentId} page={page} canEdit={canEdit} isOwner={isOwner} />
     </li>
   );
 }
@@ -203,6 +217,7 @@ function DocumentPage() {
   if (isPending) return <Loading />;
   if (error || !doc) return <ErrorBox error={error} onRetry={() => refetch()} />;
   const canEdit = caseData.data ? caseData.data.access !== "VIEWER" : false;
+  const isOwner = caseData.data?.access === "OWNER";
 
   return (
     <>
@@ -233,6 +248,7 @@ function DocumentPage() {
       </div>
 
       <FactsPanel doc={doc} caseId={caseId} canEdit={canEdit} />
+      <TranslateAll doc={doc} canEdit={canEdit} isOwner={isOwner} />
 
       {doc.pages.length > 0 && (
         <label className="mt-8 mb-3 flex min-h-11 items-start gap-2 text-sm">
@@ -249,7 +265,7 @@ function DocumentPage() {
       ) : (
         <ol className="space-y-4">
           {doc.pages.map((p) => (
-            <PageCard key={p.id} documentId={documentId} page={p} outline={outline} canEdit={canEdit} />
+            <PageCard key={p.id} documentId={documentId} page={p} outline={outline} canEdit={canEdit} isOwner={isOwner} />
           ))}
         </ol>
       )}

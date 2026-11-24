@@ -13,6 +13,8 @@ import type { LanguageModel } from "ai";
 import { type AiConfig, type AiTask, type DataLocation, dataLocation, type ModelSpec, specId } from "./config.js";
 import { createModel } from "./providers.js";
 
+// Features call the SDK through this package, so every app uses the same SDK version.
+export { generateText, type LanguageModel, type LanguageModelUsage, streamText } from "ai";
 export * from "./config.js";
 export { createModel } from "./providers.js";
 

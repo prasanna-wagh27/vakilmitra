@@ -35,6 +35,13 @@ const MR_BY_MESSAGE: Record<string, string> = {
   "All junior seats on the plan are in use.": "योजनेतील सर्व ज्युनियर जागा भरल्या आहेत.",
   "Could not load the payment window. Check the connection and try again.": "पेमेंटची खिडकी उघडता आली नाही. इंटरनेट जोडणी तपासून पुन्हा प्रयत्न करा.",
   "Payment window unavailable": "पेमेंटची खिडकी उपलब्ध नाही.",
+  "Allow AI in Settings first": "आधी सेटिंग्जमध्ये एआय वापरास परवानगी द्या.",
+  "The case owner has not allowed AI for their cases": "प्रकरणाच्या मालकाने एआय वापरास परवानगी दिलेली नाही.",
+  "This month's AI limit for the plan is used up. Upgrade the plan for more.": "या महिन्याची एआय मर्यादा संपली. अधिकसाठी योजना वाढवा.",
+  "This page has no text to translate yet": "या पानावर भाषांतरासाठी अजून मजकूर नाही.",
+  "This page has too much text to translate at once": "या पानावर एकावेळी भाषांतरासाठी खूप जास्त मजकूर आहे.",
+  "The AI service did not answer. Try again in a minute.": "एआय सेवेकडून उत्तर आले नाही. एका मिनिटाने पुन्हा प्रयत्न करा.",
+  "AI is not set up yet": "एआय सेवा अजून सुरू केलेली नाही.",
 };
 
 const MR_BY_CODE: Record<string, string> = {
@@ -44,6 +51,9 @@ const MR_BY_CODE: Record<string, string> = {
   bad_value: "मूल्य अपेक्षित स्वरूपात नाही.",
   invalid_input: "काही माहिती योग्य नाही. फॉर्म तपासा.",
   conflict: "हे आधीच अस्तित्वात आहे.",
+  ai_off: "एआय सेवा अजून सुरू केलेली नाही.",
+  ai_failed: "एआय सेवेकडून उत्तर आले नाही. एका मिनिटाने पुन्हा प्रयत्न करा.",
+  ai_consent_required: "आधी सेटिंग्जमध्ये एआय वापरास परवानगी द्या.",
   // Sign-in (Better Auth codes)
   INVALID_EMAIL_OR_PASSWORD: "ईमेल किंवा पासवर्ड चुकीचा आहे.",
   INVALID_PASSWORD: "पासवर्ड चुकीचा आहे.",
