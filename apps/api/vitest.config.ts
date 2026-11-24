@@ -18,6 +18,9 @@ export default defineConfig({
       RAZORPAY_PLAN_SOLO: "plan_solo",
       RAZORPAY_PLAN_PRO: "plan_pro",
       RAZORPAY_PLAN_CHAMBER: "plan_chamber",
+      // Used only by billing-gst.test.ts, which turns GST_REGISTERED on; receipts never carry it.
+      BILLING_SUPPLIER_GSTIN: "27AAAAA0000A1Z5",
+      BILLING_SAC: "998314",
     },
   },
 });

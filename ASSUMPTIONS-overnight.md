@@ -26,8 +26,8 @@
 ## Land-file analyzer extraction (feat/land-extraction)
 
 15. **Rules, not AI.** Extraction reads labelled fields ("गाव :", "गट क्रमांक :", "भोगवटादाराचे नाव :" …) from the OCR text. No language model is involved, in line with "flags come from rules" and with no API keys being available.
-16. **Synthetic eval only.** The 24-record eval set is synthetic (rendered pages, read by real Tesseract). It scores 100%, but that is not accuracy on real 7/12s, which are tables, often handwritten or faded. **Real labelled pages from you are needed** before switching this on for clients.
-17. **Table-layout 7/12s are not read yet.** Only "label : value" layouts are (as on the digital 7/12 header and on Ferfar and Index-II printouts). Advocates can add missing details by hand.
+16. **Synthetic eval only.** The 36-record eval set is synthetic (rendered pages, read by real Tesseract). It scores 100%, but that is not accuracy on real 7/12s, which are tables, often handwritten or faded. **Real labelled pages from you are needed** before switching this on for clients.
+17. **Table-layout 7/12s are read from their column headings** (the owners table, the survey / tenure box, the tenant column and the इतर हक्क box). Tested on synthetic table pages only; real extracts may use headings or layouts not yet in the list, and advocates add any missing details by hand. Where a table lists several owners' shares and no total, no area is taken; where it lists several ferfar numbers, the highest is taken as the latest.
 18. **A 7/12's date.** A 7/12 extract usually carries only a year. When no date is read, the "record date" box defaults to 1 January of the document's year, and the advocate is asked to correct it.
 19. **"Unclear" means below 80% OCR confidence** for the weakest word in a fact.
 20. **No deed type, no guess.** An Index-II whose deed type is not stated is added with no type, rather than assumed to be a sale.

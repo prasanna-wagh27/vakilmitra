@@ -71,15 +71,19 @@ export function verifyEmailMail(user: { email: string; name: string; locale?: un
 
 export function receiptMail(
   user: { email: string; name: string; locale?: unknown },
-  inv: { number: string; planLabel: string; total: string; periodEnd: string; url: string },
+  inv: { number: string; planLabel: string; total: string; periodEnd: string; url: string; taxInvoice: boolean },
 ): Mail {
   const l = loc(user.locale);
+  const tax = inv.taxInvoice;
   return {
     to: user.email,
-    subject: l === "mr" ? `वकीलमित्र: पैसे मिळाले, पावती ${inv.number}` : `VakilMitra: payment received, invoice ${inv.number}`,
+    subject:
+      l === "mr"
+        ? `वकीलमित्र: पैसे मिळाले, ${tax ? "कर बीजक" : "पावती"} ${inv.number}`
+        : `VakilMitra: payment received, ${tax ? "invoice" : "receipt"} ${inv.number}`,
     text:
       l === "mr"
-        ? `नमस्कार ${user.name},\n\n${inv.planLabel} योजनेसाठी ${inv.total} (GST सह) मिळाले. योजना ${inv.periodEnd} पर्यंत चालू आहे.\n\nGST पावती पाहा किंवा प्रिंट करा:\n${inv.url}\n\n${sign.mr}`
-        : `Hello ${user.name},\n\nWe received ${inv.total} (including GST) for the ${inv.planLabel} plan. Your plan runs until ${inv.periodEnd}.\n\nView or print the GST invoice:\n${inv.url}\n\n${sign.en}`,
+        ? `नमस्कार ${user.name},\n\n${inv.planLabel} योजनेसाठी ${inv.total}${tax ? " (जीएसटीसह)" : ""} मिळाले. योजना ${inv.periodEnd} पर्यंत चालू आहे.\n\n${tax ? "कर बीजक" : "पावती"} पाहा किंवा प्रिंट करा:\n${inv.url}\n\n${sign.mr}`
+        : `Hello ${user.name},\n\nWe received ${inv.total}${tax ? " (including GST)" : ""} for the ${inv.planLabel} plan. Your plan runs until ${inv.periodEnd}.\n\nView or print the ${tax ? "tax invoice" : "receipt"}:\n${inv.url}\n\n${sign.en}`,
   };
 }

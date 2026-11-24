@@ -1,5 +1,6 @@
 node_modules
 dist
+dist-ssr
 .turbo
 .env
 .env.*
@@ -12,3 +13,4 @@ dist
 /eval-data
 packages/ocr/eval/out
 shots/
+dump.rdb

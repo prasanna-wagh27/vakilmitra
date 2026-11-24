@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { GST_REGISTERED } from "@vakilmitra/shared";
 import { fmtNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { LEGAL } from "@/lib/legal";
@@ -36,10 +37,10 @@ function En() {
         <li>
           Account: name, email address, password (stored only as a secure hash), and optionally phone and Bar Council enrolment number.
         </li>
-        <li>Preferences: language and whether you allow cloud OCR.</li>
+        <li>Preferences: language, and whether you allow cloud OCR and AI.</li>
         <li>
-          Billing: plan, payment dates and amounts, billing name, GSTIN and state, and the invoices we issue. Card, UPI and bank details go
-          directly to Razorpay and never reach us.
+          Billing: plan, payment dates and amounts, billing name{GST_REGISTERED ? ", GSTIN" : ""} and state, and the receipts and invoices
+          we issue. Card, UPI and bank details go directly to Razorpay and never reach us.
         </li>
         <li>
           Your files: what you enter or scan, as described above. Photos are re-encoded on upload, which removes location and camera
@@ -57,7 +58,7 @@ function En() {
       <ul>
         <li>to give you the service you signed up for, including reading your scanned pages and building reports;</li>
         <li>to sign you in, keep your account secure and prevent misuse;</li>
-        <li>to take payments, issue GST invoices and keep the accounts that tax law requires;</li>
+        <li>to take payments, issue receipts and invoices, and keep the accounts that tax law requires;</li>
         <li>to send emails about your account: password resets, address confirmation, payment receipts and important service notices.</li>
       </ul>
       <p>
@@ -79,9 +80,20 @@ function En() {
         <li>Razorpay, to take payments;</li>
         <li>an email delivery provider, to send account emails;</li>
         <li>
+          an error-reporting service (Sentry), which receives technical details when something breaks, such as the page and the error
+          message. Files, case details, names and email addresses are removed before anything is sent;
+        </li>
+        <li>
           cloud OCR (Sarvam AI, in India; Google Cloud Vertex AI, Mumbai region), <strong>only if you turn on</strong> "Read hard pages with
           cloud OCR" in Settings. It is off by default. When on, only pages our own reader finds hard to read are sent, each one is recorded
           in your access log, and you can turn it off at any time.
+        </li>
+        <li>
+          an AI model provider (such as Google Cloud Vertex AI, Sarvam AI, Anthropic or OpenAI), <strong>only if you turn on</strong> "Use
+          AI for translation and drafting" in Settings. It is off by default. When on, text is sent only when you ask for a translation or a
+          draft, and only that page's text or your drafting notes. Settings shows whether the provider processes it in India or abroad. We
+          use only business AI services whose terms do not let them train their models on your text. Each request is recorded in your access
+          log, and you can turn it off at any time.
         </li>
       </ul>
       <p>We may also disclose data where Indian law requires it, for example on a lawful order of a court or authority.</p>
@@ -103,7 +115,7 @@ function En() {
           We keep an anonymous record that a deletion happened.
         </li>
         <li>The activity log: for 1 year from each entry, then deleted automatically.</li>
-        <li>Invoices and payment records: for 8 years, as required by tax law, even after the account is deleted.</li>
+        <li>Receipts, invoices and payment records: for 8 years, as required by tax law, even after the account is deleted.</li>
       </ul>
 
       <h2>8. Your rights</h2>
@@ -112,7 +124,7 @@ function En() {
         <li>get a summary of your personal data and how it is processed;</li>
         <li>correct or update it (most of it directly in Settings);</li>
         <li>have it erased: Settings, "Delete account", removes everything except the records the law requires us to keep;</li>
-        <li>withdraw a consent you gave (such as cloud OCR) as easily as you gave it;</li>
+        <li>withdraw a consent you gave (such as cloud OCR or AI) as easily as you gave it;</li>
         <li>nominate a person to exercise these rights if you die or become unable to;</li>
         <li>complain to us, and then to the Data Protection Board of India.</li>
       </ul>
@@ -165,10 +177,10 @@ function Mr() {
       <h2>२. आम्ही कोणती माहिती घेतो</h2>
       <ul>
         <li>खाते: नाव, ईमेल पत्ता, पासवर्ड (फक्त सुरक्षित हॅश स्वरूपात साठवला जातो), आणि ऐच्छिकपणे फोन व बार कौन्सिल नोंदणी क्रमांक.</li>
-        <li>पसंती: भाषा, आणि क्लाउड ओसीआर वापरण्याची परवानगी दिली आहे का.</li>
+        <li>पसंती: भाषा, आणि क्लाउड ओसीआर व एआय वापरण्याची परवानगी दिली आहे का.</li>
         <li>
-          बिलिंग: योजना, पेमेंटच्या तारखा व रकमा, बिलावरील नाव, जीएसटीआयएन व राज्य, आणि आम्ही दिलेली बीजके. कार्ड, यूपीआय आणि बँकेचे तपशील थेट रेझरपेकडे
-          जातात; ते आमच्यापर्यंत कधीही पोहोचत नाहीत.
+          बिलिंग: योजना, पेमेंटच्या तारखा व रकमा, बिलावरील नाव{GST_REGISTERED ? ", जीएसटीआयएन" : ""} व राज्य, आणि आम्ही दिलेल्या पावत्या व बीजके. कार्ड,
+          यूपीआय आणि बँकेचे तपशील थेट रेझरपेकडे जातात; ते आमच्यापर्यंत कधीही पोहोचत नाहीत.
         </li>
         <li>
           तुमच्या फाइल्स: वर सांगितल्याप्रमाणे तुम्ही भरलेली किंवा स्कॅन केलेली माहिती. अपलोड करताना फोटो पुन्हा तयार केले जातात, त्यामुळे त्यातील ठिकाण आणि कॅमेऱ्याचे
@@ -185,7 +197,7 @@ function Mr() {
       <ul>
         <li>तुम्ही घेतलेली सेवा देण्यासाठी, यात तुमची स्कॅन केलेली पाने वाचणे आणि अहवाल तयार करणे समाविष्ट;</li>
         <li>तुम्हाला लॉग इन करू देण्यासाठी, खाते सुरक्षित ठेवण्यासाठी आणि गैरवापर टाळण्यासाठी;</li>
-        <li>पेमेंट घेण्यासाठी, जीएसटी बीजके देण्यासाठी आणि कर कायद्याने आवश्यक हिशोब ठेवण्यासाठी;</li>
+        <li>पेमेंट घेण्यासाठी, पावत्या व बीजके देण्यासाठी आणि कर कायद्याने आवश्यक हिशोब ठेवण्यासाठी;</li>
         <li>खात्याबद्दल ईमेल पाठवण्यासाठी: पासवर्ड बदलणे, ईमेल पडताळणी, पेमेंटच्या पावत्या आणि सेवेबद्दलच्या महत्त्वाच्या सूचना.</li>
       </ul>
       <p>
@@ -207,9 +219,19 @@ function Mr() {
         <li>पेमेंट घेण्यासाठी रेझरपे;</li>
         <li>खात्याचे ईमेल पाठवण्यासाठी ईमेल वितरण सेवा;</li>
         <li>
+          त्रुटी नोंदवणारी सेवा (सेंट्री): काही बिघडल्यास तांत्रिक तपशील, जसे की पान आणि त्रुटीचा संदेश, तिला मिळतात. फाइल, प्रकरणाचे तपशील, नावे आणि ईमेल पत्ते
+          पाठवण्यापूर्वी काढून टाकले जातात;
+        </li>
+        <li>
           क्लाउड ओसीआर (सर्वम एआय, भारतात; गूगल क्लाउड व्हर्टेक्स एआय, मुंबई विभाग), <strong>फक्त तुम्ही</strong> सेटिंग्जमध्ये "कठीण पाने क्लाउड ओसीआर ने वाचा"{" "}
           <strong>चालू केल्यास</strong>. हे मूलतः बंद असते. चालू केल्यावर, आमच्या स्वतःच्या वाचकाला कठीण वाटलेलीच पाने पाठवली जातात, प्रत्येक पान तुमच्या प्रवेश
           नोंदीत नोंदवले जाते, आणि तुम्ही ते कधीही बंद करू शकता.
+        </li>
+        <li>
+          एआय मॉडेल सेवा (उदा. गूगल क्लाउड व्हर्टेक्स एआय, सर्वम एआय, अँथ्रॉपिक किंवा ओपनएआय), <strong>फक्त तुम्ही</strong> सेटिंग्जमध्ये "भाषांतर व मसुद्यासाठी
+          एआय वापरा" <strong>चालू केल्यास</strong>. हे मूलतः बंद असते. चालू केल्यावर, तुम्ही भाषांतर किंवा मसुदा मागितला तरच, त्या पानाचा मजकूर किंवा तुमच्या
+          मसुद्याच्या टिपा पाठवल्या जातात. सेवा भारतात की परदेशात प्रक्रिया करते हे सेटिंग्जमध्ये दिसते. ज्या व्यावसायिक एआय सेवांच्या अटी तुमच्या मजकुरावर त्यांचे
+          मॉडेल प्रशिक्षित करू देत नाहीत, त्याच आम्ही वापरतो. प्रत्येक विनंती तुमच्या प्रवेश नोंदीत नोंदवली जाते, आणि तुम्ही ते कधीही बंद करू शकता.
         </li>
       </ul>
       <p>भारतीय कायद्याने आवश्यक असल्यास, उदा. न्यायालय किंवा प्राधिकरणाच्या कायदेशीर आदेशावर, आम्ही माहिती उघड करू शकतो.</p>
@@ -228,7 +250,7 @@ function Mr() {
           नाव नसलेली नोंद आम्ही ठेवतो.
         </li>
         <li>हालचालींची नोंद: प्रत्येक नोंद {n(1)} वर्ष ठेवली जाते, त्यानंतर आपोआप हटवली जाते.</li>
-        <li>बीजके आणि पेमेंटच्या नोंदी: कर कायद्यानुसार {n(8)} वर्षे, खाते हटवल्यानंतरही.</li>
+        <li>पावत्या, बीजके आणि पेमेंटच्या नोंदी: कर कायद्यानुसार {n(8)} वर्षे, खाते हटवल्यानंतरही.</li>
       </ul>
 
       <h2>८. तुमचे हक्क</h2>
@@ -237,7 +259,7 @@ function Mr() {
         <li>तुमच्या वैयक्तिक माहितीचा आणि ती कशी हाताळली जाते याचा सारांश मागू शकता;</li>
         <li>ती दुरुस्त किंवा अद्ययावत करू शकता (बहुतेक थेट सेटिंग्जमध्ये);</li>
         <li>ती हटवू शकता: सेटिंग्जमधील "खाते हटवा" कायद्याने ठेवाव्या लागणाऱ्या नोंदी सोडून सर्व काही काढून टाकते;</li>
-        <li>दिलेली संमती (उदा. क्लाउड ओसीआर) दिली तितक्याच सहजपणे मागे घेऊ शकता;</li>
+        <li>दिलेली संमती (उदा. क्लाउड ओसीआर किंवा एआय) दिली तितक्याच सहजपणे मागे घेऊ शकता;</li>
         <li>तुमचा मृत्यू झाल्यास किंवा तुम्ही असमर्थ झाल्यास हे हक्क वापरण्यासाठी एखाद्या व्यक्तीला नामनिर्देशित करू शकता;</li>
         <li>आमच्याकडे, आणि त्यानंतर भारतीय डेटा संरक्षण मंडळाकडे तक्रार करू शकता.</li>
       </ul>

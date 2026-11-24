@@ -99,7 +99,7 @@ describe("password reset", () => {
 });
 
 describe("payment receipts", () => {
-  it("emails one receipt per payment, with a link to the GST invoice", async () => {
+  it("emails one receipt per payment, with a link to it", async () => {
     await db.update(advocates).set({ locale: "en" }).where(eq(advocates.id, advocateId));
     const charge = {
       advocateId,
@@ -112,8 +112,9 @@ describe("payment receipts", () => {
     await recordCharge(charge); // the webhook reporting the same payment
     const receipts = mailTo(email).filter((m) => /payment received/.test(m.subject));
     expect(receipts).toHaveLength(1);
-    expect(receipts[0]!.subject).toMatch(/invoice VM\/\d{4}-\d{2}\/\d{6}/);
-    expect(receipts[0]!.text).toMatch(/₹1,060\.82 \(including GST\) for the Pro plan/);
+    expect(receipts[0]!.subject).toMatch(/receipt VM\/\d{4}-\d{2}\/\d{6}/);
+    expect(receipts[0]!.text).toMatch(/₹899\.00 for the Pro plan/);
+    expect(receipts[0]!.text).not.toMatch(/GST/);
     expect(linkIn(receipts[0]!).href).toMatch(new RegExp(`^${ORIGIN}/billing/invoices/`));
   });
 

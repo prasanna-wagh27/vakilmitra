@@ -1,7 +1,7 @@
 /**
  * Plans, prices and limits. Every plan has the full product (diary, cases, fees, 7/12 and
  * Ferfar analysis, title report, Word export); plans differ only in seats, scanning and storage.
- * Prices are in paise and exclude GST.
+ * Prices are in paise and exclude GST (GST is added only while GST_REGISTERED is true).
  */
 import { z } from "zod";
 
@@ -18,27 +18,43 @@ export interface PlanLimits {
   /** New scanned or uploaded pages per calendar month (IST). */
   pagesPerMonth: number;
   storageBytes: number;
+  /** AI requests (a page translation, a draft) per calendar month (IST). A saved translation shown again is free. */
+  aiPerMonth: number;
 }
 
 const GB = 1024 ** 3;
 
 export const PLANS: Record<PlanId, { limits: PlanLimits; price: Record<BillingInterval, number> | null }> = {
-  TRIAL: { limits: { juniors: 1, pagesPerMonth: 100, storageBytes: 2 * GB }, price: null },
-  SOLO: { limits: { juniors: 0, pagesPerMonth: 300, storageBytes: 5 * GB }, price: { MONTHLY: 39_900, YEARLY: 399_900 } },
-  PRO: { limits: { juniors: 1, pagesPerMonth: 1_500, storageBytes: 25 * GB }, price: { MONTHLY: 89_900, YEARLY: 899_900 } },
-  CHAMBER: { limits: { juniors: 4, pagesPerMonth: 5_000, storageBytes: 100 * GB }, price: { MONTHLY: 249_900, YEARLY: 2_499_900 } },
+  TRIAL: { limits: { juniors: 1, pagesPerMonth: 100, storageBytes: 2 * GB, aiPerMonth: 30 }, price: null },
+  SOLO: { limits: { juniors: 0, pagesPerMonth: 300, storageBytes: 5 * GB, aiPerMonth: 200 }, price: { MONTHLY: 39_900, YEARLY: 399_900 } },
+  PRO: {
+    limits: { juniors: 1, pagesPerMonth: 1_500, storageBytes: 25 * GB, aiPerMonth: 800 },
+    price: { MONTHLY: 89_900, YEARLY: 899_900 },
+  },
+  CHAMBER: {
+    limits: { juniors: 4, pagesPerMonth: 5_000, storageBytes: 100 * GB, aiPerMonth: 2_500 },
+    price: { MONTHLY: 249_900, YEARLY: 2_499_900 },
+  },
 };
 
 export const TRIAL_DAYS = 14;
 /** Days after a trial or paid period ends before the account turns read-only. */
 export const GRACE_DAYS = 7;
+/**
+ * Whether we are registered for GST. While false, no GST is charged: plan prices are final and
+ * each payment gets a plain receipt, not a tax invoice (an unregistered seller may not collect GST).
+ * After registering: set this to true, set BILLING_SUPPLIER_GSTIN and BILLING_SAC on the API, and run
+ * `pnpm --filter @vakilmitra/api billing:plans` again so the monthly Razorpay plans include GST.
+ * Registration is compulsory once a year's turnover passes ₹20 lakh.
+ */
+export const GST_REGISTERED = false;
 export const GST_RATE = 0.18;
 /** Our place of supply: same-state customers pay CGST + SGST, others IGST. */
 export const SUPPLIER_STATE = "MH";
 
-/** GST split for an amount in paise (excluding tax). */
-export function gstFor(amountPaise: number, customerState: string | null | undefined) {
-  const gst = Math.round(amountPaise * GST_RATE);
+/** GST split for an amount in paise (excluding tax); all zero when not registered (pass GST_REGISTERED). */
+export function gstFor(amountPaise: number, customerState: string | null | undefined, registered: boolean) {
+  const gst = registered ? Math.round(amountPaise * GST_RATE) : 0;
   const intra = !customerState || customerState === SUPPLIER_STATE;
   const half = Math.floor(gst / 2);
   return {
@@ -57,6 +73,7 @@ export interface BillingUsage {
   pagesThisMonth: number;
   storageBytes: number;
   juniors: number;
+  aiThisMonth: number;
 }
 
 export interface PlanInvoice {
@@ -74,6 +91,8 @@ export interface PlanInvoice {
   billingName: string;
   gstin: string | null;
   billingState: string | null;
+  /** Our GSTIN when this was issued as a tax invoice; null for a plain receipt. */
+  supplierGstin: string | null;
   status: "PAID" | "REFUNDED";
   razorpayPaymentId: string;
   createdAt: string;

@@ -5,7 +5,7 @@
  */
 export const LEGAL = {
   /** Legal name of the business: a company ("… Private Limited"), LLP, or the proprietor's name. */
-  operator: null as string | null,
+  operator: "Outgrid Labs" as string | null,
   /** Registered or business address, with PIN code. */
   address: null as string | null,
   supportEmail: null as string | null,
@@ -16,7 +16,7 @@ export const LEGAL = {
   /** City whose courts hear disputes, e.g. "Pune". */
   courtsCity: null as string | null,
   /** Date these policies last changed (YYYY-MM-DD). */
-  updated: "2026-11-20",
+  updated: "2026-11-24",
 };
 
 export const legalComplete = () => Object.values(LEGAL).every((v) => v !== null);

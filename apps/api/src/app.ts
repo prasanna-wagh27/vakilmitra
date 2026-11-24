@@ -2,6 +2,7 @@ import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import multipart from "@fastify/multipart";
 import swagger from "@fastify/swagger";
+import * as Sentry from "@sentry/node";
 import { PAGE_UPLOAD } from "@vakilmitra/shared";
 import { fromNodeHeaders } from "better-auth/node";
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyRequest } from "fastify";
@@ -20,11 +21,13 @@ import { HttpError } from "./lib/http.js";
 import { accountRoutes } from "./routes/account.js";
 import { activityRoutes } from "./routes/activity.js";
 import { adminRoutes } from "./routes/admin.js";
+import { aiRoutes } from "./routes/ai.js";
 import { billingRoutes, razorpayWebhook } from "./routes/billing.js";
 import { caseRoutes } from "./routes/cases.js";
 import { clientRoutes } from "./routes/clients.js";
 import { diaryRoutes } from "./routes/diary.js";
 import { documentRoutes } from "./routes/documents.js";
+import { draftRoutes } from "./routes/drafts.js";
 import { factRoutes } from "./routes/facts.js";
 import { feeRoutes } from "./routes/fees.js";
 import { landRoutes } from "./routes/land.js";
@@ -126,6 +129,12 @@ export async function buildApp() {
       return reply.code((err as FastifyError).statusCode!).send({ error: "bad_request", message: err.message });
     }
     req.log.error(err);
+    // Only unexpected failures are reported; the route pattern, not the URL, names the place.
+    Sentry.withScope((scope) => {
+      scope.setTag("route", req.routeOptions.url ?? "unknown");
+      if (req.advocateId) scope.setUser({ id: req.advocateId });
+      Sentry.captureException(err);
+    });
     return reply.code(500).send({ error: "internal", message: "Something went wrong" });
   });
 
@@ -195,6 +204,8 @@ export async function buildApp() {
     });
     await authed.register(billingRoutes, { prefix: "/api/billing" });
     await authed.register(accountRoutes, { prefix: "/api/me" });
+    await authed.register(aiRoutes, { prefix: "/api/ai" });
+    await authed.register(draftRoutes, { prefix: "/api" });
     await authed.register(activityRoutes, { prefix: "/api/activity" });
     await authed.register(clientRoutes, { prefix: "/api/clients" });
     await authed.register(caseRoutes, { prefix: "/api/cases" });

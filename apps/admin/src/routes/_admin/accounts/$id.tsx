@@ -72,7 +72,7 @@ function AccountPage() {
                 {b.paymentFailing && <Badge tone="amber">Payment failed</Badge>}
                 {!b.complimentary && !b.cancelAtPeriodEnd && !b.paymentFailing && "—"}
               </dd>
-              <dt className="text-muted-foreground">GST details</dt>
+              <dt className="text-muted-foreground">Billing details</dt>
               <dd>{[b.details.billingName, b.details.gstin, b.details.billingState].filter(Boolean).join(" · ") || "—"}</dd>
             </dl>
           </CardContent>

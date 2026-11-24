@@ -5,6 +5,7 @@
 import { z } from "zod";
 
 export * from "./billing.js";
+export * from "./sentry.js";
 export * from "./time.js";
 
 // ---------- Enums ----------
@@ -82,6 +83,8 @@ export const updateProfileInput = z.object({
   locale: z.enum(LOCALES).optional(),
   /** Allow hard-to-read pages to be sent to a cloud OCR provider. */
   cloudOcrConsent: z.boolean().optional(),
+  /** Allow client text (page text, drafting notes) to be sent to the configured AI models. */
+  aiConsent: z.boolean().optional(),
 });
 
 export const clientInput = z.object({
@@ -320,6 +323,38 @@ export const documentUpdateInput = documentFields.partial();
 /** Upload limits shared by clients (to resize before sending) and the API (to enforce). */
 export const PAGE_UPLOAD = { maxBytes: 15 * 1024 * 1024, maxPages: 300, types: ["image/jpeg", "image/png", "image/webp"] } as const;
 
+export const translateInput = z.object({
+  /** The language to translate into. */
+  lang: z.enum(LOCALES),
+  /** Translate again even if a saved translation of this reading exists. */
+  fresh: z.boolean().optional(),
+});
+
+/** The language of a page's text: Marathi when more than half its letters are Devanagari. */
+export function textLocale(text: string): Locale {
+  let deva = 0;
+  let letters = 0;
+  for (const ch of text) {
+    if (/\p{L}/u.test(ch)) {
+      letters++;
+      if (/[\u0900-\u097F]/.test(ch)) deva++;
+    }
+  }
+  return letters && deva / letters > 0.5 ? "mr" : "en";
+}
+
+/** Where an AI task's models process data, so the advocate knows before consenting. */
+export type AiDataLocation = "india" | "abroad" | "unknown";
+export interface AiTaskStatus {
+  enabled: boolean;
+  /** The models in the order they are tried. */
+  models: { id: string; dataLocation: AiDataLocation }[];
+}
+export interface AiStatus {
+  translation: AiTaskStatus;
+  drafting: AiTaskStatus;
+}
+
 export const textSearchQuery = z.object({
   q: z.string().trim().min(2).max(200),
   caseId: z.string().optional(),
@@ -337,6 +372,8 @@ export interface Advocate {
   locale: Locale;
   cloudOcrConsent: boolean;
   cloudOcrConsentAt?: string | null;
+  aiConsent: boolean;
+  aiConsentAt?: string | null;
 }
 export interface Client {
   id: string;
@@ -461,7 +498,7 @@ export interface CaseDetail extends CaseRef {
   hearings: Hearing[];
   flags: Flag[];
   feeAgreements: FeeAgreement[];
-  drafts: { id: string; title: string; status: "DRAFT" | "APPROVED"; language: Locale; updatedAt: string }[];
+  drafts: DraftSummary[];
   grants: { id: string; role: CaseRole; advocate: { id: string; name: string; email: string } }[];
 }
 export interface ClientTotals {
@@ -489,6 +526,15 @@ export interface PageDetail extends PageSummary {
   /** local | local:no-consent | local:confident | local:cloud-queued | cloud | local:cloud-failed | local:cloud-empty */
   ocrRoute: string | null;
   ocrWords: { t: string; c: number; b: [number, number, number, number] }[] | null;
+  /** Saved AI translations of the current reading of this page. */
+  translations: PageTranslation[];
+}
+export interface PageTranslation {
+  lang: Locale;
+  text: string;
+  /** "<provider>:<model id>" that translated it. */
+  model: string;
+  createdAt: string;
 }
 export interface DocumentSummary {
   id: string;
@@ -584,6 +630,49 @@ export interface TitleReportResponse {
 }
 
 export const reportDraftInput = z.object({ opinion: z.string().max(20_000), language: z.enum(LOCALES) });
+
+// ---------- AI drafting ----------
+
+/** What the advocate can ask AI to draft. Each has its own guidance in apps/api/src/ai/draft.ts. */
+export const DRAFT_KINDS = ["PUBLIC_NOTICE", "LEGAL_NOTICE", "NOTICE_REPLY", "AFFIDAVIT", "APPLICATION", "OTHER"] as const;
+export type DraftKind = (typeof DRAFT_KINDS)[number];
+
+export const draftGenerateInput = z.object({
+  kind: z.enum(DRAFT_KINDS),
+  language: z.enum(LOCALES),
+  /** The advocate's instructions: facts, what is wanted, anything to include. */
+  instructions: z.string().trim().min(10).max(6_000),
+  /** Give the model this case's court, parties and properties. */
+  useCaseDetails: z.boolean().default(true),
+});
+
+export const draftUpdateInput = z.object({
+  title: z.string().trim().min(1).max(200).optional(),
+  body: z.string().max(60_000).optional(),
+});
+
+export interface Draft {
+  id: string;
+  caseId: string;
+  kind: DraftKind;
+  language: Locale;
+  title: string;
+  body: string;
+  /** The instructions it was drafted from. */
+  instructions: string | null;
+  /** "<provider>:<model id>" that wrote the first version. */
+  model: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface DraftSummary {
+  id: string;
+  template: string;
+  title: string;
+  language: Locale;
+  updatedAt: string;
+}
 
 export interface Extraction {
   /** The record kind used, or null when the document could not be identified. */

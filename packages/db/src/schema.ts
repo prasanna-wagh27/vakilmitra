@@ -80,6 +80,9 @@ export const advocates = pgTable("advocate", {
   // Consent to send hard-to-read pages to a cloud OCR provider (off by default). See packages/ocr.
   cloudOcrConsent: boolean("cloud_ocr_consent").notNull().default(false),
   cloudOcrConsentAt: ts("cloud_ocr_consent_at"),
+  // Consent to send client text (page text, drafting notes) to the configured AI models (off by default). See packages/ai.
+  aiConsent: boolean("ai_consent").notNull().default(false),
+  aiConsentAt: ts("ai_consent_at"),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -285,6 +288,24 @@ export const pages = pgTable(
     // Trigram index: substring search that works for Devanagari, where word tokenisers struggle.
     index("page_ocr_text_trgm_idx").using("gin", sql`${t.ocrText} gin_trgm_ops`),
   ],
+);
+
+/** A page's OCR text translated by an AI model, kept so each page is translated once per reading. */
+export const pageTranslations = pgTable(
+  "page_translation",
+  {
+    id: id(),
+    pageId: text("page_id")
+      .notNull()
+      .references(() => pages.id, { onDelete: "cascade" }),
+    lang: localeEnum("lang").notNull(), // the language translated into
+    // SHA-256 of the OCR text that was translated: a new reading of the page makes this translation stale.
+    sourceHash: text("source_hash").notNull(),
+    text: text("text").notNull(),
+    model: text("model").notNull(), // "<provider>:<model id>" that answered
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("page_translation_page_lang_uq").on(t.pageId, t.lang)],
 );
 
 export interface OcrWord {
@@ -518,7 +539,10 @@ export const checkouts = pgTable(
 /** Sequential invoice numbers (GST invoices need a unique serial per financial year). */
 export const invoiceNumberSeq = pgSequence("invoice_number_seq");
 
-/** GST tax invoice for every successful charge. One per Razorpay payment (webhooks are idempotent on it). */
+/**
+ * Invoice for every successful charge: a GST tax invoice when supplierGstin is set (we were registered
+ * when it was issued), otherwise a plain receipt. One per Razorpay payment (webhooks are idempotent on it).
+ */
 export const invoices = pgTable(
   "invoice",
   {
@@ -539,6 +563,7 @@ export const invoices = pgTable(
     billingEmail: text("billing_email").notNull(),
     gstin: text("gstin"),
     billingState: text("billing_state"),
+    supplierGstin: text("supplier_gstin"),
     status: text("status").notNull().default("PAID"), // PAID | REFUNDED
     razorpayPaymentId: text("razorpay_payment_id").notNull().unique(),
     createdAt: createdAt(),
@@ -609,6 +634,28 @@ export const staffAudit = pgTable(
  * route, which fields changed, and the result. Staff actions are in staff_audit.
  * Kept for one year (the worker's daily clean-up), except the anonymous account.delete rows.
  */
+/**
+ * One row per AI call, charged to the account that owns the case (like scanned pages), for the
+ * plan's monthly AI limit and for cost tracking. Holds no client text.
+ */
+export const aiUsage = pgTable(
+  "ai_usage",
+  {
+    id: id(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => advocates.id, { onDelete: "cascade" }),
+    // Who asked (the owner or a junior).
+    advocateId: text("advocate_id").references(() => advocates.id, { onDelete: "set null" }),
+    task: text("task").notNull(), // translation | drafting
+    model: text("model").notNull(),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("ai_usage_owner_at_idx").on(t.ownerId, t.createdAt)],
+);
+
 export const accessLogs = pgTable(
   "access_log",
   {
@@ -710,6 +757,10 @@ export const documentsRelations = relations(documents, ({ one, many }) => ({
 export const pagesRelations = relations(pages, ({ one, many }) => ({
   document: one(documents, { fields: [pages.documentId], references: [documents.id] }),
   facts: many(facts),
+  translations: many(pageTranslations),
+}));
+export const pageTranslationsRelations = relations(pageTranslations, ({ one }) => ({
+  page: one(pages, { fields: [pageTranslations.pageId], references: [pages.id] }),
 }));
 export const factsRelations = relations(facts, ({ one }) => ({
   case: one(cases, { fields: [facts.caseId], references: [cases.id] }),

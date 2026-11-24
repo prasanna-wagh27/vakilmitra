@@ -3,10 +3,13 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ApiError } from "./lib/api";
+import { initSentry, reactErrorHandler } from "./lib/sentry";
 import { routeTree } from "./routeTree.gen";
 import "@fontsource/ibm-plex-sans-devanagari/devanagari-400.css";
 import "@fontsource/ibm-plex-sans-devanagari/devanagari-500.css";
 import "./index.css";
+
+initSentry();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,7 +25,11 @@ declare module "@tanstack/react-router" {
   }
 }
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById("root")!, {
+  onUncaughtError: reactErrorHandler,
+  onCaughtError: reactErrorHandler,
+  onRecoverableError: reactErrorHandler,
+}).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />

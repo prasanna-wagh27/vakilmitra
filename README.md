@@ -14,6 +14,7 @@ packages/db       Drizzle schema + migrations (PostgreSQL, pg_trgm)
 packages/shared   Zod schemas, enums, response types, IST date helpers, Marathi/English strings
 packages/storage  Encrypted file storage (envelope AES-256-GCM) over local disk or any S3-compatible bucket
 packages/ocr      OCR adapter: Tesseract Marathi + English, on our own servers
+packages/ai       AI models per task (drafting, translation) behind one interface; the provider is a setting
 packages/jobs     Queue definitions shared by API and worker (BullMQ on Valkey)
 scripts/          license gate
 ```
@@ -76,28 +77,91 @@ Every rule is a pure function over structured events: no LLM, no clock, no I/O. 
 - **Search:** trigram (`pg_trgm`) substring search over OCR text, which works for Devanagari where word tokenisers struggle.
 - **Deletes:** deleting a page, document, case or account removes its encrypted files as well as its rows.
 
-## Deployment notes
+## Deployment
 
-- The web app calls the API at `VITE_API_URL`. Put both on the same site, e.g. `app.` and `api.` subdomains of one domain, so the session cookie works. Add the web origin to `WEB_ORIGIN` on the API.
-- Prototype tier: Neon/Supabase Postgres, API + worker on Railway/Render/Coolify, Valkey container, SPA on Cloudflare Pages.
-- Files must stay in India: set `STORAGE_DRIVER=s3` with an India-region S3-compatible bucket (for example AWS S3 `ap-south-1`). Keep `STORAGE_MASTER_KEYS` in the host's secret store, never in the bucket's account.
+Everything runs on one server in Mumbai with Docker Compose (`deploy/compose.yml`): Postgres 16, Valkey, a one-off `migrate` step, the API, the worker, and Caddy, which serves the web app and admin panel over HTTPS and passes `/api` to the API. Client files and backups go to S3 buckets in Mumbai.
+
+- **Addresses:** `https://DOMAIN` is the site and web app, with the API at `/api` on the same origin, so the sign-in cookie needs no cross-site settings. `https://admin.DOMAIN` is the admin panel, and `www.DOMAIN` redirects. Caddy gets and renews the HTTPS certificates itself.
+- **Images:** the `Dockerfile` builds two images from one build:
+  - `server`: the API, the worker and the migrations. It is built on the official Postgres 16 image, so the backups' `pg_dump` always matches the database.
+  - `web`: Caddy, with both static sites built in.
+- **Pipeline** (`.github/workflows/deploy.yml`): after CI passes on `main`, it builds both images and pushes them to GitHub Container Registry, tagged with the commit. When the server settings are present, it then runs these steps on the server over SSH:
+  1. copies the compose file
+  2. pulls the new images
+  3. runs migrations
+  4. restarts the services and waits until they are healthy
+  5. checks `https://DOMAIN/api/health`
+
+  Without the server settings it only builds and pushes. It can also be started by hand from the Actions tab. CI builds both images on every pull request too, without pushing them.
+- **Rolling back:** on the server, run `IMAGE_TAG=<older commit> docker compose up -d`. Migrations only ever add, so an older image runs against a newer database.
+- **One-time server setup** (Ubuntu 24.04 with 2 vCPU and 8 GB RAM is enough to start):
+  1. Install Docker and add a deploy user to the `docker` group.
+  2. Create `/opt/vakilmitra`, copy `deploy/.env.example` there as `.env` with `chmod 600`, and fill it in.
+  3. Point `DOMAIN`, `www.DOMAIN` and `admin.DOMAIN` at the server, and open ports 80 and 443.
+  4. In the repository's Actions settings, add the variables `DEPLOY_HOST`, `DEPLOY_USER` and `DEPLOY_DOMAIN` (also used for the full addresses search engines see), the secrets `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS`, and optionally the variable `VITE_SENTRY_DSN`.
+  5. Run the Deploy workflow.
+- **Keys:** keep an offline copy of `STORAGE_MASTER_KEYS`. Without it, client files and backups cannot be read. The keys live only in the server's `.env`, never in a bucket's account.
+- **Files must stay in India:** use `STORAGE_DRIVER=s3` with a bucket in `ap-south-1` (or another India-region, S3-compatible store), and a second bucket in another account for backups. `STORAGE_DRIVER=fs` keeps files in a Docker volume on the server, which is fine for a trial but is not backed up off the machine beyond the nightly backup.
+- **Error reports (Sentry):**
+  - They are off until `SENTRY_DSN` is set on the server and the `VITE_SENTRY_DSN` variable is set in the pipeline.
+  - They contain only what is needed to find a bug: the API and worker report unexpected failures (5xx, and jobs that fail after their last retry), and the browsers report crashes.
+  - Before sending, `scrubEvent` in `packages/shared/src/sentry.ts` removes request bodies, cookies, query strings, names, emails, IP addresses and console output; only the account id stays.
+  - Use Sentry's EU region (`de.sentry.io`), and keep `SENTRY_TRACES_SAMPLE_RATE=0` (errors only) unless performance traces are needed.
 - The worker is CPU-bound (about 1 s per page per core); set `OCR_CONCURRENCY` to the number of cores.
 - Cloud reads run on their own queue (`ocr-cloud`, limit `OCR_CLOUD_CONCURRENCY`, default 4), so a slow cloud call (Sarvam polls for up to 2 minutes) never holds a Tesseract slot. The local job saves Tesseract's reading first (route `local:cloud-queued`), so the advocate sees text at once; the cloud job then replaces it. Just before sending, the cloud job re-checks that the page is still the version it was queued for (version and image size, read again after fetching the image) and that the owner still consents, and it writes the audit row before sending. After its last retry, the local reading stays (route `local:cloud-failed`).
 
+## AI models
+
+AI features never import a provider's SDK. They ask `packages/ai` for their task's model and use the Vercel AI SDK (`generateText`, `streamText`, structured output) with it, so which company's model does which job is a setting, changed without touching code.
+
+- **One setting per task:** `AI_MODEL_DRAFTING`, `AI_MODEL_TRANSLATION`, and `AI_MODEL_DEFAULT` for any task not set. A model is written `<provider>:<model id>`, e.g. `anthropic:claude-sonnet-5-5`, `vertex:gemini-3.5-flash` or `sarvam:<model id>`. A task with no model is off.
+- **Fallbacks:** several models, comma-separated, are tried in order. If one fails (outage, rate limit), `ai.run(task, fn)` moves to the next and reports which model answered, for the audit log. Streaming uses the first model only.
+- **Providers:**
+  - `anthropic` (Claude)
+  - `openai` (GPT)
+  - `google` (Gemini API)
+  - `vertex` (Gemini on Google Cloud)
+  - `vertex-anthropic` (Claude on Google Cloud)
+  - `sarvam` (Sarvam's OpenAI-format chat API)
+  - `compatible`: any OpenAI-compatible endpoint, such as Azure OpenAI's v1 API, a self-hosted model or another Indian provider
+
+  Another provider is one case in `packages/ai/src/providers.ts`.
+- **Where data goes:** each model reports where it processes data:
+  - `india`: Sarvam, and Vertex in `asia-south1`/`asia-south2`
+  - `abroad`: the direct Anthropic, OpenAI and Gemini APIs
+  - `unknown`: a compatible endpoint, unless `AI_COMPATIBLE_IN_INDIA=true`
+
+  `AI_INDIA_ONLY=true` refuses any other model at start-up. Client documents are confidential, so features that send client text to a model must ask the advocate's consent and record each call in the audit log, as cloud OCR already does.
+- **Checked at start-up:** an unknown provider, a malformed model or a missing key stops the API with a plain message, and the API logs which model serves each task.
+- Tests use the AI SDK's mock models, so no feature test needs a key or the network.
+- **Every AI feature** goes through `apps/api/src/lib/ai.ts`: the case owner must have turned on "Use AI for translation and drafting" in Settings (off by default, every change logged), the owner's plan must have AI requests left this month (`aiPerMonth`, juniors use the senior's), and each call is counted in `ai_usage` (model and tokens, never text) and named in the audit log with its model and data location.
+- **Translation:** each scanned page can be translated between Marathi and English (`POST /api/documents/:id/pages/:pageId/translate`). The answer is saved per page and language and shown again for free until the page is read again; the screen marks it as a machine translation to check against the scan.
+- **Drafting:** on a case, "New draft" writes a public notice, legal notice, reply to a notice, affidavit, application or anything else, in Marathi or English, from the advocate's instructions and (if ticked) the case's court, parties and properties (`POST /api/cases/:caseId/drafts/generate`). The text streams onto the screen as it is written and is saved as it goes, so a dropped connection or a model failing partway keeps what was written. A model that fails before writing anything is skipped for the next one (`ai.stream`). The advocate then edits it, copies it or downloads it as Word. The prompt forbids invented names, dates, numbers, sections and citations, and leaves `[placeholders]` for missing facts.
+
 ## Plans and billing
 
-- Plans live in `packages/shared/src/billing.ts`: a 14-day free trial, then Solo, Pro and Chamber, monthly or yearly (yearly = 10 months' price). Prices exclude 18% GST. Every plan has every feature; plans differ in junior seats, pages scanned per month and storage.
+- Plans live in `packages/shared/src/billing.ts`: a 14-day free trial, then Solo, Pro and Chamber, monthly or yearly (yearly = 10 months' price). Every plan has every feature; plans differ in junior seats, pages scanned per month, storage and AI requests per month.
 - Payments use Razorpay. Monthly plans are Razorpay Subscriptions (UPI Autopay, cards); yearly plans are one-off orders, because RBI rules need extra authentication for each auto-debit above ₹15,000.
 - Setup: put the keys in `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`, run `pnpm --filter @vakilmitra/api billing:plans` once to create the monthly plans and copy the printed ids into env, and add a webhook to `<API_URL>/api/webhooks/razorpay` with secret `RAZORPAY_WEBHOOK_SECRET` (events listed in `apps/api/.env.example`). Use `rzp_test_` keys until going live.
 - After a trial or paid period ends there are 7 days of grace, then the account turns read-only: everything stays readable and exportable, and nothing is ever deleted for non-payment. Juniors on a senior's paid plan are covered by it.
-- Every payment gets a GST tax invoice (CGST + SGST inside Maharashtra, IGST outside), numbered `VM/<financial year>/<serial>`. Set the seller details (`BILLING_SUPPLIER_*`, `BILLING_SAC`) before going live.
-- Each payment emails a receipt with a link to its GST invoice, in the advocate's language.
+- GST: we are not registered, so `GST_REGISTERED` in `packages/shared/src/billing.ts` is `false`. Prices are final, nothing is added, and every payment gets a plain receipt numbered `VM/<financial year>/<serial>`. The seller name on receipts is `BILLING_SUPPLIER_NAME` (Outgrid Labs).
+- After registering for GST (compulsory once a year's turnover passes ₹20 lakh): set `GST_REGISTERED = true`, set `BILLING_SUPPLIER_GSTIN`, `BILLING_SUPPLIER_ADDRESS` and `BILLING_SAC`, and run `billing:plans` again to get monthly plans that include GST. From then on every payment gets a GST tax invoice (CGST + SGST inside Maharashtra, IGST outside) and customers can add their GSTIN. Each invoice stores our GSTIN as issued, so older receipts stay receipts.
+- Each payment emails a receipt with a link to it, in the advocate's language.
 - Not done yet: proration when switching plans mid-period (a switch starts a fresh period today).
 
 ## Policy pages
 
 - Public pages, no sign-in: `/pricing`, `/terms`, `/privacy`, `/refunds`, `/delivery`, `/contact`. Razorpay checks for these before turning on live payments. They are linked from sign-in and sign-up, Settings and the billing page, and sign-up says that creating an account accepts the Terms and Privacy Policy.
-- The home page (`/`, `apps/web/src/routes/index.tsx`) is public: what VakilMitra does, features, privacy, pricing and questions, in the reader's language. Signed-in advocates are sent to their day (`/today`). Its claims must stay true to what is built.
+- The home page (`apps/web/src/components/marketing/HomePage.tsx`) is public: what VakilMitra does, features, privacy, pricing and questions. It is at `/` in Marathi and `/en` in English, and the address follows the language the reader picks. Signed-in advocates are sent to their day (`/today`). Its claims must stay true to what is built.
+
+## Search engines and link previews
+
+- The public pages (`/`, `/en` and the policy pages) are built ahead of time as plain HTML (`src/prerender.tsx`, run by `scripts/prerender.mjs` after `vite build`), so search engines and link previews such as WhatsApp see the whole page without running JavaScript. In the browser the app loads the same page, then takes over; the screen is never blank in between. Every other address gets the empty app shell (`app.html`), as before.
+- Each page gets its title, description, canonical address, Open Graph share card (`public/og-image.png`, 1200×630) and, for the home page, Marathi/English alternates (`hreflang`) and structured data: the product with each plan's monthly price, and the six questions as an FAQ. The build also writes `robots.txt` (keeps crawlers off `/api/`) and `sitemap.xml`. Source: `apps/web/src/seo.ts`.
+- Full addresses need the site's address at build time: `SITE_URL` (e.g. `https://vakilmitra.in`). The deploy workflow sets it from `DEPLOY_DOMAIN`; without it, the canonical, alternate, share-image tags and the sitemap are left out.
+- Caddy serves `{path}`, then `{path}.html`, then `app.html` (`deploy/Caddyfile`).
+- A new public page: add its route, then add it to `PUBLIC_PAGES` in `src/seo.ts`. The tests (`test/seo.test.ts`, `test/prerender.test.tsx`) check every listed page renders with its heading and one title and description.
+- Once live, add the site in Google Search Console and submit `/sitemap.xml`.
 - Each policy is written in full in Marathi and in English, and readers see only their chosen language (if the two differ, the English text prevails). Source: `apps/web/src/components/legal/`.
 - Language rule for the whole web app: no English on a Marathi screen and no Marathi on an English one (except the language switch). Server errors are translated in `apps/web/src/lib/errors.ts`; add a Marathi line there for every new API error message.
 - Business details (legal name, address, support and grievance contacts, courts' city) live in `apps/web/src/lib/legal.ts`. Until every one is filled in, the pages show "to be added" and a draft notice.
@@ -190,14 +254,21 @@ point `DATABASE_URL` at it; start the API, which applies any newer migrations.
   - Labels that are also ordinary words need a ":" or "-" after them.
   - Owners and parties may continue on the following lines, one per line.
   - Heirship Ferfars are also read from prose ("मयत X यांचे वारस A, B").
+- **Table-layout 7/12s.** Most 7/12 extracts are tables, not "label : value" forms. A row of column headings (खाते क्रमांक | भोगवटादाराचे नाव | क्षेत्र | आकार | फेरफार क्र., or भूमापन क्रमांक | भूधारणा पद्धती) starts a table, and each cell of the rows below goes to the heading it lies under.
+  - Cells are split at gaps wider than a word space, or at ruled lines OCR reads as "|". Headings that wrap onto a second line ("भोगवटादाराचे" over "नाव") are allowed.
+  - Each owner row gives one owner (an account number in the same cell is dropped; the "एकूण" total row is not an owner). The tenant column (कुळाचे नाव) and the इतर हक्क box become other rights.
+  - The area is the total row, or the only area in the table; owners' shares alone are not taken as the land's area. The ferfar number is the highest in the column (the latest change).
+  - A table ends at the next heading row, at a "label : value" line, or at a large gap.
+  - An area whose digits OCR garbled ("0.3¢.00") is left blank rather than guessed.
 - **Values are normalised.** Areas become square metres (hectares, H.R.Sqm triples, ares, acres, gunthas). Dates become ISO. Land class becomes Class-I/II. Devanagari digits become ASCII.
 - **Nothing is final until reviewed.**
   - Each fact shows its source crop and its weakest word's OCR confidence; below 80% it is marked "unclear".
   - A corrected fact keeps what was read (`original_value`).
   - Reading a document again replaces only facts that have not been checked.
   - A document joins a property's timeline only once every fact is checked. Blank property details are filled from it; differing ones are reported, never overwritten.
-- **Eval.** `apps/api/test/extract.eval.test.ts` scores 24 synthetic records (10 7/12s, 8 Ferfars, 6 Index-IIs) read by real Tesseract, against the spec's field targets. The records vary in layout and digit script, and half are degraded like phone photos. The OCR output is stored as fixtures, so CI runs it without OCR; regenerate with `npx tsx apps/api/eval/make-extract-set.mts`.
-  - Every group currently scores 100%. That shows the parser copes with OCR noise on these layouts. It is **not** a measure of accuracy on real government records: real 7/12s are tables, often handwritten or faded.
+- **Eval.** `apps/api/test/extract.eval.test.ts` scores 36 synthetic records (10 label-layout and 12 table-layout 7/12s, 8 Ferfars, 6 Index-IIs) read by real Tesseract, against the spec's field targets. The records vary in layout and digit script, and half are degraded like phone photos. The OCR output is stored as fixtures, so CI runs it without OCR; regenerate with `npx tsx apps/api/eval/make-extract-set.mts`.
+  - A value the OCR lost entirely (not in the OCR text at all) is reported as an OCR miss and not charged to the extractor; the eval fails if more than 2% of values are lost that way. One is now: a total area whose Devanagari digits Tesseract misread.
+  - Every group currently scores 100%. That shows the parser copes with OCR noise on these layouts. It is **not** a measure of accuracy on real government records, which are often handwritten or faded.
   - The real-record eval (20+ labelled real pages) is still on the checklist below.
 - **Limits.** Prose Ferfars other than heirship (sale narratives, orders) yield their number, date and type, but not the parties; the advocate adds those with "Add a missing detail". Table-layout 7/12s, where values sit under column headings rather than after a label, are not read yet.
 
@@ -206,9 +277,10 @@ point `DATABASE_URL` at it; start the API, which applies any newer migrations.
 - [x] Hosting tier and project type picked (Prototype, web SPA; mobile app after the web app)
 - [x] Monorepo: pnpm, Turborepo, Biome, Vitest, GitHub Actions
 - [ ] Cloud, domain, app store and API accounts in the client's name
-- [ ] Staging and production with separate databases and keys
+- [x] Production server packaged (Docker Compose) with a deploy pipeline; no staging copy for now (owner's decision)
 - [x] Env vars validated with Zod at boot; no secrets in git
-- [ ] Sentry, PostHog; Langfuse when AI work starts
+- [x] Sentry error reports (scrubbed; on once a DSN is set)
+- [ ] PostHog usage analytics; Langfuse when AI work starts
 - [x] CI license check passes (no banned licenses)
 - [ ] Real-record eval set (at least 20 real, labelled 7/12, Ferfar and Index-II pages) before extraction is switched on for clients. Both harnesses are ready (`packages/ocr/eval` for OCR, `apps/api/test/extract.eval.test.ts` for extraction); today they run on synthetic pages only.
 - [ ] Daily backups running and a restore tested

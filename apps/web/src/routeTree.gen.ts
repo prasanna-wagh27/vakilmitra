@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DeliveryRouteImport } from './routes/delivery'
+import { Route as EnRouteImport } from './routes/en'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -37,6 +38,8 @@ import { Route as AppCasesCaseIdIndexRouteImport } from './routes/_app/cases/$ca
 import { Route as AppCasesCaseIdScanRouteImport } from './routes/_app/cases/$caseId/scan'
 import { Route as AppFeesInvoiceClientIdRouteImport } from './routes/_app/fees/invoice/$clientId'
 import { Route as AppCasesCaseIdDocumentsDocumentIdRouteImport } from './routes/_app/cases/$caseId/documents/$documentId'
+import { Route as AppCasesCaseIdDraftsDraftIdRouteImport } from './routes/_app/cases/$caseId/drafts/$draftId'
+import { Route as AppCasesCaseIdDraftsNewRouteImport } from './routes/_app/cases/$caseId/drafts/new'
 import { Route as AppCasesCaseIdPropertiesPropertyIdRouteImport } from './routes/_app/cases/$caseId/properties/$propertyId'
 import { Route as AppCasesCaseIdPropertiesPropertyIdReportRouteImport } from './routes/_app/cases/$caseId/properties/$propertyId_.report'
 
@@ -57,6 +60,11 @@ const ContactRoute = ContactRouteImport.update({
 const DeliveryRoute = DeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnRoute = EnRouteImport.update({
+  id: '/en',
+  path: '/en',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -181,6 +189,17 @@ const AppCasesCaseIdDocumentsDocumentIdRoute =
     path: '/cases/$caseId/documents/$documentId',
     getParentRoute: () => AppRoute,
   } as any)
+const AppCasesCaseIdDraftsDraftIdRoute =
+  AppCasesCaseIdDraftsDraftIdRouteImport.update({
+    id: '/cases/$caseId/drafts/$draftId',
+    path: '/cases/$caseId/drafts/$draftId',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppCasesCaseIdDraftsNewRoute = AppCasesCaseIdDraftsNewRouteImport.update({
+  id: '/cases/$caseId/drafts/new',
+  path: '/cases/$caseId/drafts/new',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCasesCaseIdPropertiesPropertyIdRoute =
   AppCasesCaseIdPropertiesPropertyIdRouteImport.update({
     id: '/cases/$caseId/properties/$propertyId',
@@ -198,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
+  '/en': typeof EnRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -222,6 +242,8 @@ export interface FileRoutesByFullPath {
   '/fees/invoice/$clientId': typeof AppFeesInvoiceClientIdRoute
   '/cases/$caseId/': typeof AppCasesCaseIdIndexRoute
   '/cases/$caseId/documents/$documentId': typeof AppCasesCaseIdDocumentsDocumentIdRoute
+  '/cases/$caseId/drafts/$draftId': typeof AppCasesCaseIdDraftsDraftIdRoute
+  '/cases/$caseId/drafts/new': typeof AppCasesCaseIdDraftsNewRoute
   '/cases/$caseId/properties/$propertyId': typeof AppCasesCaseIdPropertiesPropertyIdRoute
   '/cases/$caseId/properties/$propertyId/report': typeof AppCasesCaseIdPropertiesPropertyIdReportRoute
 }
@@ -229,6 +251,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
+  '/en': typeof EnRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -253,6 +276,8 @@ export interface FileRoutesByTo {
   '/fees/invoice/$clientId': typeof AppFeesInvoiceClientIdRoute
   '/cases/$caseId': typeof AppCasesCaseIdIndexRoute
   '/cases/$caseId/documents/$documentId': typeof AppCasesCaseIdDocumentsDocumentIdRoute
+  '/cases/$caseId/drafts/$draftId': typeof AppCasesCaseIdDraftsDraftIdRoute
+  '/cases/$caseId/drafts/new': typeof AppCasesCaseIdDraftsNewRoute
   '/cases/$caseId/properties/$propertyId': typeof AppCasesCaseIdPropertiesPropertyIdRoute
   '/cases/$caseId/properties/$propertyId/report': typeof AppCasesCaseIdPropertiesPropertyIdReportRoute
 }
@@ -262,6 +287,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
+  '/en': typeof EnRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -286,6 +312,8 @@ export interface FileRoutesById {
   '/_app/fees/invoice/$clientId': typeof AppFeesInvoiceClientIdRoute
   '/_app/cases/$caseId/': typeof AppCasesCaseIdIndexRoute
   '/_app/cases/$caseId/documents/$documentId': typeof AppCasesCaseIdDocumentsDocumentIdRoute
+  '/_app/cases/$caseId/drafts/$draftId': typeof AppCasesCaseIdDraftsDraftIdRoute
+  '/_app/cases/$caseId/drafts/new': typeof AppCasesCaseIdDraftsNewRoute
   '/_app/cases/$caseId/properties/$propertyId': typeof AppCasesCaseIdPropertiesPropertyIdRoute
   '/_app/cases/$caseId/properties/$propertyId_/report': typeof AppCasesCaseIdPropertiesPropertyIdReportRoute
 }
@@ -295,6 +323,7 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/delivery'
+    | '/en'
     | '/forgot-password'
     | '/login'
     | '/pricing'
@@ -319,6 +348,8 @@ export interface FileRouteTypes {
     | '/fees/invoice/$clientId'
     | '/cases/$caseId/'
     | '/cases/$caseId/documents/$documentId'
+    | '/cases/$caseId/drafts/$draftId'
+    | '/cases/$caseId/drafts/new'
     | '/cases/$caseId/properties/$propertyId'
     | '/cases/$caseId/properties/$propertyId/report'
   fileRoutesByTo: FileRoutesByTo
@@ -326,6 +357,7 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/delivery'
+    | '/en'
     | '/forgot-password'
     | '/login'
     | '/pricing'
@@ -350,6 +382,8 @@ export interface FileRouteTypes {
     | '/fees/invoice/$clientId'
     | '/cases/$caseId'
     | '/cases/$caseId/documents/$documentId'
+    | '/cases/$caseId/drafts/$draftId'
+    | '/cases/$caseId/drafts/new'
     | '/cases/$caseId/properties/$propertyId'
     | '/cases/$caseId/properties/$propertyId/report'
   id:
@@ -358,6 +392,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/contact'
     | '/delivery'
+    | '/en'
     | '/forgot-password'
     | '/login'
     | '/pricing'
@@ -382,6 +417,8 @@ export interface FileRouteTypes {
     | '/_app/fees/invoice/$clientId'
     | '/_app/cases/$caseId/'
     | '/_app/cases/$caseId/documents/$documentId'
+    | '/_app/cases/$caseId/drafts/$draftId'
+    | '/_app/cases/$caseId/drafts/new'
     | '/_app/cases/$caseId/properties/$propertyId'
     | '/_app/cases/$caseId/properties/$propertyId_/report'
   fileRoutesById: FileRoutesById
@@ -391,6 +428,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   ContactRoute: typeof ContactRoute
   DeliveryRoute: typeof DeliveryRoute
+  EnRoute: typeof EnRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
@@ -429,6 +467,13 @@ declare module '@tanstack/react-router' {
       path: '/delivery'
       fullPath: '/delivery'
       preLoaderRoute: typeof DeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en': {
+      id: '/en'
+      path: '/en'
+      fullPath: '/en'
+      preLoaderRoute: typeof EnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -599,6 +644,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCasesCaseIdDocumentsDocumentIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/cases/$caseId/drafts/$draftId': {
+      id: '/_app/cases/$caseId/drafts/$draftId'
+      path: '/cases/$caseId/drafts/$draftId'
+      fullPath: '/cases/$caseId/drafts/$draftId'
+      preLoaderRoute: typeof AppCasesCaseIdDraftsDraftIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/cases/$caseId/drafts/new': {
+      id: '/_app/cases/$caseId/drafts/new'
+      path: '/cases/$caseId/drafts/new'
+      fullPath: '/cases/$caseId/drafts/new'
+      preLoaderRoute: typeof AppCasesCaseIdDraftsNewRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/cases/$caseId/properties/$propertyId': {
       id: '/_app/cases/$caseId/properties/$propertyId'
       path: '/cases/$caseId/properties/$propertyId'
@@ -633,6 +692,8 @@ interface AppRouteChildren {
   AppFeesInvoiceClientIdRoute: typeof AppFeesInvoiceClientIdRoute
   AppCasesCaseIdIndexRoute: typeof AppCasesCaseIdIndexRoute
   AppCasesCaseIdDocumentsDocumentIdRoute: typeof AppCasesCaseIdDocumentsDocumentIdRoute
+  AppCasesCaseIdDraftsDraftIdRoute: typeof AppCasesCaseIdDraftsDraftIdRoute
+  AppCasesCaseIdDraftsNewRoute: typeof AppCasesCaseIdDraftsNewRoute
   AppCasesCaseIdPropertiesPropertyIdRoute: typeof AppCasesCaseIdPropertiesPropertyIdRoute
   AppCasesCaseIdPropertiesPropertyIdReportRoute: typeof AppCasesCaseIdPropertiesPropertyIdReportRoute
 }
@@ -655,6 +716,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppCasesCaseIdIndexRoute: AppCasesCaseIdIndexRoute,
   AppCasesCaseIdDocumentsDocumentIdRoute:
     AppCasesCaseIdDocumentsDocumentIdRoute,
+  AppCasesCaseIdDraftsDraftIdRoute: AppCasesCaseIdDraftsDraftIdRoute,
+  AppCasesCaseIdDraftsNewRoute: AppCasesCaseIdDraftsNewRoute,
   AppCasesCaseIdPropertiesPropertyIdRoute:
     AppCasesCaseIdPropertiesPropertyIdRoute,
   AppCasesCaseIdPropertiesPropertyIdReportRoute:
@@ -668,6 +731,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   ContactRoute: ContactRoute,
   DeliveryRoute: DeliveryRoute,
+  EnRoute: EnRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,

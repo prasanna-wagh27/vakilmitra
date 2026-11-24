@@ -1,0 +1,120 @@
+name: Deploy
+
+# After CI passes on main (or when started by hand): build the images, push them to GitHub
+# Container Registry, then update the server over SSH. Until the server settings below exist,
+# only the images are built and pushed.
+#
+# Repository settings (Settings > Secrets and variables > Actions):
+#   variables  DEPLOY_HOST       server address, e.g. 203.0.113.10
+#              DEPLOY_USER       SSH user on the server, in the docker group
+#              DEPLOY_DOMAIN     the site's domain (e.g. vakilmitra.in), for the health check after
+#                                deploy and the full addresses search engines see on the public pages
+#              VITE_SENTRY_DSN   (optional) Sentry DSN for the web app and admin panel
+#   secrets    DEPLOY_SSH_KEY        private key for DEPLOY_USER (deploy-only key)
+#              DEPLOY_KNOWN_HOSTS    the server's host key line: ssh-keyscan -t ed25519 <host>
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  IMAGE_REPO: ghcr.io/${{ github.repository }}
+
+jobs:
+  images:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - id: tag
+        run: echo "tag=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Server image (API, worker, migrations)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: server
+          push: true
+          build-args: APP_VERSION=${{ steps.tag.outputs.tag }}
+          tags: |
+            ${{ env.IMAGE_REPO }}-server:${{ steps.tag.outputs.tag }}
+            ${{ env.IMAGE_REPO }}-server:latest
+          cache-from: type=gha,scope=images
+          cache-to: type=gha,scope=images,mode=max
+      - name: Web image (Caddy with the web app and admin panel)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: web
+          push: true
+          build-args: |
+            APP_VERSION=${{ steps.tag.outputs.tag }}
+            VITE_SENTRY_DSN=${{ vars.VITE_SENTRY_DSN }}
+            SITE_URL=${{ vars.DEPLOY_DOMAIN && format('https://{0}', vars.DEPLOY_DOMAIN) || '' }}
+          tags: |
+            ${{ env.IMAGE_REPO }}-web:${{ steps.tag.outputs.tag }}
+            ${{ env.IMAGE_REPO }}-web:latest
+          cache-from: type=gha,scope=images
+
+  deploy:
+    needs: images
+    if: vars.DEPLOY_HOST != ''
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      TAG: ${{ needs.images.outputs.tag }}
+      HOST: ${{ vars.DEPLOY_HOST }}
+      USER: ${{ vars.DEPLOY_USER }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: SSH key
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Copy the compose file
+        run: scp -i ~/.ssh/id_deploy deploy/compose.yml "$USER@$HOST:/opt/vakilmitra/compose.yml"
+      - name: Pull and restart (migrations run first)
+        env:
+          # Read by `docker login` on the server from standard input, never put on a command line.
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          printf '%s' "$REGISTRY_TOKEN" | ssh -i ~/.ssh/id_deploy "$USER@$HOST" "
+            set -e
+            cd /opt/vakilmitra
+            docker login ghcr.io -u '$ACTOR' --password-stdin
+            export IMAGE_TAG='$TAG'
+            docker compose pull
+            docker compose up -d --remove-orphans --wait
+            sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=$TAG/' .env
+            docker logout ghcr.io
+            docker image prune -f"
+      - name: Health check
+        if: vars.DEPLOY_DOMAIN != ''
+        run: curl -fsS --retry 10 --retry-delay 6 --retry-all-errors "https://${{ vars.DEPLOY_DOMAIN }}/api/health"

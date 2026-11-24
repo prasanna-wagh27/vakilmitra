@@ -34,7 +34,7 @@ function DashboardPage() {
         <Stat
           label="Collected, last 30 days"
           value={rupees(x.revenue30d.netPaise)}
-          hint={`${fmtNum(x.revenue30d.payments)} payments · ${rupees(x.revenue30d.totalPaise)} with GST`}
+          hint={`${fmtNum(x.revenue30d.payments)} payments · ${rupees(x.revenue30d.totalPaise)} including any GST`}
         />
         <Stat label="Need attention" value={fmtNum(trouble)} tone={trouble ? "warn" : undefined} hint="In grace or with a failed renewal" />
         <Stat label="Read-only" value={fmtNum(x.accounts.byState.READ_ONLY)} hint="Plan or trial ran out" />

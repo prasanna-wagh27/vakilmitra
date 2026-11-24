@@ -5,7 +5,8 @@
  * without running OCR. Synthetic pages measure the extractor against OCR noise; they are not a
  * measure of accuracy on real government records (see eval/README.md).
  *
- * Run (needs a Devanagari font, e.g. fonts-noto-core): pnpm --filter @vakilmitra/api eval:make-extract
+ * Run from apps/api (needs a Devanagari font, e.g. fonts-noto-core): npx tsx eval/make-extract-set.mts
+ * ONLY=<name prefix> rewrites just those pages.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -38,6 +39,8 @@ interface Case {
   kind: "SEVEN_TWELVE" | "FERFAR" | "INDEX_II";
   lines: string[];
   truth: Truth;
+  /** A page drawn as a table rather than lines of text. */
+  svg?: { body: string; height: number };
 }
 
 function names(n: number) {
@@ -155,17 +158,160 @@ function index2(i: number): Case {
   };
 }
 
+/** A text item placed on the page; "middle" centres it on x, as table headings and numbers are. */
+interface Item {
+  x: number;
+  text: string;
+  mid?: boolean;
+}
+interface Row {
+  items: Item[];
+  /** Draw a ruled line under the row, as printed extracts do. */
+  rule?: boolean;
+}
+
+/**
+ * A 7/12 laid out as tables, like the computerised extract: the place line, a survey / tenure
+ * box with the values under their headings, the owners table (one row per account), and the
+ * other-rights box. Variants: survey or gat number, headings wrapped onto two lines, an account
+ * number in the owner's cell, a total row, a tenant column, the total area as a line of its own.
+ */
+function satbaraTable(i: number): Case {
+  const d = i % 3 === 1;
+  const [v, t, z] = [pick(VILLAGES), pick(TALUKAS), pick(DISTRICTS)];
+  const no = String(20 + Math.floor(rnd() * 900));
+  const survey = i % 2 === 1;
+  const owners = names(1 + (i % 3));
+  const cls = i % 4 === 2 ? 2 : 1;
+  const wrap = i % 4 === 3;
+  const acctInName = i % 5 === 4;
+  const tenant = i % 4 === 1 ? pick(NAMES.filter((n) => !owners.includes(n))) : null;
+  const right = i % 3 === 0 ? pick(RIGHTS.filter((r) => !r.startsWith("कुळ"))) : null;
+  const totalLine = i % 2 === 0;
+  let ferfarNo = 100 + Math.floor(rnd() * 900);
+  const rows = owners.map((o) => {
+    ferfarNo += 1 + Math.floor(rnd() * 200);
+    return { name: o, acct: String(10 + Math.floor(rnd() * 900)), are: 10 + Math.floor(rnd() * 80), ferfar: ferfarNo };
+  });
+  const totalAre = rows.reduce((a, r) => a + r.are, 0);
+  const hra = (are: number) => `${Math.floor(are / 100)}.${String(are % 100).padStart(2, "0")}.00`;
+  const n = (s: string) => maybeDev(s, d);
+
+  // Owners table columns: account, name (wide), area, assessment, [tenant], ferfar.
+  const cols = tenant
+    ? { acct: 160, name: 470, area: 870, aakar: 1060, kul: 1260, ferfar: 1520 }
+    : { acct: 160, name: 520, area: 960, aakar: 1170, kul: 0, ferfar: 1440 };
+  const nameLeft = cols.name - 170;
+  const heading: Item[] = [
+    { x: cols.acct, text: "खाते क्रमांक", mid: true },
+    { x: cols.name, text: wrap ? "भोगवटादाराचे" : "भोगवटादाराचे नाव", mid: true },
+    { x: cols.area, text: "क्षेत्र", mid: true },
+    { x: cols.aakar, text: "आकार", mid: true },
+    ...(tenant ? [{ x: cols.kul, text: "कुळाचे नाव", mid: true }] : []),
+    { x: cols.ferfar, text: "फेरफार क्र.", mid: true },
+  ];
+  const ownerRows: Row[] = rows.map((r, k) => ({
+    items: [
+      ...(acctInName ? [] : [{ x: cols.acct, text: n(r.acct), mid: true }]),
+      { x: nameLeft, text: acctInName ? `${n(r.acct)} ${r.name}` : r.name },
+      { x: cols.area, text: n(hra(r.are)), mid: true },
+      { x: cols.aakar, text: n(`${1 + (r.are % 5)}.${String(r.are % 100).padStart(2, "0")}`), mid: true },
+      ...(tenant && k === 0 ? [{ x: cols.kul, text: tenant, mid: true }] : []),
+      { x: cols.ferfar, text: n(`(${r.ferfar})`), mid: true },
+    ],
+  }));
+  const placeSep = i % 2 ? ":-" : ":";
+  const page: Row[] = [
+    { items: [{ x: 850, text: "गाव नमुना सात", mid: true }] },
+    { items: [{ x: 850, text: "अधिकार अभिलेख पत्रक", mid: true }], rule: true },
+    {
+      items: [
+        { x: 80, text: `गाव ${placeSep} ${v}` },
+        { x: 650, text: `तालुका ${placeSep} ${t}` },
+        { x: 1180, text: `जिल्हा ${placeSep} ${z}` },
+      ],
+      rule: true,
+    },
+    {
+      items: [
+        { x: 400, text: survey ? "भूमापन क्रमांक व उपविभाग" : "गट क्रमांक", mid: true },
+        { x: 1200, text: "भूधारणा पद्धती", mid: true },
+      ],
+    },
+    {
+      items: [
+        { x: 400, text: n(survey ? `${no}/${1 + (i % 4)}` : no), mid: true },
+        { x: 1200, text: `भोगवटादार वर्ग -${n(String(cls))}`, mid: true },
+      ],
+      rule: true,
+    },
+    ...(totalLine ? [{ items: [{ x: 80, text: `एकूण क्षेत्र ${n(hra(totalAre))} हे.आर.चौ.मी` }], rule: true }] : []),
+    { items: heading },
+    ...(wrap ? [{ items: [{ x: cols.name, text: "नाव", mid: true }] }] : []),
+    { items: [], rule: true },
+    ...ownerRows,
+    ...(!totalLine
+      ? [
+          {
+            items: [
+              { x: nameLeft, text: "एकूण" },
+              { x: cols.area, text: n(hra(totalAre)), mid: true },
+            ],
+          },
+        ]
+      : []),
+    { items: [], rule: true },
+    { items: [{ x: 80, text: "इतर हक्क" }] },
+    ...(right ? [{ items: [{ x: 80, text: right }] }] : []),
+  ];
+
+  const size = 40;
+  const step = size * 2;
+  const body: string[] = [];
+  page.forEach((r, k) => {
+    const y = 100 + k * step;
+    for (const it of r.items)
+      body.push(
+        `<text x="${it.x}" y="${y}"${it.mid ? ' text-anchor="middle"' : ""} font-family="Noto Sans Devanagari" font-size="${size}" fill="black">${esc(it.text)}</text>`,
+      );
+    if (r.rule) body.push(`<line x1="50" x2="1650" y1="${y + size * 0.6}" y2="${y + size * 0.6}" stroke="black" stroke-width="2"/>`);
+  });
+  const truth: Truth = {
+    village: v,
+    taluka: t,
+    district: z,
+    [survey ? "survey_no" : "gat_no"]: survey ? `${no}/${1 + (i % 4)}` : no,
+    owner: owners,
+    area: String(totalAre * 100),
+    land_class: cls === 2 ? "Class-II" : "Class-I",
+    ferfar_no: String(rows[rows.length - 1].ferfar),
+  };
+  const rights = [...(tenant ? [`कुळ: ${tenant}`] : []), ...(right ? [right] : [])];
+  if (rights.length) truth.other_right = rights;
+  return {
+    name: `satbara-table-${String(i).padStart(2, "0")}`,
+    kind: "SEVEN_TWELVE",
+    lines: page.map((r) => r.items.map((it) => it.text).join(" | ")),
+    truth,
+    svg: { body: body.join(""), height: 140 + page.length * step },
+  };
+}
+
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-async function render(lines: string[], variant: number) {
+async function render(c: Case, variant: number) {
+  const { lines } = c;
   const size = [46, 52, 40][variant % 3];
   const width = 1700;
-  const h = 140 + lines.length * size * 2.2;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${h}"><rect width="100%" height="100%" fill="white"/>${lines
-    .map(
-      (l, i) =>
-        `<text x="80" y="${110 + i * size * 2.2}" font-family="Noto Sans Devanagari" font-size="${size}" fill="black">${esc(l)}</text>`,
-    )
-    .join("")}</svg>`;
+  const h = c.svg?.height ?? 140 + lines.length * size * 2.2;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${h}"><rect width="100%" height="100%" fill="white"/>${
+    c.svg?.body ??
+    lines
+      .map(
+        (l, i) =>
+          `<text x="80" y="${110 + i * size * 2.2}" font-family="Noto Sans Devanagari" font-size="${size}" fill="black">${esc(l)}</text>`,
+      )
+      .join("")
+  }</svg>`;
   let img = sharp(Buffer.from(svg)).flatten({ background: "#ffffff" });
   // Degrade like a phone photo on half the set: slight tilt, softness, grey paper, JPEG.
   if (variant % 2 === 1)
@@ -181,11 +327,16 @@ const cases = [
   ...Array.from({ length: 10 }, (_, i) => satbara(i)),
   ...Array.from({ length: 8 }, (_, i) => ferfar(i)),
   ...Array.from({ length: 6 }, (_, i) => index2(i)),
+  ...Array.from({ length: 12 }, (_, i) => satbaraTable(i)),
 ];
+// ONLY=satbara-table writes just the pages whose names start with it (the others stay as they are).
+const only = process.env.ONLY;
 const engine = new TesseractEngine();
 let n = 0;
 for (const c of cases) {
-  const r = await engine.recognize(await render(c.lines, n++));
+  const variant = n++;
+  if (only && !c.name.startsWith(only)) continue;
+  const r = await engine.recognize(await render(c, variant));
   writeFileSync(
     join(OUT, `${c.name}.json`),
     `${JSON.stringify({ name: c.name, kind: c.kind, truth: c.truth, ocrConfidence: r.confidence, lines: c.lines, words: r.words })}\n`,

@@ -1,5 +1,5 @@
 import { advocates, and, checkouts, desc, eq, invoices, subscriptions } from "@vakilmitra/db";
-import { billingDetailsInput, checkoutInput, checkoutVerifyInput, gstFor, type PaidPlanId } from "@vakilmitra/shared";
+import { billingDetailsInput, checkoutInput, checkoutVerifyInput, GST_REGISTERED, gstFor, type PaidPlanId } from "@vakilmitra/shared";
 import type { FastifyPluginAsync } from "fastify";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -39,6 +39,7 @@ const invoiceColumns = {
   billingName: true,
   gstin: true,
   billingState: true,
+  supplierGstin: true,
   status: true,
   razorpayPaymentId: true,
   createdAt: true,
@@ -69,7 +70,7 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
     const amount = priceOf(plan, interval);
     const notes = { advocateId: req.advocateId, plan, interval };
     const prefill = { name: sub.billingName ?? advocate?.name ?? "", email: advocate?.email ?? "", contact: advocate?.phone ?? "" };
-    const totalPaise = gstFor(amount, sub.billingState).totalPaise;
+    const totalPaise = gstFor(amount, sub.billingState, GST_REGISTERED).totalPaise;
 
     if (interval === "MONTHLY") {
       const planId = PLAN_IDS[plan];
@@ -145,11 +146,13 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
       columns: invoiceColumns,
     });
     if (!invoice) throw notFound("Invoice");
+    // GSTIN and SAC as on the day it was issued: only tax invoices carry them, receipts never do.
+    const tax = invoice.supplierGstin !== null;
     const supplier = {
       name: env.BILLING_SUPPLIER_NAME,
       address: env.BILLING_SUPPLIER_ADDRESS ?? null,
-      gstin: env.BILLING_SUPPLIER_GSTIN ?? null,
-      sac: env.BILLING_SAC ?? null,
+      gstin: invoice.supplierGstin,
+      sac: tax ? (env.BILLING_SAC ?? null) : null,
     };
     return { invoice, supplier };
   });

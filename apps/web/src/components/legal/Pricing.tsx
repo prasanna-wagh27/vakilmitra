@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { type BillingInterval, TRIAL_DAYS } from "@vakilmitra/shared";
+import { type BillingInterval, GST_REGISTERED, TRIAL_DAYS } from "@vakilmitra/shared";
 import { useState } from "react";
 import { fmtNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -32,7 +32,7 @@ export function PricingContent() {
         )}
       />
       <p className="mt-6 text-sm text-muted-foreground">
-        {t("legal.pricingNote")}{" "}
+        {t(GST_REGISTERED ? "legal.pricingNote" : "legal.pricingNoteNoGst")}{" "}
         <Link to="/refunds" className="text-brand underline underline-offset-4">
           {t("legal.refunds")}
         </Link>

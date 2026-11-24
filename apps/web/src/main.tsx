@@ -3,12 +3,15 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ApiError } from "./lib/api";
+import { initSentry, reactErrorHandler } from "./lib/sentry";
 import { routeTree } from "./routeTree.gen";
 // Fonts are bundled and served from our own origin: no third-party requests (DPDP, offline).
 import "@fontsource/ibm-plex-sans-devanagari/devanagari-400.css";
 import "@fontsource/ibm-plex-sans-devanagari/devanagari-500.css";
 import "@fontsource/ibm-plex-sans-devanagari/devanagari-600.css";
 import "./index.css";
+
+initSentry();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,10 +30,21 @@ declare module "@tanstack/react-router" {
   }
 }
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  </StrictMode>,
-);
+const root = document.getElementById("root")!;
+const render = () =>
+  createRoot(root, {
+    onUncaughtError: reactErrorHandler,
+    onCaughtError: reactErrorHandler,
+    onRecoverableError: reactErrorHandler,
+  }).render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </StrictMode>,
+  );
+
+// A public page built ahead of time (src/prerender.tsx) stays on screen until the app has loaded
+// the page, so it is replaced by the same page and never by a blank one. Elsewhere, start at once.
+if (root.dataset.prerendered) void router.load().finally(render);
+else render();
