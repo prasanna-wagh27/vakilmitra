@@ -83,6 +83,8 @@ export const updateProfileInput = z.object({
   locale: z.enum(LOCALES).optional(),
   /** Allow hard-to-read pages to be sent to a cloud OCR provider. */
   cloudOcrConsent: z.boolean().optional(),
+  /** Allow client text (page text, drafting notes) to be sent to the configured AI models. */
+  aiConsent: z.boolean().optional(),
 });
 
 export const clientInput = z.object({
@@ -321,6 +323,38 @@ export const documentUpdateInput = documentFields.partial();
 /** Upload limits shared by clients (to resize before sending) and the API (to enforce). */
 export const PAGE_UPLOAD = { maxBytes: 15 * 1024 * 1024, maxPages: 300, types: ["image/jpeg", "image/png", "image/webp"] } as const;
 
+export const translateInput = z.object({
+  /** The language to translate into. */
+  lang: z.enum(LOCALES),
+  /** Translate again even if a saved translation of this reading exists. */
+  fresh: z.boolean().optional(),
+});
+
+/** The language of a page's text: Marathi when more than half its letters are Devanagari. */
+export function textLocale(text: string): Locale {
+  let deva = 0;
+  let letters = 0;
+  for (const ch of text) {
+    if (/\p{L}/u.test(ch)) {
+      letters++;
+      if (/[\u0900-\u097F]/.test(ch)) deva++;
+    }
+  }
+  return letters && deva / letters > 0.5 ? "mr" : "en";
+}
+
+/** Where an AI task's models process data, so the advocate knows before consenting. */
+export type AiDataLocation = "india" | "abroad" | "unknown";
+export interface AiTaskStatus {
+  enabled: boolean;
+  /** The models in the order they are tried. */
+  models: { id: string; dataLocation: AiDataLocation }[];
+}
+export interface AiStatus {
+  translation: AiTaskStatus;
+  drafting: AiTaskStatus;
+}
+
 export const textSearchQuery = z.object({
   q: z.string().trim().min(2).max(200),
   caseId: z.string().optional(),
@@ -338,6 +372,8 @@ export interface Advocate {
   locale: Locale;
   cloudOcrConsent: boolean;
   cloudOcrConsentAt?: string | null;
+  aiConsent: boolean;
+  aiConsentAt?: string | null;
 }
 export interface Client {
   id: string;
@@ -490,6 +526,15 @@ export interface PageDetail extends PageSummary {
   /** local | local:no-consent | local:confident | local:cloud-queued | cloud | local:cloud-failed | local:cloud-empty */
   ocrRoute: string | null;
   ocrWords: { t: string; c: number; b: [number, number, number, number] }[] | null;
+  /** Saved AI translations of the current reading of this page. */
+  translations: PageTranslation[];
+}
+export interface PageTranslation {
+  lang: Locale;
+  text: string;
+  /** "<provider>:<model id>" that translated it. */
+  model: string;
+  createdAt: string;
 }
 export interface DocumentSummary {
   id: string;

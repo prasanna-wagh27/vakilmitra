@@ -18,15 +18,23 @@ export interface PlanLimits {
   /** New scanned or uploaded pages per calendar month (IST). */
   pagesPerMonth: number;
   storageBytes: number;
+  /** AI requests (a page translation, a draft) per calendar month (IST). A saved translation shown again is free. */
+  aiPerMonth: number;
 }
 
 const GB = 1024 ** 3;
 
 export const PLANS: Record<PlanId, { limits: PlanLimits; price: Record<BillingInterval, number> | null }> = {
-  TRIAL: { limits: { juniors: 1, pagesPerMonth: 100, storageBytes: 2 * GB }, price: null },
-  SOLO: { limits: { juniors: 0, pagesPerMonth: 300, storageBytes: 5 * GB }, price: { MONTHLY: 39_900, YEARLY: 399_900 } },
-  PRO: { limits: { juniors: 1, pagesPerMonth: 1_500, storageBytes: 25 * GB }, price: { MONTHLY: 89_900, YEARLY: 899_900 } },
-  CHAMBER: { limits: { juniors: 4, pagesPerMonth: 5_000, storageBytes: 100 * GB }, price: { MONTHLY: 249_900, YEARLY: 2_499_900 } },
+  TRIAL: { limits: { juniors: 1, pagesPerMonth: 100, storageBytes: 2 * GB, aiPerMonth: 30 }, price: null },
+  SOLO: { limits: { juniors: 0, pagesPerMonth: 300, storageBytes: 5 * GB, aiPerMonth: 200 }, price: { MONTHLY: 39_900, YEARLY: 399_900 } },
+  PRO: {
+    limits: { juniors: 1, pagesPerMonth: 1_500, storageBytes: 25 * GB, aiPerMonth: 800 },
+    price: { MONTHLY: 89_900, YEARLY: 899_900 },
+  },
+  CHAMBER: {
+    limits: { juniors: 4, pagesPerMonth: 5_000, storageBytes: 100 * GB, aiPerMonth: 2_500 },
+    price: { MONTHLY: 249_900, YEARLY: 2_499_900 },
+  },
 };
 
 export const TRIAL_DAYS = 14;
@@ -65,6 +73,7 @@ export interface BillingUsage {
   pagesThisMonth: number;
   storageBytes: number;
   juniors: number;
+  aiThisMonth: number;
 }
 
 export interface PlanInvoice {

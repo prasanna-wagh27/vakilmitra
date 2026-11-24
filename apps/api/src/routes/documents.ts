@@ -1,14 +1,16 @@
-import { randomUUID } from "node:crypto";
-import { and, asc, cases, count, desc, documents, eq, ilike, inArray, pages, sql } from "@vakilmitra/db";
+import { createHash, randomUUID } from "node:crypto";
+import { and, asc, cases, count, desc, documents, eq, ilike, inArray, pages, pageTranslations, sql } from "@vakilmitra/db";
 import { enqueueOcr, rollUpDocumentStatus } from "@vakilmitra/jobs";
-import { documentInput, documentUpdateInput, PAGE_UPLOAD, type SearchHit, textSearchQuery } from "@vakilmitra/shared";
+import { documentInput, documentUpdateInput, PAGE_UPLOAD, type SearchHit, textSearchQuery, translateInput } from "@vakilmitra/shared";
 import { keys } from "@vakilmitra/storage";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import sharp, { type OutputInfo } from "sharp";
 import { z } from "zod";
+import { MAX_TRANSLATE_CHARS, translateText } from "../ai/translate.js";
 import { assertPageQuota } from "../billing/service.js";
 import { db } from "../db.js";
 import { logAccess, requireCaseAccess, visibleCase } from "../lib/access.js";
+import { assertAiAllowed, runAi } from "../lib/ai.js";
 import { HttpError, likePattern, notFound } from "../lib/http.js";
 import { getServices } from "../services.js";
 
@@ -24,6 +26,13 @@ const pageSummary = {
   ocrConfidence: true,
   ocrError: true,
 } as const;
+const translationColumns = { lang: true, text: true, model: true, createdAt: true } as const;
+/** Which reading of a page a translation was made from. */
+const textHash = (text: string | null) =>
+  createHash("sha256")
+    .update(text ?? "")
+    .digest("hex");
+
 const pageReturning = {
   id: pages.id,
   pageNo: pages.pageNo,
@@ -112,10 +121,16 @@ export const documentRoutes: FastifyPluginAsyncZod = async (app) => {
       where: eq(pages.documentId, doc.id),
       orderBy: asc(pages.pageNo),
       columns: { ...pageSummary, ocrText: true, ocrWords: true, ocrEngine: true, ocrRoute: true },
+      with: { translations: { columns: { ...translationColumns, sourceHash: true } } },
     });
     logAccess(req, "document.view", "document", doc.id);
     const { case: _c, ...document } = doc;
-    return { document: { ...document, pageCount: pageRows.length, pages: pageRows } };
+    // Only translations of the current reading: a re-read page shows none until translated again.
+    const withTranslations = pageRows.map(({ translations, ...p }) => {
+      const hash = textHash(p.ocrText);
+      return { ...p, translations: translations.filter((t) => t.sourceHash === hash).map(({ sourceHash: _h, ...t }) => t) };
+    });
+    return { document: { ...document, pageCount: pageRows.length, pages: withTranslations } };
   });
 
   app.patch("/documents/:id", { schema: { params: idParams, body: documentUpdateInput } }, async (req) => {
@@ -242,6 +257,50 @@ export const documentRoutes: FastifyPluginAsyncZod = async (app) => {
     await rollUpDocumentStatus(db, doc.id);
     await enqueueOcr(getServices().ocrQueue, page.id);
     return { page };
+  });
+
+  /**
+   * Translate a page's OCR text with the translation model (Marathi <-> English). The answer is
+   * saved per page and language, and given again for free until the page is re-read.
+   */
+  app.post("/documents/:id/pages/:pageId/translate", { schema: { params: pageParams, body: translateInput } }, async (req) => {
+    const doc = await documentWithAccess(req.advocateId, req.params.id, "write");
+    const page = await db.query.pages.findFirst({
+      where: and(eq(pages.id, req.params.pageId), eq(pages.documentId, doc.id)),
+      columns: { id: true, ocrStatus: true, ocrText: true },
+    });
+    if (!page) throw notFound("Page");
+    const { lang, fresh } = req.body;
+    req.audit.details = { lang };
+    const saved = await db.query.pageTranslations.findFirst({
+      where: and(eq(pageTranslations.pageId, page.id), eq(pageTranslations.lang, lang)),
+      columns: { ...translationColumns, sourceHash: true },
+    });
+    const sourceHash = textHash(page.ocrText);
+    if (saved && saved.sourceHash === sourceHash && !fresh) {
+      req.audit.details.saved = true;
+      const { sourceHash: _h, ...translation } = saved;
+      return { translation };
+    }
+    const text = page.ocrText?.trim();
+    if (page.ocrStatus !== "DONE" || !text) throw new HttpError(409, "not_read", "This page has no text to translate yet");
+    if (text.length > MAX_TRANSLATE_CHARS) throw new HttpError(422, "too_long", "This page has too much text to translate at once");
+
+    await assertAiAllowed(req, "translation", doc.case.advocateId);
+    const { value, model } = await runAi(req, "translation", doc.case.advocateId, (m) => translateText(m, text, lang));
+    if (!value) throw new HttpError(502, "ai_failed", "The AI service did not answer. Try again in a minute.");
+    const row = { sourceHash, text: value, model: model.id, createdAt: new Date() };
+    const [translation] = await db
+      .insert(pageTranslations)
+      .values({ pageId: page.id, lang, ...row })
+      .onConflictDoUpdate({ target: [pageTranslations.pageId, pageTranslations.lang], set: row })
+      .returning({
+        lang: pageTranslations.lang,
+        text: pageTranslations.text,
+        model: pageTranslations.model,
+        createdAt: pageTranslations.createdAt,
+      });
+    return { translation };
   });
 
   /** Search the OCR text of every page the advocate can see (optionally one case). */

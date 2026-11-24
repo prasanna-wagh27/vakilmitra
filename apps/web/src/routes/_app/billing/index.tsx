@@ -89,7 +89,7 @@ function CurrentPlan({ b }: { b: BillingStatus }) {
         </CardDescription>
         {b.paymentFailing && <p className="rounded-lg bg-warning-soft p-2 text-sm text-warning">{t("billing.paymentFailing")}</p>}
       </CardHeader>
-      <CardContent className="grid gap-4 sm:grid-cols-3">
+      <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Meter label={t("billing.pagesMonth")} used={b.usage.pagesThisMonth} max={b.limits.pagesPerMonth} fmt={num} />
         <Meter
           label={t("billing.storage")}
@@ -102,6 +102,7 @@ function CurrentPlan({ b }: { b: BillingStatus }) {
           }
         />
         <Meter label={t("billing.juniors")} used={b.usage.juniors} max={b.limits.juniors} fmt={num} />
+        <Meter label={t("billing.aiMonth")} used={b.usage.aiThisMonth} max={b.limits.aiPerMonth} fmt={num} />
       </CardContent>
       {paid && !b.cancelAtPeriodEnd && !b.complimentary && b.interval === "MONTHLY" && (
         <CardFooter className="flex-wrap gap-2">

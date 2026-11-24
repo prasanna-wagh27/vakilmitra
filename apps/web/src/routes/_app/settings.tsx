@@ -20,7 +20,7 @@ import { authClient } from "@/lib/auth-client";
 import { authError } from "@/lib/errors";
 import { fmtDate, orNull } from "@/lib/format";
 import { type MessageKey, useI18n } from "@/lib/i18n";
-import { billingQuery, meQuery, useApiMutation } from "@/lib/queries";
+import { aiQuery, aiWhere, billingQuery, meQuery, useApiMutation } from "@/lib/queries";
 
 export const Route = createFileRoute("/_app/settings")({ component: SettingsPage });
 
@@ -91,6 +91,7 @@ function SettingsPage() {
       </Section>
 
       <CloudOcrConsent />
+      <AiConsent />
 
       <Section title={t("settings.privacy")}>
         <Card className="gap-3 px-(--card-spacing)">
@@ -165,33 +166,57 @@ function PlanLink() {
 
 /** Consent to send hard-to-read pages to a cloud OCR provider. Off by default; every change is logged. */
 function CloudOcrConsent() {
-  const { t, tf, locale } = useI18n();
+  const { t } = useI18n();
+  return <ConsentToggle field="cloudOcrConsent" title={t("settings.cloudOcr")} text={t("settings.cloudOcrText")} />;
+}
+
+/** Consent to send text to the AI models, shown once the server has any AI task set up. */
+function AiConsent() {
+  const { t } = useI18n();
+  const ai = useQuery(aiQuery);
+  if (!ai.data) return null;
+  const models = [...ai.data.translation.models, ...ai.data.drafting.models];
+  if (!models.length) return null;
+  return <ConsentToggle field="aiConsent" title={t("settings.ai")} text={t("settings.aiText")} note={t(`ai.where.${aiWhere(models)}`)} />;
+}
+
+/** An off-by-default consent the advocate can give and withdraw in one click; the API logs every change. */
+export function ConsentToggle({
+  field,
+  title,
+  text,
+  note,
+}: {
+  field: "cloudOcrConsent" | "aiConsent";
+  title: string;
+  text: string;
+  note?: string;
+}) {
+  const { tf, locale } = useI18n();
   const qc = useQueryClient();
   const me = useQuery(meQuery);
   // Optimistic: the box changes in the same click (no flicker on slow connections) and
   // falls back to the saved value if the save fails.
   const [pending, setPending] = useState<boolean | null>(null);
-  const toggle = useApiMutation((on: boolean) => api<{ advocate: Advocate }>("/me", { method: "PATCH", body: { cloudOcrConsent: on } }), {
+  const toggle = useApiMutation((on: boolean) => api<{ advocate: Advocate }>("/me", { method: "PATCH", body: { [field]: on } }), {
     onSuccess: (r) => qc.setQueryData(meQuery.queryKey, r.advocate),
   });
-  const on = pending ?? me.data?.cloudOcrConsent ?? false;
+  const on = pending ?? me.data?.[field] ?? false;
+  const since = field === "aiConsent" ? me.data?.aiConsentAt : me.data?.cloudOcrConsentAt;
   const change = (next: boolean) => {
     setPending(next);
     toggle.mutate(next, { onSettled: () => setPending(null) });
   };
   return (
-    <Section title={t("settings.cloudOcr")}>
+    <Section title={title}>
       <Card className="gap-3 px-(--card-spacing)">
         <label className="flex min-h-11 items-start gap-3">
           <Checkbox className="mt-1" checked={on} disabled={toggle.isPending || !me.data} onChange={(e) => change(e.target.checked)} />
           <span className="text-sm">
-            <span className="block font-medium">{t("settings.cloudOcr")}</span>
-            <span className="block text-muted-foreground">{t("settings.cloudOcrText")}</span>
-            {on && me.data?.cloudOcrConsentAt && (
-              <span className="mt-1 block text-success">
-                {tf("settings.cloudOcrOn", { date: fmtDate(me.data.cloudOcrConsentAt, locale) })}
-              </span>
-            )}
+            <span className="block font-medium">{title}</span>
+            <span className="block text-muted-foreground">{text}</span>
+            {note && <span className="mt-1 block font-medium">{note}</span>}
+            {on && since && <span className="mt-1 block text-success">{tf("settings.cloudOcrOn", { date: fmtDate(since, locale) })}</span>}
           </span>
         </label>
         <ErrorBox error={toggle.error} />
