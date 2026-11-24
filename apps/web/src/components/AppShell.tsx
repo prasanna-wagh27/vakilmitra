@@ -33,7 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <header className="no-print sticky top-0 z-40 border-b border-black/5 bg-white/85 backdrop-blur-lg">
+      <header className="no-print sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-lg">
         <div className="mx-auto flex h-16 max-w-5xl items-center gap-2 px-4">
           <Link to="/today" aria-label={t("app.name")} className="mr-4">
             <Brand />
@@ -57,7 +57,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-1">
-            <LanguageToggle persist compact className="rounded-xl" />
+            <LanguageToggle persist compact className="h-10 rounded-xl px-3" />
             <Button asChild variant="ghost" size="icon">
               <Link to="/search" aria-label={t("nav.search")}>
                 <HugeiconsIcon icon={Search01Icon} />
@@ -78,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </main>
 
       <nav
-        className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-black/5 bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
+        className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
         aria-label={t("nav.main")}
       >
         <ul className="grid grid-cols-5">
