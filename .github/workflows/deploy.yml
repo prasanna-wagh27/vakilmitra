@@ -7,7 +7,8 @@ name: Deploy
 # Repository settings (Settings > Secrets and variables > Actions):
 #   variables  DEPLOY_HOST       server address, e.g. 203.0.113.10
 #              DEPLOY_USER       SSH user on the server, in the docker group
-#              DEPLOY_DOMAIN     the site's domain, for the health check after deploy
+#              DEPLOY_DOMAIN     the site's domain (e.g. vakilmitra.in), for the health check after
+#                                deploy and the full addresses search engines see on the public pages
 #              VITE_SENTRY_DSN   (optional) Sentry DSN for the web app and admin panel
 #   secrets    DEPLOY_SSH_KEY        private key for DEPLOY_USER (deploy-only key)
 #              DEPLOY_KNOWN_HOSTS    the server's host key line: ssh-keyscan -t ed25519 <host>
@@ -69,6 +70,7 @@ jobs:
           build-args: |
             APP_VERSION=${{ steps.tag.outputs.tag }}
             VITE_SENTRY_DSN=${{ vars.VITE_SENTRY_DSN }}
+            SITE_URL=${{ vars.DEPLOY_DOMAIN && format('https://{0}', vars.DEPLOY_DOMAIN) || '' }}
           tags: |
             ${{ env.IMAGE_REPO }}-web:${{ steps.tag.outputs.tag }}
             ${{ env.IMAGE_REPO }}-web:latest

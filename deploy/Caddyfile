@@ -21,13 +21,16 @@
 	}
 	handle {
 		# File names under /assets carry a content hash, so they can be cached for a year;
-		# everything else (index.html) is checked on every visit so a deploy shows at once.
+		# everything else (the pages) is checked on every visit so a deploy shows at once.
 		@assets path /assets/*
 		header @assets Cache-Control "public, max-age=31536000, immutable"
 		@pages not path /assets/*
 		header @pages Cache-Control "no-cache"
 		root * /srv/{args[0]}
-		try_files {path} /index.html
+		# The web app's public pages are built ahead of time as /index.html, /en.html, /pricing.html
+		# and so on; every other address gets the app shell (app.html; the admin panel has only
+		# index.html), and the app draws the page in the browser.
+		try_files {path} {path}.html /app.html /index.html
 		file_server
 	}
 }

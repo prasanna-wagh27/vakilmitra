@@ -30,14 +30,21 @@ declare module "@tanstack/react-router" {
   }
 }
 
-createRoot(document.getElementById("root")!, {
-  onUncaughtError: reactErrorHandler,
-  onCaughtError: reactErrorHandler,
-  onRecoverableError: reactErrorHandler,
-}).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  </StrictMode>,
-);
+const root = document.getElementById("root")!;
+const render = () =>
+  createRoot(root, {
+    onUncaughtError: reactErrorHandler,
+    onCaughtError: reactErrorHandler,
+    onRecoverableError: reactErrorHandler,
+  }).render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </StrictMode>,
+  );
+
+// A public page built ahead of time (src/prerender.tsx) stays on screen until the app has loaded
+// the page, so it is replaced by the same page and never by a blank one. Elsewhere, start at once.
+if (root.dataset.prerendered) void router.load().finally(render);
+else render();
