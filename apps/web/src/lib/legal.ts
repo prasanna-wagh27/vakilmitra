@@ -5,7 +5,7 @@
  */
 export const LEGAL = {
   /** Legal name of the business: a company ("… Private Limited"), LLP, or the proprietor's name. */
-  operator: null as string | null,
+  operator: "Outgrid Labs" as string | null,
   /** Registered or business address, with PIN code. */
   address: null as string | null,
   supportEmail: null as string | null,

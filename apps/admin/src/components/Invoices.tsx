@@ -21,7 +21,7 @@ export function InvoiceTable({ invoices, owner, showCustomer }: { invoices: Admi
               {showCustomer && <th className={th}>Customer</th>}
               <th className={th}>Plan</th>
               <th className={`${th} text-right`}>Amount</th>
-              <th className={`${th} text-right`}>With GST</th>
+              <th className={`${th} text-right`}>Total paid</th>
               <th className={th}>Status</th>
               <th className={th}>Date</th>
               {owner && <th className={th} />}

@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { GST_REGISTERED } from "@vakilmitra/shared";
 import { fmtNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { LEGAL } from "@/lib/legal";
@@ -38,8 +39,8 @@ function En() {
         </li>
         <li>Preferences: language and whether you allow cloud OCR.</li>
         <li>
-          Billing: plan, payment dates and amounts, billing name, GSTIN and state, and the invoices we issue. Card, UPI and bank details go
-          directly to Razorpay and never reach us.
+          Billing: plan, payment dates and amounts, billing name{GST_REGISTERED ? ", GSTIN" : ""} and state, and the receipts and invoices
+          we issue. Card, UPI and bank details go directly to Razorpay and never reach us.
         </li>
         <li>
           Your files: what you enter or scan, as described above. Photos are re-encoded on upload, which removes location and camera
@@ -57,7 +58,7 @@ function En() {
       <ul>
         <li>to give you the service you signed up for, including reading your scanned pages and building reports;</li>
         <li>to sign you in, keep your account secure and prevent misuse;</li>
-        <li>to take payments, issue GST invoices and keep the accounts that tax law requires;</li>
+        <li>to take payments, issue receipts and invoices, and keep the accounts that tax law requires;</li>
         <li>to send emails about your account: password resets, address confirmation, payment receipts and important service notices.</li>
       </ul>
       <p>
@@ -103,7 +104,7 @@ function En() {
           We keep an anonymous record that a deletion happened.
         </li>
         <li>The activity log: for 1 year from each entry, then deleted automatically.</li>
-        <li>Invoices and payment records: for 8 years, as required by tax law, even after the account is deleted.</li>
+        <li>Receipts, invoices and payment records: for 8 years, as required by tax law, even after the account is deleted.</li>
       </ul>
 
       <h2>8. Your rights</h2>
@@ -167,8 +168,8 @@ function Mr() {
         <li>खाते: नाव, ईमेल पत्ता, पासवर्ड (फक्त सुरक्षित हॅश स्वरूपात साठवला जातो), आणि ऐच्छिकपणे फोन व बार कौन्सिल नोंदणी क्रमांक.</li>
         <li>पसंती: भाषा, आणि क्लाउड ओसीआर वापरण्याची परवानगी दिली आहे का.</li>
         <li>
-          बिलिंग: योजना, पेमेंटच्या तारखा व रकमा, बिलावरील नाव, जीएसटीआयएन व राज्य, आणि आम्ही दिलेली बीजके. कार्ड, यूपीआय आणि बँकेचे तपशील थेट रेझरपेकडे
-          जातात; ते आमच्यापर्यंत कधीही पोहोचत नाहीत.
+          बिलिंग: योजना, पेमेंटच्या तारखा व रकमा, बिलावरील नाव{GST_REGISTERED ? ", जीएसटीआयएन" : ""} व राज्य, आणि आम्ही दिलेल्या पावत्या व बीजके. कार्ड,
+          यूपीआय आणि बँकेचे तपशील थेट रेझरपेकडे जातात; ते आमच्यापर्यंत कधीही पोहोचत नाहीत.
         </li>
         <li>
           तुमच्या फाइल्स: वर सांगितल्याप्रमाणे तुम्ही भरलेली किंवा स्कॅन केलेली माहिती. अपलोड करताना फोटो पुन्हा तयार केले जातात, त्यामुळे त्यातील ठिकाण आणि कॅमेऱ्याचे
@@ -185,7 +186,7 @@ function Mr() {
       <ul>
         <li>तुम्ही घेतलेली सेवा देण्यासाठी, यात तुमची स्कॅन केलेली पाने वाचणे आणि अहवाल तयार करणे समाविष्ट;</li>
         <li>तुम्हाला लॉग इन करू देण्यासाठी, खाते सुरक्षित ठेवण्यासाठी आणि गैरवापर टाळण्यासाठी;</li>
-        <li>पेमेंट घेण्यासाठी, जीएसटी बीजके देण्यासाठी आणि कर कायद्याने आवश्यक हिशोब ठेवण्यासाठी;</li>
+        <li>पेमेंट घेण्यासाठी, पावत्या व बीजके देण्यासाठी आणि कर कायद्याने आवश्यक हिशोब ठेवण्यासाठी;</li>
         <li>खात्याबद्दल ईमेल पाठवण्यासाठी: पासवर्ड बदलणे, ईमेल पडताळणी, पेमेंटच्या पावत्या आणि सेवेबद्दलच्या महत्त्वाच्या सूचना.</li>
       </ul>
       <p>
@@ -228,7 +229,7 @@ function Mr() {
           नाव नसलेली नोंद आम्ही ठेवतो.
         </li>
         <li>हालचालींची नोंद: प्रत्येक नोंद {n(1)} वर्ष ठेवली जाते, त्यानंतर आपोआप हटवली जाते.</li>
-        <li>बीजके आणि पेमेंटच्या नोंदी: कर कायद्यानुसार {n(8)} वर्षे, खाते हटवल्यानंतरही.</li>
+        <li>पावत्या, बीजके आणि पेमेंटच्या नोंदी: कर कायद्यानुसार {n(8)} वर्षे, खाते हटवल्यानंतरही.</li>
       </ul>
 
       <h2>८. तुमचे हक्क</h2>

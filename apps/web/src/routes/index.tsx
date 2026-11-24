@@ -13,7 +13,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { type BillingInterval, PAID_PLANS, PLANS, TRIAL_DAYS } from "@vakilmitra/shared";
+import { type BillingInterval, GST_REGISTERED, PAID_PLANS, PLANS, TRIAL_DAYS } from "@vakilmitra/shared";
 import { type ReactNode, useEffect, useState } from "react";
 import { Brand } from "@/components/Brand";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -300,7 +300,8 @@ function Pricing() {
               </p>
               <p className="tight mt-10 text-5xl font-semibold tabular-nums md:text-6xl">{rupees(price![interval], locale)}</p>
               <p className={cn("mt-3 text-base", dark ? "text-white/65" : "text-graphite/55")}>
-                {t(interval === "MONTHLY" ? "billing.perMonth" : "billing.perYear")} · {t("billing.plusGst")}
+                {t(interval === "MONTHLY" ? "billing.perMonth" : "billing.perYear")}
+                {GST_REGISTERED && ` · ${t("billing.plusGst")}`}
               </p>
               <TrialButton light={dark} arrow={dark} className="mt-7 w-full" />
               <div className={cn("mt-8 border-t pt-7", dark ? "border-white/15" : "border-black/10")}>
@@ -322,7 +323,7 @@ function Pricing() {
         })}
       </div>
       <p className="mt-8 text-graphite/55">
-        {t("legal.pricingNote")}{" "}
+        {t(GST_REGISTERED ? "legal.pricingNote" : "legal.pricingNoteNoGst")}{" "}
         <Link to="/pricing" className="text-link underline underline-offset-4">
           {t("home.pricing.more")}
         </Link>
@@ -475,6 +476,7 @@ function SiteFooter() {
           </div>
         ))}
       </div>
+      <p className="mx-auto mt-12 max-w-6xl px-4 text-sm text-white/50">{t("legal.madeBy")}</p>
       {/* The name, big and faint, over a little indigo glow. */}
       <div aria-hidden className="relative mt-16 select-none">
         <div className="absolute bottom-0 left-1/2 h-40 w-[70%] -translate-x-1/2 rounded-full bg-link/40 blur-3xl" />

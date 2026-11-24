@@ -27,6 +27,7 @@ import {
   type BillingStatus,
   type BillingUsage,
   GRACE_DAYS,
+  GST_REGISTERED,
   gstFor,
   istDate,
   type PaidPlanId,
@@ -194,7 +195,8 @@ export function priceOf(plan: PaidPlanId, interval: BillingInterval) {
 }
 
 /**
- * Records one successful charge: extends the plan and issues the GST invoice.
+ * Records one successful charge: extends the plan and issues the invoice (a GST tax invoice when
+ * we are registered, otherwise a plain receipt).
  * Idempotent on the Razorpay payment id, because both the browser and the webhook report the same payment.
  */
 export async function recordCharge(c: {
@@ -254,7 +256,7 @@ export async function recordCharge(c: {
       .where(eq(subscriptions.advocateId, c.advocateId));
 
     const amount = priceOf(c.plan, c.interval);
-    const tax = gstFor(amount, sub.billingState);
+    const tax = gstFor(amount, sub.billingState, GST_REGISTERED);
     const [{ n }] = (await tx.execute(sql`select nextval('invoice_number_seq') as n`)).rows as [{ n: string }];
     const [inv] = await tx
       .insert(invoices)
@@ -274,9 +276,16 @@ export async function recordCharge(c: {
         billingEmail: advocate.email,
         gstin: sub.gstin,
         billingState: sub.billingState,
+        supplierGstin: GST_REGISTERED ? (env.BILLING_SUPPLIER_GSTIN ?? null) : null,
         razorpayPaymentId: c.paymentId,
       })
-      .returning({ id: invoices.id, number: invoices.number, totalPaise: invoices.totalPaise, periodEnd: invoices.periodEnd });
+      .returning({
+        id: invoices.id,
+        number: invoices.number,
+        totalPaise: invoices.totalPaise,
+        periodEnd: invoices.periodEnd,
+        supplierGstin: invoices.supplierGstin,
+      });
     if (c.checkoutId) await tx.update(checkouts).set({ completedAt: now }).where(eq(checkouts.id, c.checkoutId));
     await logBilling(tx, c.advocateId, "billing.paid", c.paymentId);
     return { oldRecurring, advocate, inv: inv! };
@@ -290,11 +299,11 @@ export async function recordCharge(c: {
   sendReceipt(done.advocate, c.plan, done.inv);
 }
 
-/** Emails the receipt with a link to the GST invoice. Never fails the charge. */
+/** Emails the receipt with a link to the invoice. Never fails the charge. */
 function sendReceipt(
   to: { name: string; email: string; locale: "mr" | "en" },
   plan: PaidPlanId,
-  inv: { id: string; number: string; totalPaise: number; periodEnd: Date },
+  inv: { id: string; number: string; totalPaise: number; periodEnd: Date; supplierGstin: string | null },
 ) {
   const l = to.locale;
   const mail = receiptMail(to, {
@@ -308,6 +317,7 @@ function sendReceipt(
       timeZone: "Asia/Kolkata",
     }),
     url: `${env.WEB_ORIGIN}/billing/invoices/${inv.id}`,
+    taxInvoice: inv.supplierGstin !== null,
   });
   void mailer()
     .send(mail)

@@ -1,7 +1,7 @@
 /**
  * Plans, prices and limits. Every plan has the full product (diary, cases, fees, 7/12 and
  * Ferfar analysis, title report, Word export); plans differ only in seats, scanning and storage.
- * Prices are in paise and exclude GST.
+ * Prices are in paise and exclude GST (GST is added only while GST_REGISTERED is true).
  */
 import { z } from "zod";
 
@@ -32,13 +32,21 @@ export const PLANS: Record<PlanId, { limits: PlanLimits; price: Record<BillingIn
 export const TRIAL_DAYS = 14;
 /** Days after a trial or paid period ends before the account turns read-only. */
 export const GRACE_DAYS = 7;
+/**
+ * Whether we are registered for GST. While false, no GST is charged: plan prices are final and
+ * each payment gets a plain receipt, not a tax invoice (an unregistered seller may not collect GST).
+ * After registering: set this to true, set BILLING_SUPPLIER_GSTIN and BILLING_SAC on the API, and run
+ * `pnpm --filter @vakilmitra/api billing:plans` again so the monthly Razorpay plans include GST.
+ * Registration is compulsory once a year's turnover passes ₹20 lakh.
+ */
+export const GST_REGISTERED = false;
 export const GST_RATE = 0.18;
 /** Our place of supply: same-state customers pay CGST + SGST, others IGST. */
 export const SUPPLIER_STATE = "MH";
 
-/** GST split for an amount in paise (excluding tax). */
-export function gstFor(amountPaise: number, customerState: string | null | undefined) {
-  const gst = Math.round(amountPaise * GST_RATE);
+/** GST split for an amount in paise (excluding tax); all zero when not registered (pass GST_REGISTERED). */
+export function gstFor(amountPaise: number, customerState: string | null | undefined, registered: boolean) {
+  const gst = registered ? Math.round(amountPaise * GST_RATE) : 0;
   const intra = !customerState || customerState === SUPPLIER_STATE;
   const half = Math.floor(gst / 2);
   return {
@@ -74,6 +82,8 @@ export interface PlanInvoice {
   billingName: string;
   gstin: string | null;
   billingState: string | null;
+  /** Our GSTIN when this was issued as a tax invoice; null for a plain receipt. */
+  supplierGstin: string | null;
   status: "PAID" | "REFUNDED";
   razorpayPaymentId: string;
   createdAt: string;

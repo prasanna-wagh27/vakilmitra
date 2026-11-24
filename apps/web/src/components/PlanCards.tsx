@@ -1,6 +1,6 @@
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { type BillingInterval, PAID_PLANS, type PaidPlanId, PLANS } from "@vakilmitra/shared";
+import { type BillingInterval, GST_REGISTERED, PAID_PLANS, type PaidPlanId, PLANS } from "@vakilmitra/shared";
 import type { ReactNode } from "react";
 import { fmtNumber, rupees } from "@/lib/format";
 import { type MessageKey, useI18n } from "@/lib/i18n";
@@ -36,7 +36,7 @@ export function PlanCards({ interval, action }: { interval: BillingInterval; act
               <div>
                 <span className="font-display text-4xl tabular-nums">{rupees(amount, locale)}</span>
                 <span className="text-sm text-muted-foreground">{t(interval === "MONTHLY" ? "billing.perMonth" : "billing.perYear")}</span>
-                <p className="text-xs text-muted-foreground">{t("billing.plusGst")}</p>
+                {GST_REGISTERED && <p className="text-xs text-muted-foreground">{t("billing.plusGst")}</p>}
               </div>
               <ul className="flex flex-col gap-2 text-sm">
                 {feats.map((f) => (

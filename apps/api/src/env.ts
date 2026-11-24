@@ -1,3 +1,4 @@
+import { GST_REGISTERED } from "@vakilmitra/shared";
 import { z } from "zod";
 
 /** Optional setting; an empty value (as copied from .env.example) counts as not set. */
@@ -22,8 +23,8 @@ const schema = z.object({
   RAZORPAY_PLAN_SOLO: optional,
   RAZORPAY_PLAN_PRO: optional,
   RAZORPAY_PLAN_CHAMBER: optional,
-  // Seller details printed on GST invoices (fill in before going live).
-  BILLING_SUPPLIER_NAME: z.string().default("VakilMitra"),
+  // Seller details printed on receipts and invoices. GSTIN and SAC are needed only once GST_REGISTERED is true.
+  BILLING_SUPPLIER_NAME: z.string().default("Outgrid Labs"),
   BILLING_SUPPLIER_ADDRESS: optional,
   BILLING_SUPPLIER_GSTIN: optional,
   BILLING_SAC: optional,
@@ -41,6 +42,11 @@ if (!parsed.success) {
 export const env = parsed.data;
 export const isProd = env.NODE_ENV === "production";
 if (isProd && !env.SMTP_URL) console.warn("SMTP_URL is not set: password resets and receipts will not be emailed");
+
+if (GST_REGISTERED && !env.BILLING_SUPPLIER_GSTIN) {
+  console.error("GST_REGISTERED is true, so BILLING_SUPPLIER_GSTIN must be set to issue tax invoices");
+  process.exit(1);
+}
 
 if (isProd && env.BETTER_AUTH_SECRET.length < 32) {
   console.error("BETTER_AUTH_SECRET must be at least 32 characters in production");

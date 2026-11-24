@@ -99,6 +99,13 @@
       "when": 1795161243672,
       "tag": "0013_activity_retention",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795524661114,
+      "tag": "0014_invoice_supplier_gstin",
+      "breakpoints": true
     }
   ]
 }

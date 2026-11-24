@@ -102,10 +102,10 @@ describe("yearly plan (Razorpay order)", () => {
     a = await signup("bill-yearly");
   });
 
-  it("creates an order for the plan price plus GST", async () => {
+  it("creates an order for the plan price, with no GST while we are not registered", async () => {
     const r = await a.agent.post("/api/billing/checkout").send({ plan: "PRO", interval: "YEARLY" });
     expect(r.status).toBe(200);
-    expect(r.body.checkout.totalPaise).toBe(899_900 + 161_982);
+    expect(r.body.checkout.totalPaise).toBe(899_900);
     expect(r.body.checkout.subscriptionId).toBeNull();
     orderId = r.body.checkout.orderId;
     expect(orderId).toMatch(/^order_/);
@@ -119,7 +119,7 @@ describe("yearly plan (Razorpay order)", () => {
     expect((await a.agent.get("/api/billing")).body.billing.plan).toBe("TRIAL");
   });
 
-  it("activates the plan for a year and issues one GST invoice, however often it is reported", async () => {
+  it("activates the plan for a year and issues one receipt, however often it is reported", async () => {
     const body = {
       razorpay_payment_id: `pay_y1_${stamp}`,
       razorpay_order_id: orderId,
@@ -141,11 +141,14 @@ describe("yearly plan (Razorpay order)", () => {
     expect(list.body.invoices).toHaveLength(1);
     const inv = list.body.invoices[0];
     expect(inv.number).toMatch(/^VM\/\d{4}-\d{2}\/\d{6}$/);
-    expect(inv).toMatchObject({ amountPaise: 899_900, cgstPaise: 80_991, sgstPaise: 80_991, igstPaise: 0, totalPaise: 1_061_882 });
-    expect((await a.agent.get(`/api/billing/invoices/${inv.id}`)).status).toBe(200);
+    expect(inv).toMatchObject({ amountPaise: 899_900, cgstPaise: 0, sgstPaise: 0, igstPaise: 0, totalPaise: 899_900, supplierGstin: null });
+    const one = await a.agent.get(`/api/billing/invoices/${inv.id}`);
+    expect(one.status).toBe(200);
+    // A receipt never carries a GSTIN or SAC, whatever the API is configured with.
+    expect(one.body.supplier).toMatchObject({ name: "Outgrid Labs", gstin: null, sac: null });
   });
 
-  it("charges IGST to customers outside Maharashtra", async () => {
+  it("keeps the billing name and state on receipts for customers outside Maharashtra, without GST", async () => {
     const b = await signup("bill-igst");
     await b.agent.put("/api/billing/details").send({ billingName: "Adv. Goa", gstin: "30abcde1234f1z5", billingState: "ga" });
     const c = await b.agent.post("/api/billing/checkout").send({ plan: "SOLO", interval: "YEARLY" });
@@ -157,9 +160,10 @@ describe("yearly plan (Razorpay order)", () => {
     });
     const [inv] = await invoicesOf(b.id);
     expect(inv).toMatchObject({
-      igstPaise: 71_982,
+      igstPaise: 0,
       cgstPaise: 0,
       sgstPaise: 0,
+      totalPaise: 399_900,
       gstin: "30ABCDE1234F1Z5",
       billingState: "GA",
       billingName: "Adv. Goa",
