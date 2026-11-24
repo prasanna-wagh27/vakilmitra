@@ -23,7 +23,9 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm install --frozen-lo
 ARG VITE_SENTRY_DSN=""
 ARG VITE_SENTRY_ENVIRONMENT="production"
 ARG APP_VERSION="dev"
-ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN VITE_SENTRY_ENVIRONMENT=$VITE_SENTRY_ENVIRONMENT VITE_APP_VERSION=$APP_VERSION
+# The site's address (https://…), for the search-engine tags and sitemap on the public pages.
+ARG SITE_URL=""
+ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN VITE_SENTRY_ENVIRONMENT=$VITE_SENTRY_ENVIRONMENT VITE_APP_VERSION=$APP_VERSION SITE_URL=$SITE_URL
 RUN pnpm turbo run build
 # Keep only what the API and worker need at run time.
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \

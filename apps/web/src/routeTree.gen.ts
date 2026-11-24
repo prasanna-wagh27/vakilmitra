@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DeliveryRouteImport } from './routes/delivery'
+import { Route as EnRouteImport } from './routes/en'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -59,6 +60,11 @@ const ContactRoute = ContactRouteImport.update({
 const DeliveryRoute = DeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnRoute = EnRouteImport.update({
+  id: '/en',
+  path: '/en',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
+  '/en': typeof EnRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
+  '/en': typeof EnRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/contact': typeof ContactRoute
   '/delivery': typeof DeliveryRoute
+  '/en': typeof EnRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/delivery'
+    | '/en'
     | '/forgot-password'
     | '/login'
     | '/pricing'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/delivery'
+    | '/en'
     | '/forgot-password'
     | '/login'
     | '/pricing'
@@ -381,6 +392,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/contact'
     | '/delivery'
+    | '/en'
     | '/forgot-password'
     | '/login'
     | '/pricing'
@@ -416,6 +428,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   ContactRoute: typeof ContactRoute
   DeliveryRoute: typeof DeliveryRoute
+  EnRoute: typeof EnRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
@@ -454,6 +467,13 @@ declare module '@tanstack/react-router' {
       path: '/delivery'
       fullPath: '/delivery'
       preLoaderRoute: typeof DeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en': {
+      id: '/en'
+      path: '/en'
+      fullPath: '/en'
+      preLoaderRoute: typeof EnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -711,6 +731,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   ContactRoute: ContactRoute,
   DeliveryRoute: DeliveryRoute,
+  EnRoute: EnRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,

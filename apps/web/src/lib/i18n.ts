@@ -1,6 +1,6 @@
 import type { Locale } from "@vakilmitra/shared";
 import { interpolate, type MessageKey, translate } from "@vakilmitra/shared/i18n";
-import { useCallback, useEffect } from "react";
+import { createContext, useCallback, useContext, useEffect } from "react";
 import { z } from "zod";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -25,8 +25,15 @@ export const useLocaleStore = create<LocaleState>()(
   ),
 );
 
+/**
+ * The language of a page rendered at build time (src/prerender.tsx). On the server the store
+ * always answers with its starting state, so the page's language is passed down this way.
+ */
+export const PrerenderLocale = createContext<Locale | null>(null);
+
 export function useI18n() {
-  const locale = useLocaleStore((s) => s.locale);
+  const stored = useLocaleStore((s) => s.locale);
+  const locale = useContext(PrerenderLocale) ?? stored;
   const setLocale = useLocaleStore((s) => s.setLocale);
   const t = useCallback((key: MessageKey) => translate(locale, key), [locale]);
   const tf = useCallback((key: MessageKey, vars: Record<string, string | number>) => interpolate(translate(locale, key), vars), [locale]);

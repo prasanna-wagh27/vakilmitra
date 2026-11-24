@@ -98,7 +98,7 @@ Everything runs on one server in Mumbai with Docker Compose (`deploy/compose.yml
   1. Install Docker and add a deploy user to the `docker` group.
   2. Create `/opt/vakilmitra`, copy `deploy/.env.example` there as `.env` with `chmod 600`, and fill it in.
   3. Point `DOMAIN`, `www.DOMAIN` and `admin.DOMAIN` at the server, and open ports 80 and 443.
-  4. In the repository's Actions settings, add the variables `DEPLOY_HOST`, `DEPLOY_USER` and `DEPLOY_DOMAIN`, the secrets `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS`, and optionally the variable `VITE_SENTRY_DSN`.
+  4. In the repository's Actions settings, add the variables `DEPLOY_HOST`, `DEPLOY_USER` and `DEPLOY_DOMAIN` (also used for the full addresses search engines see), the secrets `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS`, and optionally the variable `VITE_SENTRY_DSN`.
   5. Run the Deploy workflow.
 - **Keys:** keep an offline copy of `STORAGE_MASTER_KEYS`. Without it, client files and backups cannot be read. The keys live only in the server's `.env`, never in a bucket's account.
 - **Files must stay in India:** use `STORAGE_DRIVER=s3` with a bucket in `ap-south-1` (or another India-region, S3-compatible store), and a second bucket in another account for backups. `STORAGE_DRIVER=fs` keeps files in a Docker volume on the server, which is fine for a trial but is not backed up off the machine beyond the nightly backup.
@@ -152,7 +152,16 @@ AI features never import a provider's SDK. They ask `packages/ai` for their task
 ## Policy pages
 
 - Public pages, no sign-in: `/pricing`, `/terms`, `/privacy`, `/refunds`, `/delivery`, `/contact`. Razorpay checks for these before turning on live payments. They are linked from sign-in and sign-up, Settings and the billing page, and sign-up says that creating an account accepts the Terms and Privacy Policy.
-- The home page (`/`, `apps/web/src/routes/index.tsx`) is public: what VakilMitra does, features, privacy, pricing and questions, in the reader's language. Signed-in advocates are sent to their day (`/today`). Its claims must stay true to what is built.
+- The home page (`apps/web/src/components/marketing/HomePage.tsx`) is public: what VakilMitra does, features, privacy, pricing and questions. It is at `/` in Marathi and `/en` in English, and the address follows the language the reader picks. Signed-in advocates are sent to their day (`/today`). Its claims must stay true to what is built.
+
+## Search engines and link previews
+
+- The public pages (`/`, `/en` and the policy pages) are built ahead of time as plain HTML (`src/prerender.tsx`, run by `scripts/prerender.mjs` after `vite build`), so search engines and link previews such as WhatsApp see the whole page without running JavaScript. In the browser the app loads the same page, then takes over; the screen is never blank in between. Every other address gets the empty app shell (`app.html`), as before.
+- Each page gets its title, description, canonical address, Open Graph share card (`public/og-image.png`, 1200×630) and, for the home page, Marathi/English alternates (`hreflang`) and structured data: the product with each plan's monthly price, and the six questions as an FAQ. The build also writes `robots.txt` (keeps crawlers off `/api/`) and `sitemap.xml`. Source: `apps/web/src/seo.ts`.
+- Full addresses need the site's address at build time: `SITE_URL` (e.g. `https://vakilmitra.in`). The deploy workflow sets it from `DEPLOY_DOMAIN`; without it, the canonical, alternate, share-image tags and the sitemap are left out.
+- Caddy serves `{path}`, then `{path}.html`, then `app.html` (`deploy/Caddyfile`).
+- A new public page: add its route, then add it to `PUBLIC_PAGES` in `src/seo.ts`. The tests (`test/seo.test.ts`, `test/prerender.test.tsx`) check every listed page renders with its heading and one title and description.
+- Once live, add the site in Google Search Console and submit `/sitemap.xml`.
 - Each policy is written in full in Marathi and in English, and readers see only their chosen language (if the two differ, the English text prevails). Source: `apps/web/src/components/legal/`.
 - Language rule for the whole web app: no English on a Marathi screen and no Marathi on an English one (except the language switch). Server errors are translated in `apps/web/src/lib/errors.ts`; add a Marathi line there for every new API error message.
 - Business details (legal name, address, support and grievance contacts, courts' city) live in `apps/web/src/lib/legal.ts`. Until every one is filled in, the pages show "to be added" and a draft notice.
