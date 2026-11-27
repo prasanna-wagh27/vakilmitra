@@ -72,7 +72,7 @@ export function PolicyFooter({ className }: { className?: string }) {
   return (
     <footer className={cn("border-t", className)}>
       <nav className="mx-auto flex max-w-4xl flex-wrap justify-center gap-x-4 gap-y-2 px-4 py-5 text-xs text-muted-foreground">
-        {POLICY_LINKS.map((l) => (
+        {[...POLICY_LINKS, { to: "/new-laws", key: "laws.title" } as const].map((l) => (
           <Link key={l.to} to={l.to} className="hover:text-foreground hover:underline" activeProps={{ className: "text-foreground" }}>
             {t(l.key)}
           </Link>

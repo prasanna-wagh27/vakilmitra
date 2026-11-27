@@ -16,6 +16,7 @@ import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as NewLawsRouteImport } from './routes/new-laws'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RefundsRouteImport } from './routes/refunds'
@@ -75,6 +76,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewLawsRoute = NewLawsRouteImport.update({
+  id: '/new-laws',
+  path: '/new-laws',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/en': typeof EnRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/new-laws': typeof NewLawsRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refunds': typeof RefundsRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/en': typeof EnRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/new-laws': typeof NewLawsRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refunds': typeof RefundsRoute
@@ -290,6 +298,7 @@ export interface FileRoutesById {
   '/en': typeof EnRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/new-laws': typeof NewLawsRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refunds': typeof RefundsRoute
@@ -326,6 +335,7 @@ export interface FileRouteTypes {
     | '/en'
     | '/forgot-password'
     | '/login'
+    | '/new-laws'
     | '/pricing'
     | '/privacy'
     | '/refunds'
@@ -360,6 +370,7 @@ export interface FileRouteTypes {
     | '/en'
     | '/forgot-password'
     | '/login'
+    | '/new-laws'
     | '/pricing'
     | '/privacy'
     | '/refunds'
@@ -395,6 +406,7 @@ export interface FileRouteTypes {
     | '/en'
     | '/forgot-password'
     | '/login'
+    | '/new-laws'
     | '/pricing'
     | '/privacy'
     | '/refunds'
@@ -431,6 +443,7 @@ export interface RootRouteChildren {
   EnRoute: typeof EnRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  NewLawsRoute: typeof NewLawsRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundsRoute: typeof RefundsRoute
@@ -488,6 +501,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/new-laws': {
+      id: '/new-laws'
+      path: '/new-laws'
+      fullPath: '/new-laws'
+      preLoaderRoute: typeof NewLawsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -734,6 +754,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnRoute: EnRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  NewLawsRoute: NewLawsRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RefundsRoute: RefundsRoute,

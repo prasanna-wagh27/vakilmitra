@@ -1,0 +1,3087 @@
+{
+  "bns": [
+    { "section": "1(1)", "title": "Short title, commencement and application.", "old": "1", "oldSections": ["1"] },
+    { "section": "1(2)", "title": "Commencement.", "old": null, "oldSections": [] },
+    { "section": "1(3)", "title": "Punishment of offences committed within India.", "old": "2", "oldSections": ["2"] },
+    {
+      "section": "1(4)",
+      "title": "Punishment of offences committed beyond, which by law may be tried within, India.",
+      "old": "3",
+      "oldSections": ["3"]
+    },
+    {
+      "section": "1(5)",
+      "title": "Short title, commencement and application- Extension of Code to extra-territorial offences.",
+      "old": "4",
+      "oldSections": ["4"]
+    },
+    {
+      "section": "1(6)",
+      "title": "Short title, commencement and application-“Certain laws not to be affected by this Act”.",
+      "old": "5",
+      "oldSections": ["5"]
+    },
+    { "section": "2", "title": "Definitions.", "old": null, "oldSections": [] },
+    { "section": "2(1)", "title": "“act”.", "old": "33", "oldSections": ["33"] },
+    { "section": "2(2)", "title": "\"animal\".", "old": "47", "oldSections": ["47"] },
+    { "section": "2(3)", "title": "\"child\".", "old": null, "oldSections": [] },
+    { "section": "2(4)", "title": "\"Counterfeit\".", "old": "28", "oldSections": ["28"] },
+    { "section": "2(5)", "title": "\"Court\".", "old": "20", "oldSections": ["20"] },
+    { "section": "2(6)", "title": "\"Death\".", "old": "46", "oldSections": ["46"] },
+    { "section": "2(7)", "title": "\"Dishonestly\".", "old": "24", "oldSections": ["24"] },
+    { "section": "2(8)", "title": "\"Document\".", "old": "29 and 29A", "oldSections": ["29", "29A"] },
+    { "section": "2(9)", "title": "Fraudulently.", "old": "25", "oldSections": ["25"] },
+    { "section": "2(10)", "title": "Gender.", "old": "8", "oldSections": ["8"] },
+    { "section": "2(11)", "title": "Good faith.", "old": "52", "oldSections": ["52"] },
+    { "section": "2(12)", "title": "Government.", "old": "17", "oldSections": ["17"] },
+    { "section": "2(13)", "title": "Harbour.", "old": "52A", "oldSections": ["52A"] },
+    { "section": "2(14)", "title": "Injury.", "old": "44", "oldSections": ["44"] },
+    { "section": "2(15)", "title": "Illegal and legally bound to do.", "old": "43", "oldSections": ["43"] },
+    { "section": "2(16)", "title": "Judge.", "old": "19", "oldSections": ["19"] },
+    { "section": "2(17)", "title": "Life.", "old": "45", "oldSections": ["45"] },
+    { "section": "2(18)", "title": "Local law.", "old": "42", "oldSections": ["42"] },
+    { "section": "2(19)", "title": "Man.", "old": "10", "oldSections": ["10"] },
+    { "section": "2(20)", "title": "Month and year.", "old": "49", "oldSections": ["49"] },
+    { "section": "2(21)", "title": "Movable property.", "old": "22", "oldSections": ["22"] },
+    { "section": "2(22)", "title": "Number.", "old": "9", "oldSections": ["9"] },
+    { "section": "2(23)", "title": "Oath.", "old": "51", "oldSections": ["51"] },
+    { "section": "2(24)", "title": "Offence.", "old": "40", "oldSections": ["40"] },
+    { "section": "2(25)", "title": "Omission.", "old": "33", "oldSections": ["33"] },
+    { "section": "2(26)", "title": "Person.", "old": "11", "oldSections": ["11"] },
+    { "section": "2(27)", "title": "Public.", "old": "12", "oldSections": ["12"] },
+    { "section": "2(28)", "title": "Public servant.", "old": "21", "oldSections": ["21"] },
+    { "section": "2(29)", "title": "Reason to believe.", "old": "26", "oldSections": ["26"] },
+    { "section": "2(30)", "title": "Special law.", "old": "41", "oldSections": ["41"] },
+    { "section": "2(31)", "title": "Valuable security.", "old": "30", "oldSections": ["30"] },
+    { "section": "2(32)", "title": "Vessel.", "old": "48", "oldSections": ["48"] },
+    { "section": "2(33)", "title": "Voluntarily.", "old": "39", "oldSections": ["39"] },
+    { "section": "2(34)", "title": "Will.", "old": "31", "oldSections": ["31"] },
+    { "section": "2(35)", "title": "Woman.", "old": "10", "oldSections": ["10"] },
+    { "section": "2(36)", "title": "Wrongful gain.", "old": "23 Clause-1", "oldSections": ["23"] },
+    { "section": "2(37)", "title": "Wrongful loss.", "old": "23 Clause-2", "oldSections": ["23"] },
+    { "section": "2(38)", "title": "Gaining wrongfully, losing wrongfully.", "old": "23 Clause-3", "oldSections": ["23"] },
+    { "section": "2(39)", "title": "Words and expressions used but not defined.", "old": "29A", "oldSections": ["29A"] },
+    { "section": "3(1)", "title": "General explanations.", "old": "6", "oldSections": ["6"] },
+    { "section": "3(2)", "title": "General explanations- Sense of expression once explained.", "old": "7", "oldSections": ["7"] },
+    {
+      "section": "3(3)",
+      "title": "General explanations- Property in possession of wife, clerk or servant.",
+      "old": "27",
+      "oldSections": ["27"]
+    },
+    {
+      "section": "3(4)",
+      "title": "General explanations-\"Words referring to acts include illegal omissions\".",
+      "old": "32",
+      "oldSections": ["32"]
+    },
+    {
+      "section": "3(5)",
+      "title": "General explanations- Acts done by several persons in furtherance of common intention.",
+      "old": "34",
+      "oldSections": ["34"]
+    },
+    {
+      "section": "3(6)",
+      "title": "General explanations- When such an act is criminal by reason of its being done with a criminal knowledge or intention.",
+      "old": "35",
+      "oldSections": ["35"]
+    },
+    {
+      "section": "3(7)",
+      "title": "General explanations- Effect caused partly by act and partly by omission.",
+      "old": "36",
+      "oldSections": ["36"]
+    },
+    {
+      "section": "3(8)",
+      "title": "General explanations- Co-operation by doing one of several acts constituting an offence.",
+      "old": "37",
+      "oldSections": ["37"]
+    },
+    {
+      "section": "3(9)",
+      "title": "General explanations- Persons concerned in Criminal act may be guilty of different offences.",
+      "old": "38",
+      "oldSections": ["38"]
+    },
+    { "section": "4", "title": "Punishments.", "old": "53", "oldSections": ["53"] },
+    { "section": "5", "title": "Commutation of sentence.", "old": "54 & 55", "oldSections": ["54", "55"] },
+    { "section": "Explanation to section 5", "title": "Commutation of sentence.", "old": "55A", "oldSections": ["55A"] },
+    { "section": "6", "title": "Fractions of terms of punishment.", "old": "57", "oldSections": ["57"] },
+    {
+      "section": "7",
+      "title": "Sentence may be (in certain cases of imprisonment) wholly or partly rigorous or simple.",
+      "old": "60",
+      "oldSections": ["60"]
+    },
+    { "section": "8(1)", "title": "Amount of fine, liability in default of payment of fine, etc.", "old": "63", "oldSections": ["63"] },
+    { "section": "8(2)", "title": "Sentence of imprisonment for non- payment of fine.", "old": "64", "oldSections": ["64"] },
+    {
+      "section": "8(3)",
+      "title": "Limit to imprisonment for non- payment of fine, when imprisonment and fine awardable.",
+      "old": "65",
+      "oldSections": ["65"]
+    },
+    { "section": "8(4)", "title": "Description of imprisonment for non- payment of fine.", "old": "66", "oldSections": ["66"] },
+    {
+      "section": "8(5)",
+      "title": "Imprisonment for non-payment of fine, when offence punishable with fine only.",
+      "old": "67",
+      "oldSections": ["67"]
+    },
+    {
+      "section": "8(6)",
+      "title": "Imprisonment to terminate on payment of fine. Termination of imprisonment on payment of proportional part of fine.",
+      "old": "68 & 69",
+      "oldSections": ["68", "69"]
+    },
+    {
+      "section": "8(7)",
+      "title": "Fine leviable within six years, or during imprisonment. Death not to discharge property from liability.",
+      "old": "70",
+      "oldSections": ["70"]
+    },
+    { "section": "9", "title": "Limit of punishment of offence made up of several offences.", "old": "71", "oldSections": ["71"] },
+    {
+      "section": "10",
+      "title": "Punishment of person guilty of one of several offences, the judgment stating that it is doubtful of which.",
+      "old": "72",
+      "oldSections": ["72"]
+    },
+    { "section": "11", "title": "Solitary confinement.", "old": "73", "oldSections": ["73"] },
+    { "section": "12", "title": "Limit of solitary confinement.", "old": "74", "oldSections": ["74"] },
+    { "section": "13", "title": "Enhanced punishment for certain offences after previous conviction.", "old": "75", "oldSections": ["75"] },
+    {
+      "section": "14",
+      "title": "Act done by a person bound, or by mistake of fact believing himself bound, by law.",
+      "old": "76",
+      "oldSections": ["76"]
+    },
+    { "section": "15", "title": "Act of Judge when acting judicially.", "old": "77", "oldSections": ["77"] },
+    { "section": "16", "title": "Act done pursuant to the judgment or order of Court.", "old": "78", "oldSections": ["78"] },
+    {
+      "section": "17",
+      "title": "Act done by a person justified, or by mistake of fact believing himself justified, by law.",
+      "old": "79",
+      "oldSections": ["79"]
+    },
+    { "section": "18", "title": "Accident in doing a lawful act.", "old": "80", "oldSections": ["80"] },
+    {
+      "section": "19",
+      "title": "Act likely to cause harm, but done without criminal intent, and to prevent other harm.",
+      "old": "81",
+      "oldSections": ["81"]
+    },
+    { "section": "20", "title": "Act of a child under seven years of age.", "old": "82", "oldSections": ["82"] },
+    {
+      "section": "21",
+      "title": "Act of a child above seven and under twelve of immature understanding.",
+      "old": "83",
+      "oldSections": ["83"]
+    },
+    { "section": "22", "title": "Act of a person of unsound mind.", "old": "84", "oldSections": ["84"] },
+    {
+      "section": "23",
+      "title": "Act of a person incapable of judgment by reason of intoxication caused against his will.",
+      "old": "85",
+      "oldSections": ["85"]
+    },
+    {
+      "section": "24",
+      "title": "Offence requiring a particular intent or knowledge committed by one who is intoxicated.",
+      "old": "86",
+      "oldSections": ["86"]
+    },
+    {
+      "section": "25",
+      "title": "Act not intended and not known to be likely to cause death or grievous hurt, done by consent.",
+      "old": "87",
+      "oldSections": ["87"]
+    },
+    {
+      "section": "26",
+      "title": "Act not intended to cause death, done by consent in good faith for person's benefit.",
+      "old": "88",
+      "oldSections": ["88"]
+    },
+    {
+      "section": "27",
+      "title": "Act done in good faith for benefit of child or person, by or by consent of guardian.",
+      "old": "89",
+      "oldSections": ["89"]
+    },
+    { "section": "28", "title": "Consent known to be given under fear or misconception.", "old": "90", "oldSections": ["90"] },
+    { "section": "29", "title": "Exclusion of acts which are offences independently of harm caused.", "old": "91", "oldSections": ["91"] },
+    { "section": "30", "title": "Act done in good faith for benefit of a person without consent.", "old": "92", "oldSections": ["92"] },
+    { "section": "31", "title": "Communication made in good faith.", "old": "93", "oldSections": ["93"] },
+    { "section": "32", "title": "Act to which a person is compelled by threats.", "old": "94", "oldSections": ["94"] },
+    { "section": "33", "title": "Act causing slight harm.", "old": "95", "oldSections": ["95"] },
+    { "section": "34", "title": "Things done in private defence.", "old": "96", "oldSections": ["96"] },
+    { "section": "35", "title": "Right of private defence of body and of property.", "old": "97", "oldSections": ["97"] },
+    {
+      "section": "36",
+      "title": "Right of private defence against the act of a person of unsound mind, etc.",
+      "old": "98",
+      "oldSections": ["98"]
+    },
+    {
+      "section": "37",
+      "title": "Act against which there is no right to private defence Extent to which the right may be exercised.",
+      "old": "99",
+      "oldSections": ["99"]
+    },
+    {
+      "section": "38",
+      "title": "When the right of private defence of property extends to causing death.",
+      "old": "100",
+      "oldSections": ["100"]
+    },
+    { "section": "39", "title": "When such right extends to causing any harm other than death.", "old": "101", "oldSections": ["101"] },
+    {
+      "section": "40",
+      "title": "Commencement and continuance of the right of private defence of the body.",
+      "old": "102",
+      "oldSections": ["102"]
+    },
+    {
+      "section": "41",
+      "title": "When the right of private defence of property extends to causing death.",
+      "old": "103",
+      "oldSections": ["103"]
+    },
+    { "section": "42", "title": "When such right extends to causing any harm other than death.", "old": "104", "oldSections": ["104"] },
+    {
+      "section": "43",
+      "title": "Commencement and continuance of the right of private defence of property.",
+      "old": "105",
+      "oldSections": ["105"]
+    },
+    {
+      "section": "44",
+      "title": "Right of private defence against deadly assault when there is risk of harm to innocent person.",
+      "old": "106",
+      "oldSections": ["106"]
+    },
+    { "section": "45", "title": "Abetment of a thing.", "old": "107", "oldSections": ["107"] },
+    { "section": "46", "title": "Abettor.", "old": "108", "oldSections": ["108"] },
+    { "section": "47", "title": "Abetment in India of offences outside India.", "old": "108A", "oldSections": ["108A"] },
+    { "section": "48", "title": "Abetment outside India for offence in India.", "old": null, "oldSections": [] },
+    {
+      "section": "49",
+      "title": "Punishment of abetment if act abetted is committed in consequence and where no express provision is made for its punishment.",
+      "old": "109",
+      "oldSections": ["109"]
+    },
+    {
+      "section": "50",
+      "title": "Punishment of abetment if person abetted does act with different intention from that of abettor.",
+      "old": "110",
+      "oldSections": ["110"]
+    },
+    { "section": "51", "title": "Liability of abettor when one act abetted and different act done.", "old": "111", "oldSections": ["111"] },
+    {
+      "section": "52",
+      "title": "Abettor when liable to cumulative punishment for act abetted and for act done.",
+      "old": "112",
+      "oldSections": ["112"]
+    },
+    {
+      "section": "53",
+      "title": "Liability of abettor for an effect caused by the act abetted different from that intended by the abettor.",
+      "old": "113",
+      "oldSections": ["113"]
+    },
+    { "section": "54", "title": "Abettor present when offence committed.", "old": "114", "oldSections": ["114"] },
+    {
+      "section": "55",
+      "title": "Abetment of offence punishable with death or imprisonment for life.",
+      "old": "115",
+      "oldSections": ["115"]
+    },
+    { "section": "56", "title": "Abetment of offence punishable with imprisonment.", "old": "116", "oldSections": ["116"] },
+    {
+      "section": "57",
+      "title": "Abetting commission of offence by the public or by more than ten persons.",
+      "old": "117",
+      "oldSections": ["117"]
+    },
+    {
+      "section": "58",
+      "title": "Concealing design to commit offence punishable with death or imprisonment for life.",
+      "old": "118",
+      "oldSections": ["118"]
+    },
+    {
+      "section": "59",
+      "title": "Public servant concealing design to commit offence which it is his duty to prevent.",
+      "old": "119",
+      "oldSections": ["119"]
+    },
+    { "section": "60", "title": "Concealing design to commit offence punishable with imprisonment.", "old": "120", "oldSections": ["120"] },
+    { "section": "61(1)", "title": "Criminal conspiracy definition.", "old": "120A", "oldSections": ["120A"] },
+    { "section": "61(2)", "title": "Criminal conspiracy punishment.", "old": "120B", "oldSections": ["120B"] },
+    {
+      "section": "62",
+      "title": "Punishment for attempting to commit offences punishable with imprisonment for life or other imprisonment.",
+      "old": "511",
+      "oldSections": ["511"]
+    },
+    { "section": "63", "title": "Rape definition.", "old": "375", "oldSections": ["375"] },
+    { "section": "64", "title": "Punishment for rape.", "old": "376(1) & 376(2)", "oldSections": ["376"] },
+    {
+      "section": "65(1)",
+      "title": "Punishment for rape in certain cases- rape on a woman under sixteen years.",
+      "old": "376(3)",
+      "oldSections": ["376"]
+    },
+    {
+      "section": "65(2)",
+      "title": "Punishment for rape in certain cases- rape on a woman under twelve years.",
+      "old": "376AB",
+      "oldSections": ["376AB"]
+    },
+    {
+      "section": "66",
+      "title": "Punishment for causing death or resulting in persistent vegetative state of victim.",
+      "old": "376A",
+      "oldSections": ["376A"]
+    },
+    { "section": "67", "title": "Sexual intercourse by husband upon his wife during separation.", "old": "376B", "oldSections": ["376B"] },
+    { "section": "68", "title": "Sexual intercourse by a person in authority.", "old": "376C", "oldSections": ["376C"] },
+    { "section": "69", "title": "Sexual intercourse by employing deceitful means etc.", "old": null, "oldSections": [] },
+    { "section": "70(1)", "title": "Gang rape.", "old": "376D", "oldSections": ["376D"] },
+    { "section": "70(2)", "title": "Gang rape on women under the age of eighteen.", "old": "376DB", "oldSections": ["376DB"] },
+    { "section": "71", "title": "Punishment for repeat offenders.", "old": "376E", "oldSections": ["376E"] },
+    {
+      "section": "72",
+      "title": "Disclosure of identity of victim of certain offences etc.",
+      "old": "228A (1)/(2)",
+      "oldSections": ["228A"]
+    },
+    {
+      "section": "73",
+      "title": "Printing or publishing any matter relating to court proceedings without permission.",
+      "old": "228A (3)",
+      "oldSections": ["228A"]
+    },
+    {
+      "section": "74",
+      "title": "Assault or use of criminal force to woman with intent to outrage her modesty.",
+      "old": "354",
+      "oldSections": ["354"]
+    },
+    { "section": "75", "title": "Sexual harassment.", "old": "354A", "oldSections": ["354A"] },
+    { "section": "76", "title": "Assault or use of criminal force to woman with intent disrobe.", "old": "354B", "oldSections": ["354B"] },
+    { "section": "77", "title": "Voyeurism.", "old": "354C", "oldSections": ["354C"] },
+    { "section": "78", "title": "Stalking.", "old": "354D", "oldSections": ["354D"] },
+    { "section": "79", "title": "Word, gesture or act intended to insult the modesty of a woman.", "old": "509", "oldSections": ["509"] },
+    { "section": "80", "title": "Dowry death.", "old": "304B", "oldSections": ["304B"] },
+    {
+      "section": "81",
+      "title": "Cohabitation caused by man deceitfully inducing belief of lawful marriage.",
+      "old": "493",
+      "oldSections": ["493"]
+    },
+    { "section": "82(1)", "title": "Marrying again during lifetime of husband or wife.", "old": "494", "oldSections": ["494"] },
+    {
+      "section": "82(2)",
+      "title": "Marrying again during lifetime of husband or wife with concealment of former marriage from person with whom subsequent marriage is contracted.",
+      "old": "495",
+      "oldSections": ["495"]
+    },
+    {
+      "section": "83",
+      "title": "Marriage ceremony fraudulently gone through without lawful marriage.",
+      "old": "496",
+      "oldSections": ["496"]
+    },
+    {
+      "section": "84",
+      "title": "Enticing or taking away or detaining with criminal intent a married Woman.",
+      "old": "498",
+      "oldSections": ["498"]
+    },
+    {
+      "section": "85",
+      "title": "Husband or relative of husband of a woman subjecting her to cruelty.",
+      "old": "498A",
+      "oldSections": ["498A"]
+    },
+    { "section": "86", "title": "Cruelty defined.", "old": "498A Explanation", "oldSections": ["498A"] },
+    { "section": "87", "title": "Kidnapping or abducting in order to murder or for ransom, etc.", "old": "366", "oldSections": ["366"] },
+    { "section": "88", "title": "Causing miscarriage.", "old": "312", "oldSections": ["312"] },
+    { "section": "89", "title": "Causing miscarriage without woman’s consent.", "old": "313", "oldSections": ["313"] },
+    { "section": "90", "title": "Death caused by act done with intent to cause miscarriage.", "old": "314", "oldSections": ["314"] },
+    {
+      "section": "91",
+      "title": "Act done with intent to prevent child being born alive or to cause it to die after birth.",
+      "old": "315",
+      "oldSections": ["315"]
+    },
+    {
+      "section": "92",
+      "title": "Causing death of quick unborn child by act amounting to culpable homicide.",
+      "old": "316",
+      "oldSections": ["316"]
+    },
+    {
+      "section": "93",
+      "title": "Exposure and abandonment of child under twelve years, by parent or person having care of it.",
+      "old": "317",
+      "oldSections": ["317"]
+    },
+    { "section": "94", "title": "Concealment of birth by secret disposal of dead body.", "old": "318", "oldSections": ["318"] },
+    { "section": "95", "title": "Hiring, employing or engaging a child to commit an offence.", "old": null, "oldSections": [] },
+    { "section": "96", "title": "Procuration of child.", "old": "366A", "oldSections": ["366A"] },
+    {
+      "section": "97",
+      "title": "Kidnapping or abducting child under ten years with intent to steal from its person.",
+      "old": "369",
+      "oldSections": ["369"]
+    },
+    { "section": "98", "title": "Selling minor for purposes of prostitution, etc.", "old": "372", "oldSections": ["372"] },
+    { "section": "99", "title": "Buying minor for purposes of prostitution, etc.", "old": "373", "oldSections": ["373"] },
+    { "section": "100", "title": "Culpable homicide.", "old": "299", "oldSections": ["299"] },
+    { "section": "101", "title": "Murder.", "old": "300", "oldSections": ["300"] },
+    {
+      "section": "102",
+      "title": "Culpable homicide by causing death of person other than person whose death was intended.",
+      "old": "301",
+      "oldSections": ["301"]
+    },
+    { "section": "103(1)", "title": "Punishment for murder.", "old": "302", "oldSections": ["302"] },
+    { "section": "103(2)", "title": "Punishment for murder.", "old": null, "oldSections": [] },
+    { "section": "104", "title": "Punishment for murder by life- convict.", "old": "303", "oldSections": ["303"] },
+    { "section": "105", "title": "Punishment for culpable homicide not amounting to murder.", "old": "304", "oldSections": ["304"] },
+    { "section": "106(1)", "title": "Causing death by negligence.", "old": "304A", "oldSections": ["304A"] },
+    { "section": "106(2)", "title": "Causing death by negligence.", "old": null, "oldSections": [] },
+    { "section": "107", "title": "Abetment of suicide of child or person of unsound mind.", "old": "305", "oldSections": ["305"] },
+    { "section": "108", "title": "Abetment of suicide.", "old": "306", "oldSections": ["306"] },
+    { "section": "109", "title": "Attempt to murder.", "old": "307", "oldSections": ["307"] },
+    { "section": "110", "title": "Attempt to commit culpable homicide.", "old": "308", "oldSections": ["308"] },
+    { "section": "111", "title": "Organized crime.", "old": null, "oldSections": [] },
+    { "section": "112", "title": "Petty organized crime.", "old": null, "oldSections": [] },
+    { "section": "113", "title": "Terrorist act.", "old": null, "oldSections": [] },
+    { "section": "114", "title": "Hurt.", "old": "319", "oldSections": ["319"] },
+    { "section": "115(1)", "title": "Voluntarily causing hurt.", "old": "321", "oldSections": ["321"] },
+    { "section": "115(2)", "title": "Punishment for voluntarily causing hurt.", "old": "323", "oldSections": ["323"] },
+    { "section": "116", "title": "Grievous hurt definition.", "old": "320", "oldSections": ["320"] },
+    { "section": "117(1)", "title": "Voluntarily causing grievous hurt punishment.", "old": "322", "oldSections": ["322"] },
+    { "section": "117(2)", "title": "Punishment for voluntarily causing grievous hurt.", "old": "325", "oldSections": ["325"] },
+    { "section": "117(3)", "title": "Voluntarily causing grievous hurt.", "old": null, "oldSections": [] },
+    { "section": "117(4)", "title": "Voluntarily causing grievous hurt.", "old": null, "oldSections": [] },
+    {
+      "section": "118(1)",
+      "title": "Voluntarily causing hurt or grievous hurt by dangerous weapons or means.",
+      "old": "324",
+      "oldSections": ["324"]
+    },
+    {
+      "section": "118(2)",
+      "title": "Voluntarily causing hurt or grievous hurt by dangerous weapons or means.",
+      "old": "326",
+      "oldSections": ["326"]
+    },
+    {
+      "section": "119(1)",
+      "title": "Voluntarily causing hurt or grievous hurt to extort property, or to constrain to an illegal act.",
+      "old": "327",
+      "oldSections": ["327"]
+    },
+    {
+      "section": "119(2)",
+      "title": "Voluntarily causing hurt or grievous hurt to extort property, or to constrain to an illegal act.",
+      "old": "329",
+      "oldSections": ["329"]
+    },
+    {
+      "section": "120(1)",
+      "title": "Voluntarily causing hurt or grievous hurt to extort confession or to compel restoration of property.",
+      "old": "330",
+      "oldSections": ["330"]
+    },
+    {
+      "section": "120(2)",
+      "title": "Voluntarily causing grievous hurt to extort confession, or to compel restoration of property.",
+      "old": "331",
+      "oldSections": ["331"]
+    },
+    {
+      "section": "121(1)",
+      "title": "Voluntarily causing hurt to deter public servant from his duty.",
+      "old": "332",
+      "oldSections": ["332"]
+    },
+    {
+      "section": "121(2)",
+      "title": "Voluntarily causing grievous hurt to deter public servant from his duty.",
+      "old": "333",
+      "oldSections": ["333"]
+    },
+    { "section": "122(1)", "title": "Voluntarily causing provocation hurt on.", "old": "334", "oldSections": ["334"] },
+    { "section": "122(2)", "title": "Voluntarily causing grievous hurt on provocation.", "old": "335", "oldSections": ["335"] },
+    {
+      "section": "123",
+      "title": "Causing harm by means of poison etc with intent to commit an offence.",
+      "old": "328",
+      "oldSections": ["328"]
+    },
+    { "section": "124(1)", "title": "Voluntarily causing grievous hurt by use of acid etc.", "old": "326A", "oldSections": ["326A"] },
+    {
+      "section": "124(2)",
+      "title": "Voluntarily causing grievous hurt by throwing or attempting to throw acid.",
+      "old": "326B",
+      "oldSections": ["326B"]
+    },
+    { "section": "125", "title": "Act endangering life or personal safety of others.", "old": "336", "oldSections": ["336"] },
+    { "section": "125(a)", "title": "Where hurt is caused.", "old": "337", "oldSections": ["337"] },
+    { "section": "125(b)", "title": "Where grievous hurt is caused.", "old": "338", "oldSections": ["338"] },
+    { "section": "126(1)", "title": "Wrongful restraint.", "old": "339", "oldSections": ["339"] },
+    { "section": "126(2)", "title": "Punishment for Wrongful restraint.", "old": "341", "oldSections": ["341"] },
+    { "section": "127(1)", "title": "Wrongful confinement.", "old": "340", "oldSections": ["340"] },
+    { "section": "127(2)", "title": "Punishment for Wrongful confinement.", "old": "342", "oldSections": ["342"] },
+    { "section": "127(3)", "title": "Wrongful confinement for three or more days.", "old": "343", "oldSections": ["343"] },
+    { "section": "127(4)", "title": "Wrongful confinement for ten or more days.", "old": "344", "oldSections": ["344"] },
+    {
+      "section": "127(5)",
+      "title": "Wrongful confinement of person for whose liberation writ has been issued.",
+      "old": "345",
+      "oldSections": ["345"]
+    },
+    { "section": "127(6)", "title": "Wrongful confinement in secret.", "old": "346", "oldSections": ["346"] },
+    {
+      "section": "127(7)",
+      "title": "Wrongful confinement to extort property, or constrain to illegal act.",
+      "old": "347",
+      "oldSections": ["347"]
+    },
+    {
+      "section": "127(8)",
+      "title": "Wrongful confinement to extort confession, or compel restoration of property.",
+      "old": "348",
+      "oldSections": ["348"]
+    },
+    { "section": "128", "title": "Force.", "old": "349", "oldSections": ["349"] },
+    { "section": "129", "title": "Criminal force.", "old": "350", "oldSections": ["350"] },
+    { "section": "130", "title": "Assault.", "old": "351", "oldSections": ["351"] },
+    {
+      "section": "131",
+      "title": "Punishment for assault or criminal force otherwise than on grave provocation.",
+      "old": "352",
+      "oldSections": ["352"]
+    },
+    {
+      "section": "132",
+      "title": "Assault or criminal force to deter public servant from discharge of his duty.",
+      "old": "353",
+      "oldSections": ["353"]
+    },
+    {
+      "section": "133",
+      "title": "Assault or criminal force with intent to dishonour person, otherwise than on grave provocation.",
+      "old": "355",
+      "oldSections": ["355"]
+    },
+    {
+      "section": "134",
+      "title": "Assault or criminal force in attempt to commit theft of property carried by a person.",
+      "old": "356",
+      "oldSections": ["356"]
+    },
+    {
+      "section": "135",
+      "title": "Assault or criminal force in attempt to wrongfully confine a person.",
+      "old": "357",
+      "oldSections": ["357"]
+    },
+    { "section": "136", "title": "Assault or criminal force on grave provocation.", "old": "358", "oldSections": ["358"] },
+    { "section": "137(1)", "title": "Kidnapping.", "old": "359", "oldSections": ["359"] },
+    { "section": "137(1)(a)", "title": "Kidnapping from India.", "old": "360", "oldSections": ["360"] },
+    { "section": "137(1)(b)", "title": "Kidnapping from lawful guardianship.", "old": "361", "oldSections": ["361"] },
+    { "section": "137(2)", "title": "Punishment for kidnapping.", "old": "363", "oldSections": ["363"] },
+    { "section": "138", "title": "Abduction.", "old": "362", "oldSections": ["362"] },
+    { "section": "139", "title": "Kidnapping or maiming a child for purposes of begging.", "old": "363A,", "oldSections": ["363A"] },
+    { "section": "140(1)", "title": "Kidnapping or abducting in order to murder, etc.", "old": "364", "oldSections": ["364"] },
+    { "section": "140(2)", "title": "Kidnapping for ransom, etc.", "old": "364A", "oldSections": ["364A"] },
+    {
+      "section": "140(3)",
+      "title": "Kidnapping or abducting with intent secretly and wrongfully to confine person.",
+      "old": "365",
+      "oldSections": ["365"]
+    },
+    {
+      "section": "140(4)",
+      "title": "Kidnapping or abducting in order to subject person to grievous hurt, slavery, etc.",
+      "old": "367",
+      "oldSections": ["367"]
+    },
+    { "section": "141", "title": "Importation of girl or boy from foreign country.", "old": "366B", "oldSections": ["366B"] },
+    {
+      "section": "142",
+      "title": "Wrongfully concealing or keeping in confinement, kidnapped or abducted person.",
+      "old": "368",
+      "oldSections": ["368"]
+    },
+    { "section": "143", "title": "Trafficking of person.", "old": "370", "oldSections": ["370"] },
+    { "section": "144", "title": "Exploitation of a trafficked person.", "old": "370A", "oldSections": ["370A"] },
+    { "section": "145", "title": "Habitual dealing in slaves.", "old": "371", "oldSections": ["371"] },
+    { "section": "146", "title": "Unlawful compulsory labour.", "old": "374", "oldSections": ["374"] },
+    {
+      "section": "147",
+      "title": "Waging, or attempting to wage war. or abetting waging of war, against the Government of India.",
+      "old": "121",
+      "oldSections": ["121"]
+    },
+    { "section": "148", "title": "Conspiracy to commit offences punishable by Section 147.", "old": "121A", "oldSections": ["121A"] },
+    {
+      "section": "149",
+      "title": "Collecting arms, etc., with intention of waging war against the Government of India.",
+      "old": "122",
+      "oldSections": ["122"]
+    },
+    { "section": "150", "title": "Concealing with intent to facilitate design to wage war.", "old": "123", "oldSections": ["123"] },
+    {
+      "section": "151",
+      "title": "Assaulting President, Governor, etc., with intent to compel or restrain the exercise of any lawful power.",
+      "old": "124",
+      "oldSections": ["124"]
+    },
+    { "section": "152", "title": "Act endangering sovereignty, unity and integrity of India.", "old": null, "oldSections": [] },
+    {
+      "section": "153",
+      "title": "Waging war against Government of any Foreign State at peace with Government of India.",
+      "old": "125",
+      "oldSections": ["125"]
+    },
+    {
+      "section": "154",
+      "title": "Committing depredation on territories of Foreign State at peace with Government of India.",
+      "old": "126",
+      "oldSections": ["126"]
+    },
+    {
+      "section": "155",
+      "title": "Receiving property taken by war or depredation mentioned in Sections 153 and 154.",
+      "old": "127",
+      "oldSections": ["127"]
+    },
+    {
+      "section": "156",
+      "title": "Public servant voluntarily allowing prisoner of State or war to escape.",
+      "old": "128",
+      "oldSections": ["128"]
+    },
+    { "section": "157", "title": "Public servant negligently suffering such prisoner to escape.", "old": "129", "oldSections": ["129"] },
+    { "section": "158", "title": "Aiding escape of, rescuing or harbouring such prisoner.", "old": "130", "oldSections": ["130"] },
+    {
+      "section": "159",
+      "title": "Abetting mutiny, attempting to seduce a soldier, sailor or airman from his duty.",
+      "old": "131",
+      "oldSections": ["131"]
+    },
+    {
+      "section": "160",
+      "title": "Abetment of mutiny, if mutiny is committed in consequence thereof.",
+      "old": "132",
+      "oldSections": ["132"]
+    },
+    {
+      "section": "161",
+      "title": "Abetment of assault by soldier, sailor or airman on his superior officer, when in execution of his office.",
+      "old": "133",
+      "oldSections": ["133"]
+    },
+    { "section": "162", "title": "Abetment of such assault, if the assault is committed.", "old": "134", "oldSections": ["134"] },
+    { "section": "163", "title": "Abetment of desertion of soldier, sailor or airman.", "old": "135", "oldSections": ["135"] },
+    { "section": "164", "title": "Harbouring deserter.", "old": "136", "oldSections": ["136"] },
+    {
+      "section": "165",
+      "title": "Deserter concealed on board, of master merchant vessel through negligence.",
+      "old": "137",
+      "oldSections": ["137"]
+    },
+    { "section": "166", "title": "Abetment of act of insubordination by soldier, sailor or airman.", "old": "138", "oldSections": ["138"] },
+    { "section": "167", "title": "Persons subject to certain Acts.", "old": "139", "oldSections": ["139"] },
+    {
+      "section": "168",
+      "title": "Wearing garb or carrying token used by soldier, sailor or airman.",
+      "old": "140",
+      "oldSections": ["140"]
+    },
+    { "section": "169", "title": "Candidate, electoral right defined.", "old": "171A", "oldSections": ["171A"] },
+    { "section": "170", "title": "Bribery.", "old": "171B", "oldSections": ["171B"] },
+    { "section": "171", "title": "Undue influence at elections.", "old": "171C", "oldSections": ["171C"] },
+    { "section": "172", "title": "Personation at elections.", "old": "171D", "oldSections": ["171D"] },
+    { "section": "173", "title": "Punishment for bribery.", "old": "171E", "oldSections": ["171E"] },
+    { "section": "174", "title": "Punishment for undue influence or personation at an election.", "old": "171F", "oldSections": ["171F"] },
+    { "section": "175", "title": "False statement in connection with an election.", "old": "171G", "oldSections": ["171G"] },
+    { "section": "176", "title": "Illegal payment in connection with an election.", "old": "171H", "oldSections": ["171H"] },
+    { "section": "177", "title": "Failure to keep election accounts.", "old": "171-I", "oldSections": ["171"] },
+    {
+      "section": "178",
+      "title": "Counterfeiting coin, Government stamps, currency- notes or bank- notes.",
+      "old": "230 to 232, 246 to 249, 255, 489A",
+      "oldSections": ["230", "231", "232", "246", "247", "248", "249", "255", "489A"]
+    },
+    {
+      "section": "179",
+      "title": "Using as genuine, forged or counterfeit coin, Government stamp, currency-notes or bank-notes.",
+      "old": "237 to 241, 250, 251, 254, 258, 260, 489B",
+      "oldSections": ["237", "238", "239", "240", "241", "250", "251", "254", "258", "260", "489B"]
+    },
+    {
+      "section": "180",
+      "title": "Possession of forged or counterfeit coin, Government stamp, currency- notes or bank-notes.",
+      "old": "242, 243, 252, 253, 259, 489C",
+      "oldSections": ["242", "243", "252", "253", "259", "489C"]
+    },
+    {
+      "section": "181",
+      "title": "Making or possessing instruments or materials for forging or counterfeiting coin, govt stamps, currency notes or bank notes.",
+      "old": "233 / 234 / 235 / 256 / 257 / 489D",
+      "oldSections": ["233", "234", "235", "256", "257", "489D"]
+    },
+    {
+      "section": "182",
+      "title": "Making or using documents resembling currency-notes or bank- notes.",
+      "old": "489E",
+      "oldSections": ["489E"]
+    },
+    {
+      "section": "183",
+      "title": "Effacing, writing from substance bearing Government stamp, removing from document a stamp used for it, with intent to cause loss to Government.",
+      "old": "261",
+      "oldSections": ["261"]
+    },
+    { "section": "184", "title": "Using Government stamp known to have been before used.", "old": "262", "oldSections": ["262"] },
+    { "section": "185", "title": "Erasure of mark denoting that stamp has been used.", "old": "263", "oldSections": ["263"] },
+    { "section": "186", "title": "Prohibition of fictitious stamps.", "old": "263A", "oldSections": ["263A"] },
+    {
+      "section": "187",
+      "title": "Person employed in mint causing coin to be of different weight or composition from that fixed by law.",
+      "old": "244",
+      "oldSections": ["244"]
+    },
+    { "section": "188", "title": "Unlawfully taking coining instrument from mint.", "old": "245", "oldSections": ["245"] },
+    { "section": "189(1)", "title": "Unlawful assembly.", "old": "141", "oldSections": ["141"] },
+    { "section": "189(2)", "title": "Unlawful assembly- Being member of unlawful assembly.", "old": "142", "oldSections": ["142"] },
+    {
+      "section": "189(3)",
+      "title": "Unlawful assembly- Joining or continuing in unlawful assembly, knowing it has been commanded to disperse.",
+      "old": "145",
+      "oldSections": ["145"]
+    },
+    {
+      "section": "189(4)",
+      "title": "Unlawful assembly- Joining unlawful assembly armed with deadly weapon.—",
+      "old": "144",
+      "oldSections": ["144"]
+    },
+    {
+      "section": "189(5)",
+      "title": "Unlawful assembly- Knowingly joining or continuing in assembly of five or more persons after it has been commanded to disperse.—",
+      "old": "151",
+      "oldSections": ["151"]
+    },
+    {
+      "section": "189(6)",
+      "title": "Unlawful assembly- Hiring, or conniving at hiring, of persons to join unlawful assembly.",
+      "old": "150",
+      "oldSections": ["150"]
+    },
+    {
+      "section": "189(7)",
+      "title": "Unlawful assembly- Harbouring persons hired for an unlawful assembly.",
+      "old": "157",
+      "oldSections": ["157"]
+    },
+    {
+      "section": "189(8)/(9)",
+      "title": "Unlawful assembly- Being hired to take part in an unlawful assembly or riot. Or to go armed.",
+      "old": "158",
+      "oldSections": ["158"]
+    },
+    {
+      "section": "190",
+      "title": "Every member of unlawful assembly guilty of offence committed in prosecution of common object.",
+      "old": "149",
+      "oldSections": ["149"]
+    },
+    { "section": "191(1)", "title": "Rioting-Offence defined.", "old": "146", "oldSections": ["146"] },
+    { "section": "191(2)", "title": "Rioting- Punishment for rioting.", "old": "147", "oldSections": ["147"] },
+    { "section": "191(3)", "title": "Rioting- Being armed with deadly weapon.—", "old": "148", "oldSections": ["148"] },
+    {
+      "section": "192",
+      "title": "Wantonly giving provocation with intent to cause riot if rioting be committed if not committed.",
+      "old": "153",
+      "oldSections": ["153"]
+    },
+    {
+      "section": "193(1)",
+      "title": "Liability of owner, occupier, etc., of land on which an unlawful assembly or riot takes place.",
+      "old": "154",
+      "oldSections": ["154"]
+    },
+    { "section": "193(2)", "title": "Liability of person for whose benefit riot is committed.", "old": "155", "oldSections": ["155"] },
+    {
+      "section": "193(3)",
+      "title": "Liability of agent of owner or occupier for whose benefit riot is committed.",
+      "old": "156",
+      "oldSections": ["156"]
+    },
+    { "section": "194(1)", "title": "Affray- defined.", "old": "159", "oldSections": ["159"] },
+    { "section": "194(2)", "title": "Punishment for Affray.", "old": "160", "oldSections": ["160"] },
+    {
+      "section": "195(1)",
+      "title": "Assaulting or obstructing public servant when suppressing riot, etc.",
+      "old": "152",
+      "oldSections": ["152"]
+    },
+    {
+      "section": "195(2)",
+      "title": "Assaulting or obstructing public servant when suppressing riot, etc.",
+      "old": "152",
+      "oldSections": ["152"]
+    },
+    {
+      "section": "196",
+      "title": "Promoting enmity between different groups on grounds of religion, race, place of birth, residence, language, etc., and doing acts prejudicial to maintenance of harmony.",
+      "old": "153A",
+      "oldSections": ["153A"]
+    },
+    { "section": "197", "title": "Imputations, assertions prejudicial to national integration.", "old": "153B", "oldSections": ["153B"] },
+    {
+      "section": "197(1)(d)",
+      "title": "Makes or publishes false or misleading information, jeopardising the sovereignty, unity and integrity or security of India.",
+      "old": null,
+      "oldSections": []
+    },
+    {
+      "section": "198",
+      "title": "Public servant disobeying law, with intent to cause injury to any person.",
+      "old": "166",
+      "oldSections": ["166"]
+    },
+    { "section": "199", "title": "Public servant disobeying direction under law.", "old": "166A", "oldSections": ["166A"] },
+    { "section": "200", "title": "Punishment for non-treatment of victim.", "old": "166B", "oldSections": ["166B"] },
+    {
+      "section": "201",
+      "title": "Public servant framing an incorrect document with intent to cause injury.",
+      "old": "167",
+      "oldSections": ["167"]
+    },
+    { "section": "202", "title": "Public servant unlawfully engaging in trade.", "old": "168", "oldSections": ["168"] },
+    { "section": "203", "title": "Public servant unlawfully buying or bidding for property.", "old": "169", "oldSections": ["169"] },
+    { "section": "204", "title": "Personating a public servant.", "old": "170", "oldSections": ["170"] },
+    {
+      "section": "205",
+      "title": "Wearing garb or carrying token used by public servant with fraudulent intent.",
+      "old": "171",
+      "oldSections": ["171"]
+    },
+    { "section": "206", "title": "Absconding to avoid service of summons or other proceeding.", "old": "172", "oldSections": ["172"] },
+    {
+      "section": "207",
+      "title": "Preventing service of summons or other proceeding, or preventing publication thereof.",
+      "old": "173",
+      "oldSections": ["173"]
+    },
+    { "section": "208", "title": "Non-attendance in obedience to an order from public servant.", "old": "174", "oldSections": ["174"] },
+    {
+      "section": "209",
+      "title": "Non-appearance in response to a proclamation under section 84 of Bharatiya Nagarik Suraksha Sanhita,2023.",
+      "old": "174A",
+      "oldSections": ["174A"]
+    },
+    {
+      "section": "210",
+      "title": "Omission to produce document or electronic record to public servant by person, legally bound to produce it.",
+      "old": "175",
+      "oldSections": ["175"]
+    },
+    {
+      "section": "211",
+      "title": "Omission to give notice or information to public servant by person legally bound to give it.",
+      "old": "176",
+      "oldSections": ["176"]
+    },
+    { "section": "212", "title": "Furnishing false information.", "old": "177", "oldSections": ["177"] },
+    {
+      "section": "213",
+      "title": "Refusing oath or affirmation when duly required by public servant to make it.",
+      "old": "178",
+      "oldSections": ["178"]
+    },
+    { "section": "214", "title": "Refusing to answer public servant authorised to question.", "old": "179", "oldSections": ["179"] },
+    { "section": "215", "title": "Refusing to sign statement.", "old": "180", "oldSections": ["180"] },
+    {
+      "section": "216",
+      "title": "False statement on oath or affirmation to public servant or person authorised to administer an oath or affirmation.",
+      "old": "181",
+      "oldSections": ["181"]
+    },
+    {
+      "section": "217",
+      "title": "False information, with intent to cause public servant to use his lawful power to the injury of another person.",
+      "old": "182",
+      "oldSections": ["182"]
+    },
+    {
+      "section": "218",
+      "title": "Resistance to the taking of property by the lawful authority of a public servant.",
+      "old": "183",
+      "oldSections": ["183"]
+    },
+    {
+      "section": "219",
+      "title": "Obstructing sale of property offered by authority of public servant for sale.",
+      "old": "184",
+      "oldSections": ["184"]
+    },
+    {
+      "section": "220",
+      "title": "Illegal purchase or bid for property offered for sale by authority of public servant.",
+      "old": "185",
+      "oldSections": ["185"]
+    },
+    { "section": "221", "title": "Obstructing public servant in discharge of public functions.", "old": "186", "oldSections": ["186"] },
+    {
+      "section": "222",
+      "title": "Omission to assist public servant when bound by law to give assistance.",
+      "old": "187",
+      "oldSections": ["187"]
+    },
+    { "section": "223", "title": "Disobedience to order duly promulgated by public servant.", "old": "188", "oldSections": ["188"] },
+    { "section": "224", "title": "Threat of injury to public servant.", "old": "189", "oldSections": ["189"] },
+    {
+      "section": "225",
+      "title": "Threat of injury to induce person to refrain from applying for protection.",
+      "old": "190",
+      "oldSections": ["190"]
+    },
+    {
+      "section": "226",
+      "title": "Attempt to commit suicide to compel or restrain from applying or restrain of lawful power.",
+      "old": null,
+      "oldSections": []
+    },
+    { "section": "227", "title": "Giving false evidence.", "old": "191", "oldSections": ["191"] },
+    { "section": "228", "title": "Fabricating false evidence.", "old": "192", "oldSections": ["192"] },
+    { "section": "229", "title": "Punishment for false evidence.", "old": "193", "oldSections": ["193"] },
+    {
+      "section": "230",
+      "title": "Giving or fabricating false evidence with intent to procure conviction of capital offence.",
+      "old": "194",
+      "oldSections": ["194"]
+    },
+    {
+      "section": "231",
+      "title": "Giving or fabricating false evidence with intent to procure conviction of offence punishable with imprisonment for life or imprisonment.",
+      "old": "195",
+      "oldSections": ["195"]
+    },
+    { "section": "232", "title": "Threatening any person to give false evidence.", "old": "195A", "oldSections": ["195A"] },
+    { "section": "233", "title": "Using evidence known to be false.", "old": "196", "oldSections": ["196"] },
+    { "section": "234", "title": "Issuing or signing false certificate.", "old": "197", "oldSections": ["197"] },
+    { "section": "235", "title": "Using as true a certificate known to be false.", "old": "198", "oldSections": ["198"] },
+    {
+      "section": "236",
+      "title": "False statement made in declaration which is by law receivable as evidence.",
+      "old": "199",
+      "oldSections": ["199"]
+    },
+    { "section": "237", "title": "Using as true such declaration knowing it to be false.", "old": "200", "oldSections": ["200"] },
+    {
+      "section": "238",
+      "title": "Causing disappearance of evidence ,or giving false information to screen offender.",
+      "old": "201",
+      "oldSections": ["201"]
+    },
+    {
+      "section": "239",
+      "title": "Intentional omission to give information of offence by person bound to inform.",
+      "old": "202",
+      "oldSections": ["202"]
+    },
+    { "section": "240", "title": "Giving false information respecting an offence committed.", "old": "203", "oldSections": ["203"] },
+    {
+      "section": "241",
+      "title": "Destruction of document or electronic record to prevent its production as evidence.",
+      "old": "204",
+      "oldSections": ["204"]
+    },
+    {
+      "section": "242",
+      "title": "False personation for purpose of act or proceeding in suit or prosecution.",
+      "old": "205",
+      "oldSections": ["205"]
+    },
+    {
+      "section": "243",
+      "title": "Fraudulent removal or concealment of property to prevent its seizure as forfeited or in execution.",
+      "old": "206",
+      "oldSections": ["206"]
+    },
+    {
+      "section": "244",
+      "title": "Fraudulent claim to property to prevent its seizure as forfeited or in execution.",
+      "old": "207",
+      "oldSections": ["207"]
+    },
+    { "section": "245", "title": "Fraudulently suffering decree for sum not due.", "old": "208", "oldSections": ["208"] },
+    { "section": "246", "title": "Dishonestly making false claim in Court.", "old": "209", "oldSections": ["209"] },
+    { "section": "247", "title": "Fraudulently obtaining decree for sum not due.", "old": "210", "oldSections": ["210"] },
+    { "section": "248", "title": "False charge of offence made with intent to injure.", "old": "211", "oldSections": ["211"] },
+    { "section": "249", "title": "Harbouring offender.", "old": "212", "oldSections": ["212"] },
+    { "section": "250", "title": "Taking gift, etc., to screen an offender from punishment.", "old": "213", "oldSections": ["213"] },
+    {
+      "section": "251",
+      "title": "Offering gift or restoration of property in consideration of screening offender.",
+      "old": "214",
+      "oldSections": ["214"]
+    },
+    { "section": "252", "title": "Taking gift to help to recover stolen property, etc.", "old": "215", "oldSections": ["215"] },
+    {
+      "section": "253",
+      "title": "Harbouring offender who has escaped from custody or whose apprehension has been ordered.",
+      "old": "216",
+      "oldSections": ["216"]
+    },
+    { "section": "254", "title": "Penalty for harbouring robbers or dacoits.", "old": "216A", "oldSections": ["216A"] },
+    {
+      "section": "255",
+      "title": "Public servant disobeying direction of law with intent to save person from punishment or property from forfeiture.",
+      "old": "217",
+      "oldSections": ["217"]
+    },
+    {
+      "section": "256",
+      "title": "Public servant framing incorrect record or writing with intent to save person from punishment or property from forfeiture.",
+      "old": "218",
+      "oldSections": ["218"]
+    },
+    {
+      "section": "257",
+      "title": "Public servant in judicial proceeding corruptly making report, etc. contrary to law.",
+      "old": "219",
+      "oldSections": ["219"]
+    },
+    {
+      "section": "258",
+      "title": "Commitment for trial or confinement by person having authority who knows that he is acting contrary to law.",
+      "old": "220",
+      "oldSections": ["220"]
+    },
+    {
+      "section": "259",
+      "title": "Intentional omission to apprehend on part of public servant bound to apprehend.",
+      "old": "221",
+      "oldSections": ["221"]
+    },
+    {
+      "section": "260",
+      "title": "Intentional omission to apprehend on part of public servant bound to apprehend person under sentence or lawfully committed.",
+      "old": "222",
+      "oldSections": ["222"]
+    },
+    {
+      "section": "261",
+      "title": "Escape from confinement or custody negligently suffered by public servant.",
+      "old": "223",
+      "oldSections": ["223"]
+    },
+    {
+      "section": "262",
+      "title": "Resistance or obstruction by a person to his lawful apprehension.",
+      "old": "224",
+      "oldSections": ["224"]
+    },
+    {
+      "section": "263",
+      "title": "Resistance or obstruction to lawful apprehension of another person.",
+      "old": "225",
+      "oldSections": ["225"]
+    },
+    {
+      "section": "264",
+      "title": "Omission to apprehend, or sufferance of escape, on part of public servant, in cases not otherwise provided for.",
+      "old": "225A",
+      "oldSections": ["225A"]
+    },
+    {
+      "section": "265",
+      "title": "Resistance or obstruction to lawful apprehension or escape or rescue in cases not otherwise provided for.",
+      "old": "225B",
+      "oldSections": ["225B"]
+    },
+    { "section": "266", "title": "Violation of condition of remission of punishment.", "old": "227", "oldSections": ["227"] },
+    {
+      "section": "267",
+      "title": "Intentional insult or interruption to public servant sitting in judicial proceeding.",
+      "old": "228",
+      "oldSections": ["228"]
+    },
+    { "section": "268", "title": "Personation of assessor.", "old": "229", "oldSections": ["229"] },
+    { "section": "269", "title": "Failure by person released on bail or bond to appear in Court.", "old": "229A", "oldSections": ["229A"] },
+    { "section": "270", "title": "Public nuisance.", "old": "268", "oldSections": ["268"] },
+    {
+      "section": "271",
+      "title": "Negligent act likely to spread infection of disease dangerous to life.",
+      "old": "269",
+      "oldSections": ["269"]
+    },
+    {
+      "section": "272",
+      "title": "Malignant act likely to spread infection of disease dangerous to life.",
+      "old": "270",
+      "oldSections": ["270"]
+    },
+    { "section": "273", "title": "Disobedience to quarantine rule.", "old": "271", "oldSections": ["271"] },
+    { "section": "274", "title": "Adulteration of food or drink intended for sale.", "old": "272", "oldSections": ["272"] },
+    { "section": "275", "title": "Sale of noxious food or drink.", "old": "273", "oldSections": ["273"] },
+    { "section": "276", "title": "Adulteration of drugs.", "old": "274", "oldSections": ["274"] },
+    { "section": "277", "title": "Sale of adulterated drugs.", "old": "275", "oldSections": ["275"] },
+    { "section": "278", "title": "Sale of drug as a different drug or preparation.", "old": "276", "oldSections": ["276"] },
+    { "section": "279", "title": "Fouling water of public spring or reservoir.", "old": "277", "oldSections": ["277"] },
+    { "section": "280", "title": "Making atmosphere noxious to health.", "old": "278", "oldSections": ["278"] },
+    { "section": "281", "title": "Rash driving or riding on a public way.", "old": "279", "oldSections": ["279"] },
+    { "section": "282", "title": "Rash navigation of vessel.", "old": "280", "oldSections": ["280"] },
+    { "section": "283", "title": "Exhibition of false light, mark or buoy.", "old": "281", "oldSections": ["281"] },
+    {
+      "section": "284",
+      "title": "Conveying person by water for hire in unsafe or overloaded vessel.",
+      "old": "282",
+      "oldSections": ["282"]
+    },
+    { "section": "285", "title": "Danger or obstruction in public way or line of navigation.", "old": "283", "oldSections": ["283"] },
+    { "section": "286", "title": "Negligent conduct with respect to poisonous substance.", "old": "284", "oldSections": ["284"] },
+    { "section": "287", "title": "Negligent conduct with respect to fire or combustible matter.", "old": "285", "oldSections": ["285"] },
+    { "section": "288", "title": "Negligent conduct with respect to explosive substance.", "old": "286", "oldSections": ["286"] },
+    { "section": "289", "title": "Negligent conduct with respect to machinery.", "old": "287", "oldSections": ["287"] },
+    {
+      "section": "290",
+      "title": "Negligent conduct with respect to pulling down, repairing or constructing buildings, etc.",
+      "old": "288",
+      "oldSections": ["288"]
+    },
+    { "section": "291", "title": "Negligent conduct with respect to animal.", "old": "289", "oldSections": ["289"] },
+    {
+      "section": "292",
+      "title": "Punishment for public nuisance in cases not otherwise provided for.",
+      "old": "290",
+      "oldSections": ["290"]
+    },
+    { "section": "293", "title": "Continuance of nuisance after injunction to discontinue.", "old": "291", "oldSections": ["291"] },
+    { "section": "294", "title": "Sale, etc., of obscene books, etc.", "old": "292", "oldSections": ["292"] },
+    { "section": "295", "title": "Sale, etc., of obscene objects to young person.", "old": "293", "oldSections": ["293"] },
+    { "section": "296", "title": "Obscene acts and songs.", "old": "294", "oldSections": ["294"] },
+    { "section": "297", "title": "Keeping lottery office.", "old": "294A", "oldSections": ["294A"] },
+    {
+      "section": "298",
+      "title": "Injuring or defiling place of worship with intent to insult the religion of any class.",
+      "old": "295",
+      "oldSections": ["295"]
+    },
+    {
+      "section": "299",
+      "title": "Deliberate and malicious acts intended to outrage religious feelings of any class, by insulting its religion or religious beliefs.",
+      "old": "295A",
+      "oldSections": ["295A"]
+    },
+    { "section": "300", "title": "Disturbing religious assembly.", "old": "296", "oldSections": ["296"] },
+    { "section": "301", "title": "Trespassing on burial places, etc.", "old": "297", "oldSections": ["297"] },
+    {
+      "section": "302",
+      "title": "Uttering words, etc., with deliberate intent to wound the religious feelings of any person.",
+      "old": "298",
+      "oldSections": ["298"]
+    },
+    { "section": "303(1)", "title": "Theft.", "old": "378", "oldSections": ["378"] },
+    { "section": "303(2)", "title": "Punishment for theft.", "old": "379", "oldSections": ["379"] },
+    { "section": "304", "title": "Snatching.", "old": null, "oldSections": [] },
+    {
+      "section": "305",
+      "title": "Theft in a dwelling house, or means of transportation or place of worship, etc.",
+      "old": "380",
+      "oldSections": ["380"]
+    },
+    { "section": "306", "title": "Theft by clerk or servant of property in possession of master.", "old": "381", "oldSections": ["381"] },
+    {
+      "section": "307",
+      "title": "Theft after preparation made for causing death, hurt or restraint in order to committing of theft.",
+      "old": "382",
+      "oldSections": ["382"]
+    },
+    { "section": "308(1)", "title": "Extortion.", "old": "383", "oldSections": ["383"] },
+    { "section": "308(2)", "title": "Extortion punishment.", "old": "384", "oldSections": ["384"] },
+    {
+      "section": "308(3)",
+      "title": "Putting person in fear of injury in order to commit extortion.",
+      "old": "385",
+      "oldSections": ["385"]
+    },
+    {
+      "section": "308(4)",
+      "title": "Putting person in fear of death or of grievous hurt, in order to commit extortion.",
+      "old": "387",
+      "oldSections": ["387"]
+    },
+    {
+      "section": "308(5)",
+      "title": "Extortion by putting a person in fear of death or grievous hurt.",
+      "old": "386",
+      "oldSections": ["386"]
+    },
+    {
+      "section": "308(6)",
+      "title": "Extortion by threat of accusation of an offence punishable with death or imprisonment for life, etc.",
+      "old": "388",
+      "oldSections": ["388"]
+    },
+    {
+      "section": "308(7)",
+      "title": "Putting person in fear or accusation of offence, in order to commit extortion.",
+      "old": "389",
+      "oldSections": ["389"]
+    },
+    {
+      "section": "309(1),(2),(3)",
+      "title": "Robbery- When theft is robbery When extortion is robbery.",
+      "old": "390",
+      "oldSections": ["390"]
+    },
+    { "section": "309(4)", "title": "Robbery- Punishment for robbery.", "old": "392", "oldSections": ["392"] },
+    { "section": "309(5)", "title": "Robbery- Attempt to commit robbery.", "old": "393", "oldSections": ["393"] },
+    { "section": "309(6)", "title": "Robbery- Voluntarily causing hurt in committing robbery.", "old": "394", "oldSections": ["394"] },
+    { "section": "310(1)", "title": "Dacoity definition.", "old": "391", "oldSections": ["391"] },
+    { "section": "310(2)", "title": "Dacoity punishment .", "old": "395", "oldSections": ["395"] },
+    { "section": "310(3)", "title": "Dacoity with murder.", "old": "396", "oldSections": ["396"] },
+    { "section": "310(4)", "title": "Making preparation to commit dacoity.", "old": "399", "oldSections": ["399"] },
+    { "section": "310(5)", "title": "Assembling for purpose of committing dacoity.", "old": "402", "oldSections": ["402"] },
+    { "section": "310(6)", "title": "Punishment for belonging to gang of dacoits.", "old": "400", "oldSections": ["400"] },
+    {
+      "section": "311",
+      "title": "Robbery or dacoity, with attempt to cause death or grievous hurt.",
+      "old": "397",
+      "oldSections": ["397"]
+    },
+    {
+      "section": "312",
+      "title": "Attempt to commit robbery or dacoity when armed with deadly weapon.",
+      "old": "398",
+      "oldSections": ["398"]
+    },
+    { "section": "313", "title": "Punishment for belonging to gang of robbers, etc.", "old": "401", "oldSections": ["401"] },
+    { "section": "314", "title": "Dishonest misappropriation of property.", "old": "403", "oldSections": ["403"] },
+    {
+      "section": "315",
+      "title": "Dishonest misappropriation of property possessed by deceased person at the time of his death.",
+      "old": "404",
+      "oldSections": ["404"]
+    },
+    { "section": "316(1)", "title": "Criminal breach of trust.", "old": "405", "oldSections": ["405"] },
+    { "section": "316(2)", "title": "Punishment for criminal breach of trust.", "old": "406", "oldSections": ["406"] },
+    { "section": "316(3)", "title": "Criminal breach of trust by carrier, etc.", "old": "407", "oldSections": ["407"] },
+    { "section": "316(4)", "title": "Criminal breach of trust by clerk or servant.", "old": "408", "oldSections": ["408"] },
+    {
+      "section": "316(5)",
+      "title": "Criminal breach of trust by public servant, or by banker, merchant or agent.",
+      "old": "409",
+      "oldSections": ["409"]
+    },
+    { "section": "317(1)", "title": "Stolen property.", "old": "410", "oldSections": ["410"] },
+    { "section": "317(2)", "title": "Dishonestly receiving stolen property.", "old": "411", "oldSections": ["411"] },
+    {
+      "section": "317(3)",
+      "title": "Dishonestly receiving property stolen in the commission of a dacoity.",
+      "old": "412",
+      "oldSections": ["412"]
+    },
+    { "section": "317(4)", "title": "Habitually dealing in stolen property.", "old": "413", "oldSections": ["413"] },
+    { "section": "317(5)", "title": "Assisting in concealment of stolen property.", "old": "414", "oldSections": ["414"] },
+    { "section": "318(1)", "title": "Cheating.", "old": "415", "oldSections": ["415"] },
+    { "section": "318(2)", "title": "Cheating punishment.", "old": "417", "oldSections": ["417"] },
+    {
+      "section": "318(3)",
+      "title": "Cheating with knowledge that wrongful loss may ensue to person whose interest offender is bound to protect.",
+      "old": "418",
+      "oldSections": ["418"]
+    },
+    { "section": "318(4)", "title": "Cheating and dishonestly inducing delivery of property.", "old": "420", "oldSections": ["420"] },
+    { "section": "319(1)", "title": "Cheating by personation.", "old": "416", "oldSections": ["416"] },
+    { "section": "319(2)", "title": "Cheating by personation punishment.", "old": "419", "oldSections": ["419"] },
+    {
+      "section": "320",
+      "title": "Dishonest or fraudulent removal or concealment of property to prevent distribution among creditors.",
+      "old": "421",
+      "oldSections": ["421"]
+    },
+    {
+      "section": "321",
+      "title": "Dishonestly or fraudulently preventing debt being available for creditors.",
+      "old": "422",
+      "oldSections": ["422"]
+    },
+    {
+      "section": "322",
+      "title": "Dishonest or fraudulent execution of deed of transfer containing false statement of consideration.",
+      "old": "423",
+      "oldSections": ["423"]
+    },
+    { "section": "323", "title": "Dishonest or fraudulent removal or concealment of property.", "old": "424", "oldSections": ["424"] },
+    { "section": "324(1)", "title": "Mischief.", "old": "425", "oldSections": ["425"] },
+    { "section": "324(2)", "title": "Mischief punishment.", "old": "426", "oldSections": ["426"] },
+    {
+      "section": "324(3)",
+      "title": "Mischief - causes loss or damage to any property including the property of Government or Local Authority.",
+      "old": null,
+      "oldSections": []
+    },
+    {
+      "section": "324(4)",
+      "title": "Mischief causing damage to the amount of twenty thousand rupees and more but less than one lakh rupees.",
+      "old": "427",
+      "oldSections": ["427"]
+    },
+    {
+      "section": "324(5)",
+      "title": "Mischief- cause loss or damage to amount of one lakh rupees onwards.",
+      "old": null,
+      "oldSections": []
+    },
+    {
+      "section": "324(6)",
+      "title": "Mischief committed after preparation made for causing death or hurt.",
+      "old": "440",
+      "oldSections": ["440"]
+    },
+    { "section": "325", "title": "Mischief by killing or maiming animal.", "old": "428/ 429", "oldSections": ["428", "429"] },
+    {
+      "section": "326(a)",
+      "title": "Mischief by injury, inundation, fire or explosive substance, etc.",
+      "old": "430",
+      "oldSections": ["430"]
+    },
+    { "section": "326(b)", "title": "Mischief by injury to public road, bridge, river or channel.", "old": "431", "oldSections": ["431"] },
+    {
+      "section": "326(c)",
+      "title": "Mischief by causing inundation or obstruction to public drainage attended with damage.",
+      "old": "432",
+      "oldSections": ["432"]
+    },
+    {
+      "section": "326(d)",
+      "title": "Mischief by injury, inundation, fire or explosive substance, etc.",
+      "old": "433",
+      "oldSections": ["433"]
+    },
+    {
+      "section": "326(e)",
+      "title": "Mischief by destroying or moving, etc., a land-mark fixed by public authority.",
+      "old": "434",
+      "oldSections": ["434"]
+    },
+    {
+      "section": "326(f)",
+      "title": "Mischief by injury, inundation, fire or explosive substance, etc.",
+      "old": "435",
+      "oldSections": ["435"]
+    },
+    {
+      "section": "326(g)",
+      "title": "Mischief by fire or explosive substance with intent to destroy house, etc.",
+      "old": "436",
+      "oldSections": ["436"]
+    },
+    {
+      "section": "327(1)",
+      "title": "Mischief with intent to destroy or make unsafe a rail, aircraft, decked vessel or one of twenty tons burden.",
+      "old": "437",
+      "oldSections": ["437"]
+    },
+    { "section": "327(2)", "title": "Punishment for above offence.", "old": "438", "oldSections": ["438"] },
+    {
+      "section": "328",
+      "title": "Punishment for intentionally running vessel aground or ashore with intent to commit theft, etc.",
+      "old": "439",
+      "oldSections": ["439"]
+    },
+    { "section": "329(1)", "title": "Criminal trespass and house- trespass.", "old": "441", "oldSections": ["441"] },
+    { "section": "329(2)", "title": "Criminal trespass and house- trespass.", "old": "442", "oldSections": ["442"] },
+    { "section": "329(3)", "title": "Criminal trespass punishment.", "old": "447", "oldSections": ["447"] },
+    { "section": "329(4)", "title": "Punishment for house- trespass.", "old": "448", "oldSections": ["448"] },
+    { "section": "330(1)", "title": "Lurking house trespass.", "old": "443", "oldSections": ["443"] },
+    { "section": "330(2)", "title": "House breaking.", "old": "445", "oldSections": ["445"] },
+    { "section": "331(1)", "title": "Punishment for house- trespass or house-breaking.", "old": "453", "oldSections": ["453"] },
+    {
+      "section": "331(2)",
+      "title": "Punishment for lurking house-trespass or house-breaking by night.",
+      "old": "456",
+      "oldSections": ["456"]
+    },
+    {
+      "section": "331(3)",
+      "title": "Lurking house-trespass or house- breaking in order to commit offence punishable with imprisonment.",
+      "old": "454",
+      "oldSections": ["454"]
+    },
+    {
+      "section": "331(4)",
+      "title": "Lurking house-trespass or house- breaking by night in order to commit offence punishable with imprisonment.",
+      "old": "457",
+      "oldSections": ["457"]
+    },
+    {
+      "section": "331(5)",
+      "title": "Lurking house-trespass or house- breaking after preparation for hurt, assault or wrongful restraint.",
+      "old": "455",
+      "oldSections": ["455"]
+    },
+    {
+      "section": "331(6)",
+      "title": "Lurking house-trespass or house- breaking by night after preparation for hurt, assault, or wrongful restraint.",
+      "old": "458",
+      "oldSections": ["458"]
+    },
+    {
+      "section": "331(7)",
+      "title": "Grievous hurt caused whilst committing lurking house-trespass or house-breaking.",
+      "old": "459",
+      "oldSections": ["459"]
+    },
+    {
+      "section": "331(8)",
+      "title": "All persons jointly concerned in lurking house-trespass or house- breaking by night punishable where death or grievous hurt caused by one of them.",
+      "old": "460",
+      "oldSections": ["460"]
+    },
+    {
+      "section": "332(a)",
+      "title": "House-trespass in order to commit offence punishable with death.",
+      "old": "449",
+      "oldSections": ["449"]
+    },
+    {
+      "section": "332(b)",
+      "title": "House-trespass in order to commit offence punishable with imprisonment for life.",
+      "old": "450",
+      "oldSections": ["450"]
+    },
+    {
+      "section": "332(c)",
+      "title": "House-trespass in order to commit offence punishable with imprisonment.",
+      "old": "451",
+      "oldSections": ["451"]
+    },
+    {
+      "section": "333",
+      "title": "House-trespass after preparation for hurt, assault or wrongful restraint.",
+      "old": "452",
+      "oldSections": ["452"]
+    },
+    { "section": "334(1)", "title": "Dishonestly breaking open receptacle containing property.", "old": "461", "oldSections": ["461"] },
+    {
+      "section": "334(2)",
+      "title": "Punishment for same offence when committed by person entrusted with custody.",
+      "old": "462",
+      "oldSections": ["462"]
+    },
+    { "section": "335", "title": "Making a false document.", "old": "464", "oldSections": ["464"] },
+    { "section": "336(1)", "title": "Forgery.", "old": "463", "oldSections": ["463"] },
+    { "section": "336(2)", "title": "Forgery punishment.", "old": "465", "oldSections": ["465"] },
+    { "section": "336(3)", "title": "Forgery for purpose of cheating.", "old": "468", "oldSections": ["468"] },
+    { "section": "336(4)", "title": "Forgery for purpose of harming reputation.", "old": "469", "oldSections": ["469"] },
+    { "section": "337", "title": "Forgery of record of Court or of public register, etc.", "old": "466", "oldSections": ["466"] },
+    { "section": "338", "title": "Forgery of valuable security, will, etc.", "old": "467", "oldSections": ["467"] },
+    {
+      "section": "339",
+      "title": "Having possession of document described in Section 337 or Section 338, knowing it to be forged and intending to use it as genuine.",
+      "old": "474",
+      "oldSections": ["474"]
+    },
+    {
+      "section": "340(1)",
+      "title": "Forged document or electronic record. and using it as genuine.",
+      "old": "470",
+      "oldSections": ["470"]
+    },
+    { "section": "340(2)", "title": "Using as genuine a forged document or electronic record.", "old": "471", "oldSections": ["471"] },
+    {
+      "section": "341(1)",
+      "title": "Making or possessing counterfeit seal, etc., with intent to commit forgery, punishable under section 338.",
+      "old": "472",
+      "oldSections": ["472"]
+    },
+    {
+      "section": "341(2)",
+      "title": "Making or possessing counterfeit seal, etc., with intent to commit forgery punishable otherwise.",
+      "old": "473",
+      "oldSections": ["473"]
+    },
+    {
+      "section": "341(3)",
+      "title": "Possesses any seal, plate or other instrument knowing the same to be counterfeit.",
+      "old": null,
+      "oldSections": []
+    },
+    {
+      "section": "341(4)",
+      "title": "Fraudulently or dishonestly uses as genuine any seal, plate or other instrument knowing or having reason to believe the same to be counterfeit.",
+      "old": null,
+      "oldSections": []
+    },
+    {
+      "section": "342(1)",
+      "title": "Counterfeiting device or mark used for authenticating documents described in section 338, or possessing counterfeit marked material.",
+      "old": "475",
+      "oldSections": ["475"]
+    },
+    {
+      "section": "342(2)",
+      "title": "Counterfeiting device or mark used for authenticating documents described in section 338, or possessing counterfeit marked material.",
+      "old": "476",
+      "oldSections": ["476"]
+    },
+    {
+      "section": "343",
+      "title": "Fraudulent cancellation, destruction, etc. of will, authority to adopt, or valuable security.",
+      "old": "477",
+      "oldSections": ["477"]
+    },
+    { "section": "344", "title": "Falsification of accounts.", "old": "477A", "oldSections": ["477A"] },
+    { "section": "345(1)", "title": "Property mark.", "old": "479", "oldSections": ["479"] },
+    { "section": "345(2)", "title": "Using a false property mark.", "old": "481", "oldSections": ["481"] },
+    { "section": "345(3)", "title": "Punishment for using a false property mark.", "old": "482", "oldSections": ["482"] },
+    { "section": "346", "title": "Tampering with property mark with intent to cause injury.", "old": "489", "oldSections": ["489"] },
+    { "section": "347(1)", "title": "Counterfeiting a property mark.", "old": "483", "oldSections": ["483"] },
+    { "section": "347(2)", "title": "Counterfeiting a mark used by a public servant.", "old": "484", "oldSections": ["484"] },
+    {
+      "section": "348",
+      "title": "Making or possession of any instrument for counterfeiting a property mark.",
+      "old": "485",
+      "oldSections": ["485"]
+    },
+    { "section": "349", "title": "Selling goods marked with counterfeit property mark.", "old": "486", "oldSections": ["486"] },
+    { "section": "350(1)", "title": "Making a false mark upon any receptacle containing goods.", "old": "487", "oldSections": ["487"] },
+    { "section": "350(2)", "title": "Punishment for making use of any such false mark.", "old": "488", "oldSections": ["488"] },
+    { "section": "351(1)", "title": "Criminal intimidation.", "old": "503", "oldSections": ["503"] },
+    { "section": "351(2)/(3)", "title": "Criminal intimidation punishment.", "old": "506", "oldSections": ["506"] },
+    { "section": "351(4)", "title": "Criminal intimidation by an anonymous communication.", "old": "507", "oldSections": ["507"] },
+    { "section": "352", "title": "Intentional insult with intent to provoke breach of the peace.", "old": "504", "oldSections": ["504"] },
+    { "section": "353", "title": "Statements conducing to public mischief.", "old": "505", "oldSections": ["505"] },
+    {
+      "section": "354",
+      "title": "Act caused by inducing person to believe that he will be rendered an object of the Divine displeasure.",
+      "old": "508",
+      "oldSections": ["508"]
+    },
+    { "section": "355", "title": "Misconduct in public by a drunken person.", "old": "510", "oldSections": ["510"] },
+    { "section": "356(1)", "title": "Defamation.", "old": "499", "oldSections": ["499"] },
+    { "section": "356(2)", "title": "Defamation punishment.", "old": "500", "oldSections": ["500"] },
+    { "section": "356(3)", "title": "Printing or engraving matter known to be defamatory.", "old": "501", "oldSections": ["501"] },
+    {
+      "section": "356(4)",
+      "title": "Sale of printed or engraved substance containing defamatory matter.",
+      "old": "502",
+      "oldSections": ["502"]
+    },
+    {
+      "section": "357",
+      "title": "Breach of contract to attend on and supply wants of helpless person.",
+      "old": "491",
+      "oldSections": ["491"]
+    },
+    { "section": "358", "title": "Repeal and Savings.", "old": null, "oldSections": [] }
+  ],
+  "bnss": [
+    { "section": "1", "title": "Short title, extent and commencement.", "old": "1", "oldSections": ["1"] },
+    { "section": "2", "title": "Definitions.", "old": "2", "oldSections": ["2"] },
+    { "section": "2(1)(a)", "title": "\"audio-video electronic means\" .", "old": null, "oldSections": [] },
+    { "section": "2(1)(b)", "title": "\"bail\"", "old": null, "oldSections": [] },
+    { "section": "2(1)(c)", "title": "\"bailable offence\".", "old": "2(a)]", "oldSections": ["2"] },
+    { "section": "2(1)(d)", "title": "\"bail bond\".", "old": null, "oldSections": [] },
+    { "section": "2(1)(e)", "title": "\"bond\".", "old": null, "oldSections": [] },
+    { "section": "2(1)(f)", "title": "\"charge\".", "old": "2(b)]", "oldSections": ["2"] },
+    { "section": "2(1)(g)", "title": "\"cognizable offence\".", "old": "2(c)", "oldSections": ["2"] },
+    { "section": "2(1)(h)", "title": "\"complaint\".", "old": "2(d)", "oldSections": ["2"] },
+    { "section": "2(1)(i)", "title": "\"electronic communication\".", "old": null, "oldSections": [] },
+    { "section": "2(1)(j)", "title": "\"High Court\".", "old": "2(e)", "oldSections": ["2"] },
+    { "section": "2(1)(k)", "title": "\"inquiry\".", "old": "2(g)", "oldSections": ["2"] },
+    { "section": "2(1)(l)", "title": "\"investigation\".", "old": "2(h)", "oldSections": ["2"] },
+    { "section": "2(1)(m)", "title": "\"judicial proceeding\".", "old": "2(i)", "oldSections": ["2"] },
+    { "section": "2(1)(n)", "title": "\"local jurisdiction\".", "old": "2(j)", "oldSections": ["2"] },
+    { "section": "2(1)(o)", "title": "\"non-cognizable offence\".", "old": "2(l)", "oldSections": ["2"] },
+    { "section": "2(1)(p)", "title": "\"notification\".", "old": "2(m)", "oldSections": ["2"] },
+    { "section": "2(1)(q)", "title": "\"offence\".", "old": "2(n)", "oldSections": ["2"] },
+    { "section": "2(1)(r)", "title": "\"officer in charge of a police station\".", "old": "2(o)", "oldSections": ["2"] },
+    { "section": "2(1)(s)", "title": "\"place\".", "old": "2(p)", "oldSections": ["2"] },
+    { "section": "2(1)(t)", "title": "\"police report\".", "old": "2(r)", "oldSections": ["2"] },
+    { "section": "2(1)(u)", "title": "\"police station\".", "old": "2(s)", "oldSections": ["2"] },
+    { "section": "2(1)(v)", "title": "\"Public Prosecutor\".", "old": "2(u)", "oldSections": ["2"] },
+    { "section": "2(1)(w)", "title": "\"sub-division\".", "old": "2(v)", "oldSections": ["2"] },
+    { "section": "2(1)(x)", "title": "\"summons-case\".", "old": "2(w)", "oldSections": ["2"] },
+    { "section": "2(1)(y)", "title": "\"victim\".", "old": "2 (wa)", "oldSections": ["2"] },
+    { "section": "2(1)(z)", "title": "\"warrant-case\".", "old": "2(x)", "oldSections": ["2"] },
+    { "section": "2(2)", "title": "Words and expressions used.", "old": "2(y)", "oldSections": ["2"] },
+    { "section": "3", "title": "Construction of references.", "old": "3", "oldSections": ["3"] },
+    { "section": "4", "title": "Trial of offences under Bharatiya Nyaya Sanhita and other laws.", "old": "4", "oldSections": ["4"] },
+    { "section": "5", "title": "Saving.", "old": "5", "oldSections": ["5"] },
+    { "section": "6", "title": "Classes of Criminal Courts.", "old": "6", "oldSections": ["6"] },
+    { "section": "7", "title": "Territorial divisions.", "old": "7", "oldSections": ["7"] },
+    { "section": "8", "title": "Court of Session.", "old": "9", "oldSections": ["9"] },
+    { "section": "9", "title": "Courts of Judicial Magistrates.", "old": "11", "oldSections": ["11"] },
+    {
+      "section": "10",
+      "title": "Chief Judicial Magistrate and Additional Chief Judicial Magistrate, etc.",
+      "old": "12",
+      "oldSections": ["12"]
+    },
+    { "section": "11", "title": "Special Judicial Magistrates.", "old": "13", "oldSections": ["13"] },
+    { "section": "12", "title": "Local jurisdiction of Judicial Magistrates.", "old": "14", "oldSections": ["14"] },
+    { "section": "13", "title": "Subordination of Judicial Magistrates.", "old": "15", "oldSections": ["15"] },
+    { "section": "14", "title": "Executive Magistrates.", "old": "20", "oldSections": ["20"] },
+    { "section": "15", "title": "Special Executive Magistrates.", "old": "21", "oldSections": ["21"] },
+    { "section": "16", "title": "Local Jurisdiction of Executive Magistrates.", "old": "22", "oldSections": ["22"] },
+    { "section": "17", "title": "Subordination of Executive Magistrates.", "old": "23", "oldSections": ["23"] },
+    { "section": "18", "title": "Public Prosecutors.", "old": "24", "oldSections": ["24"] },
+    { "section": "19", "title": "Assistant Public Prosecutors.", "old": "25", "oldSections": ["25"] },
+    { "section": "20", "title": "Directorate of Prosecution.", "old": "25A", "oldSections": ["25A"] },
+    { "section": "21", "title": "Courts by which offences are triable.", "old": "26", "oldSections": ["26"] },
+    { "section": "22", "title": "Sentences which High Courts and Sessions Judges may pass.", "old": "28", "oldSections": ["28"] },
+    { "section": "23", "title": "Sentences which Magistrates may pass.", "old": "29", "oldSections": ["29"] },
+    { "section": "24", "title": "Sentence of imprisonment in default of fine.", "old": "30", "oldSections": ["30"] },
+    { "section": "25", "title": "Sentence in cases of conviction of several offences at one trial.", "old": "31", "oldSections": ["31"] },
+    { "section": "26", "title": "Mode of conferring powers.", "old": "32", "oldSections": ["32"] },
+    { "section": "27", "title": "Powers of officers appointed.", "old": "33", "oldSections": ["33"] },
+    { "section": "28", "title": "Withdrawal of powers.", "old": "34", "oldSections": ["34"] },
+    {
+      "section": "29",
+      "title": "Powers of Judges and Magistrates exercisable by their successors-in-office.",
+      "old": "35",
+      "oldSections": ["35"]
+    },
+    { "section": "30", "title": "Powers of superior officers of police.", "old": "36", "oldSections": ["36"] },
+    { "section": "31", "title": "Public when to assist Magistrates and police.", "old": "37", "oldSections": ["37"] },
+    { "section": "32", "title": "Aid to person, other than police officer, executing warrant.", "old": "38", "oldSections": ["38"] },
+    { "section": "33", "title": "Public to give information of certain offences.", "old": "39", "oldSections": ["39"] },
+    {
+      "section": "34",
+      "title": "Duty of officers employed in connection with the affairs of a village to make certain report.",
+      "old": "40",
+      "oldSections": ["40"]
+    },
+    { "section": "35", "title": "When police may arrest without warrant.", "old": "41 & 41A", "oldSections": ["41", "41A"] },
+    { "section": "36", "title": "Procedure of arrest and duties of officer making arrest.", "old": "41B", "oldSections": ["41B"] },
+    { "section": "37", "title": "Designated Police Officer.", "old": "41C", "oldSections": ["41C"] },
+    {
+      "section": "38",
+      "title": "Right of arrested person to meet an advocate of his choice during interrogation.",
+      "old": "41D",
+      "oldSections": ["41D"]
+    },
+    { "section": "39", "title": "Arrest on refusal to give name and residence.", "old": "42", "oldSections": ["42"] },
+    { "section": "40", "title": "Arrest by private person and procedure on such arrest.", "old": "43", "oldSections": ["43"] },
+    { "section": "41", "title": "Arrest by Magistrate.", "old": "44", "oldSections": ["44"] },
+    { "section": "42", "title": "Protection of members of the Armed Forces from arrest.", "old": "45", "oldSections": ["45"] },
+    { "section": "43", "title": "Arrest how made.", "old": "46", "oldSections": ["46"] },
+    { "section": "44", "title": "Search of place entered by person sought to be arrested.", "old": "47", "oldSections": ["47"] },
+    { "section": "45", "title": "Pursuit of offenders into other jurisdictions.", "old": "48", "oldSections": ["48"] },
+    { "section": "46", "title": "No unnecessary restraint.", "old": "49", "oldSections": ["49"] },
+    {
+      "section": "47",
+      "title": "Person arrested to be informed of grounds of arrest and of right to bail.",
+      "old": "50",
+      "oldSections": ["50"]
+    },
+    {
+      "section": "48",
+      "title": "Obligation of person making arrest to inform about the arrest, etc , to relative or friend.",
+      "old": "50A",
+      "oldSections": ["50A"]
+    },
+    { "section": "49", "title": "Search of arrested person.", "old": "51", "oldSections": ["51"] },
+    { "section": "50", "title": "Power to seize offensive weapons.", "old": "52", "oldSections": ["52"] },
+    {
+      "section": "51",
+      "title": "Examination of accused by medical practitioner at the request of police officer.",
+      "old": "53",
+      "oldSections": ["53"]
+    },
+    { "section": "52", "title": "Examination of person accused of rape by medical practitioner.", "old": "53A", "oldSections": ["53A"] },
+    { "section": "53", "title": "Examination of arrested person by medical officer.", "old": "54", "oldSections": ["54"] },
+    { "section": "54", "title": "Identification of person arrested.", "old": "54A", "oldSections": ["54A"] },
+    {
+      "section": "55",
+      "title": "Procedure when police officer deputes subordinate to arrest without warrant.",
+      "old": "55",
+      "oldSections": ["55"]
+    },
+    { "section": "56", "title": "Health and safety of arrested person.", "old": "55A", "oldSections": ["55A"] },
+    {
+      "section": "57",
+      "title": "Person arrested to be taken before Magistrate or officer in charge of police station.",
+      "old": "56",
+      "oldSections": ["56"]
+    },
+    { "section": "58", "title": "Person arrested not to be detained more than twenty- four hours.", "old": "57", "oldSections": ["57"] },
+    { "section": "59", "title": "Police to report apprehensions.", "old": "58", "oldSections": ["58"] },
+    { "section": "60", "title": "Discharge of person apprehended.", "old": "59", "oldSections": ["59"] },
+    { "section": "61", "title": "Power, on escape, to pursue and retake.", "old": "60", "oldSections": ["60"] },
+    { "section": "62", "title": "Arrest to be made strictly according to the Sanhita.", "old": "60A", "oldSections": ["60A"] },
+    { "section": "63", "title": "Form of summons.", "old": "61", "oldSections": ["61"] },
+    { "section": "64", "title": "Summons how served.", "old": "62", "oldSections": ["62"] },
+    { "section": "65", "title": "Service of summons on corporate bodies, firms, and societies.", "old": "63", "oldSections": ["63"] },
+    { "section": "66", "title": "Service when persons summoned cannot be found.", "old": "64", "oldSections": ["64"] },
+    { "section": "67", "title": "Procedure when service cannot be effected as before provided.", "old": "65", "oldSections": ["65"] },
+    { "section": "68", "title": "Service on Government servant.", "old": "66", "oldSections": ["66"] },
+    { "section": "69", "title": "Service of summons outside local limits.", "old": "67", "oldSections": ["67"] },
+    {
+      "section": "70",
+      "title": "Proof of service in such cases and when serving officer not present.",
+      "old": "68",
+      "oldSections": ["68"]
+    },
+    { "section": "71", "title": "Service of summons on witness by post.", "old": "69", "oldSections": ["69"] },
+    { "section": "72", "title": "Form of warrant of arrest and duration.", "old": "70", "oldSections": ["70"] },
+    { "section": "73", "title": "Power to direct security to be taken.", "old": "71", "oldSections": ["71"] },
+    { "section": "74", "title": "Warrants to whom directed.", "old": "72", "oldSections": ["72"] },
+    { "section": "75", "title": "Warrant may be directed to any person.", "old": "73", "oldSections": ["73"] },
+    { "section": "76", "title": "Warrant directed to police officer.", "old": "74", "oldSections": ["74"] },
+    { "section": "77", "title": "Notification of substance of warrant.", "old": "75", "oldSections": ["75"] },
+    { "section": "78", "title": "Person arrested to be brought before court without delay.", "old": "76", "oldSections": ["76"] },
+    { "section": "79", "title": "Where warrant may be executed.", "old": "77", "oldSections": ["77"] },
+    { "section": "80", "title": "Warrant forwarded for execution outside jurisdiction.", "old": "78", "oldSections": ["78"] },
+    {
+      "section": "81",
+      "title": "Warrant directed to police officer for execution outside jurisdiction.",
+      "old": "79",
+      "oldSections": ["79"]
+    },
+    { "section": "82", "title": "Procedure on arrest of person against whom warrant issued.", "old": "80", "oldSections": ["80"] },
+    {
+      "section": "83",
+      "title": "Procedure by Magistrate before whom such person arrested is brought.",
+      "old": "81",
+      "oldSections": ["81"]
+    },
+    { "section": "84", "title": "Proclamation for person absconding.", "old": "82", "oldSections": ["82"] },
+    { "section": "85", "title": "Attachment of property of person absconding.", "old": "83", "oldSections": ["83"] },
+    { "section": "86", "title": "Identification and attachment of property of proclaimed person.", "old": null, "oldSections": [] },
+    { "section": "87", "title": "Claims and objections to attachment.", "old": "84", "oldSections": ["84"] },
+    { "section": "88", "title": "Release, sale and restoration of attached property.", "old": "85", "oldSections": ["85"] },
+    {
+      "section": "89",
+      "title": "Appeal from order rejecting application for restoration of attached property.",
+      "old": "86",
+      "oldSections": ["86"]
+    },
+    { "section": "90", "title": "Issue of warrant in lieu of, or in addition to, summons.", "old": "87", "oldSections": ["87"] },
+    { "section": "91", "title": "Power to take bond or bail bond for appearance.", "old": "88", "oldSections": ["88"] },
+    { "section": "92", "title": "Arrest on breach of bond or bail bond for appearance.", "old": "89", "oldSections": ["89"] },
+    {
+      "section": "93",
+      "title": "Provisions of this Chapter generally applicable to summonses and warrants of arrest.",
+      "old": "90",
+      "oldSections": ["90"]
+    },
+    { "section": "94", "title": "Summons to produce document or other thing.", "old": "91", "oldSections": ["91"] },
+    { "section": "95", "title": "Procedure as to letters.", "old": "92", "oldSections": ["92"] },
+    { "section": "96", "title": "When search-warrant may be issued.", "old": "93", "oldSections": ["93"] },
+    {
+      "section": "97",
+      "title": "Search of place suspected to contain stolen property, forged documents, etc.",
+      "old": "94",
+      "oldSections": ["94"]
+    },
+    {
+      "section": "98",
+      "title": "Power to declare certain publications forfeited and to issue search-warrants for the same.",
+      "old": "95",
+      "oldSections": ["95"]
+    },
+    { "section": "99", "title": "Application to High Court to set aside declaration of forfeiture.", "old": "96", "oldSections": ["96"] },
+    { "section": "100", "title": "Search for persons wrongfully confined.", "old": "97", "oldSections": ["97"] },
+    { "section": "101", "title": "Power to compel restoration of abducted females.", "old": "98", "oldSections": ["98"] },
+    { "section": "102", "title": "Direction, etc, of search- warrants.", "old": "99", "oldSections": ["99"] },
+    { "section": "103", "title": "Persons in charge of closed place to allow search.", "old": "100", "oldSections": ["100"] },
+    { "section": "104", "title": "Disposal of things found in search beyond jurisdiction.", "old": "101", "oldSections": ["101"] },
+    { "section": "105", "title": "Recording of search and seizure through audio-video electronic means.", "old": null, "oldSections": [] },
+    { "section": "106", "title": "Power of police officer to seize certain property.", "old": "102", "oldSections": ["102"] },
+    { "section": "107", "title": "Attachment, forfeiture or restoration of property.", "old": null, "oldSections": [] },
+    { "section": "108", "title": "Magistrate may direct search in his presence.", "old": "103", "oldSections": ["103"] },
+    { "section": "109", "title": "Power to impound document, etc , produced.", "old": "104", "oldSections": ["104"] },
+    { "section": "110", "title": "Reciprocal arrangements regarding processes.", "old": "105", "oldSections": ["105"] },
+    { "section": "111", "title": "Definitions.", "old": "105A", "oldSections": ["105A"] },
+    {
+      "section": "112",
+      "title": "Letter of request to competent authority for investigation in a country or place outside India.",
+      "old": "166A",
+      "oldSections": ["166A"]
+    },
+    {
+      "section": "113",
+      "title": "Letter of request from a country or place outside India to a Court or an authority for investigation in India.",
+      "old": "166B",
+      "oldSections": ["166B"]
+    },
+    { "section": "114", "title": "Assistance in securing transfer of persons.", "old": "105B", "oldSections": ["105B"] },
+    {
+      "section": "115",
+      "title": "Assistance in relation to orders of attachment or forfeiture of property.",
+      "old": "105C",
+      "oldSections": ["105C"]
+    },
+    { "section": "116", "title": "Identifying unlawfully acquired property.", "old": "105D", "oldSections": ["105D"] },
+    { "section": "117", "title": "Seizure or attachment of property.", "old": "105E", "oldSections": ["105E"] },
+    {
+      "section": "118",
+      "title": "Management of properties seized or forfeited under this Chapter.",
+      "old": "105F",
+      "oldSections": ["105F"]
+    },
+    { "section": "119", "title": "Notice of forfeiture of property.", "old": "105G", "oldSections": ["105G"] },
+    { "section": "120", "title": "Forfeiture of property in certain cases.", "old": "105H", "oldSections": ["105H"] },
+    { "section": "121", "title": "Fine in lieu of forfeiture.", "old": "105I", "oldSections": ["105I"] },
+    { "section": "122", "title": "Certain transfers to be null and void.", "old": "105J", "oldSections": ["105J"] },
+    { "section": "123", "title": "Procedure in respect of letter of request.", "old": "105K", "oldSections": ["105K"] },
+    { "section": "124", "title": "Application of this Chapter.", "old": "105L", "oldSections": ["105L"] },
+    { "section": "125", "title": "Security for keeping the peace on conviction.", "old": "106", "oldSections": ["106"] },
+    { "section": "126", "title": "Security for keeping the peace in other cases.", "old": "107", "oldSections": ["107"] },
+    {
+      "section": "127",
+      "title": "Security for good behaviour from persons disseminating seditious matters.",
+      "old": "108",
+      "oldSections": ["108"]
+    },
+    { "section": "128", "title": "Security for good behaviour from suspected persons.", "old": "109", "oldSections": ["109"] },
+    { "section": "129", "title": "Security for good behaviour from habitual offenders.", "old": "110", "oldSections": ["110"] },
+    { "section": "130", "title": "Order to be made.", "old": "111", "oldSections": ["111"] },
+    { "section": "131", "title": "Procedure in respect of person present in Court.", "old": "112", "oldSections": ["112"] },
+    { "section": "132", "title": "Summons or warrant in case of person not so present.", "old": "113", "oldSections": ["113"] },
+    { "section": "133", "title": "Copy of order to accompany summons or warrant.", "old": "114", "oldSections": ["114"] },
+    { "section": "134", "title": "Power to dispense with personal attendance.", "old": "115", "oldSections": ["115"] },
+    { "section": "135", "title": "Inquiry as to truth of information.", "old": "116", "oldSections": ["116"] },
+    { "section": "136", "title": "Order to give security.", "old": "117", "oldSections": ["117"] },
+    { "section": "137", "title": "Discharge of person informed against.", "old": "118", "oldSections": ["118"] },
+    { "section": "138", "title": "Commencement of period for which security is required.", "old": "119", "oldSections": ["119"] },
+    { "section": "139", "title": "Contents of bond.", "old": "120", "oldSections": ["120"] },
+    { "section": "140", "title": "Power to reject sureties.", "old": "121", "oldSections": ["121"] },
+    { "section": "141", "title": "Imprisonment in default of security.", "old": "122", "oldSections": ["122"] },
+    {
+      "section": "142",
+      "title": "Power to release persons imprisoned for failing to give security.",
+      "old": "123",
+      "oldSections": ["123"]
+    },
+    { "section": "143", "title": "Security for unexpired period of bond.", "old": "124", "oldSections": ["124"] },
+    { "section": "144", "title": "Order for maintenance of wives, children and parents.", "old": "125", "oldSections": ["125"] },
+    { "section": "145", "title": "Procedure.", "old": "126", "oldSections": ["126"] },
+    { "section": "146", "title": "Alteration in allowance.", "old": "127", "oldSections": ["127"] },
+    { "section": "147", "title": "Enforcement of order of maintenance.", "old": "128", "oldSections": ["128"] },
+    { "section": "148", "title": "Dispersal of assembly by use of civil force.", "old": "129", "oldSections": ["129"] },
+    { "section": "149", "title": "Use of armed forces to disperse assembly.", "old": "130", "oldSections": ["130"] },
+    { "section": "150", "title": "Power of certain armed force officers to disperse assembly.", "old": "131", "oldSections": ["131"] },
+    {
+      "section": "151",
+      "title": "Protection against prosecution for acts done under sections 148, 149 and 150.",
+      "old": "132",
+      "oldSections": ["132"]
+    },
+    { "section": "152", "title": "Conditional order for removal of nuisance.", "old": "133", "oldSections": ["133"] },
+    { "section": "153", "title": "Service or notification of order.", "old": "134", "oldSections": ["134"] },
+    { "section": "154", "title": "Person to whom order is addressed to obey or show cause.", "old": "135", "oldSections": ["135"] },
+    { "section": "155", "title": "Penalty for failure to comply with section 154.", "old": "136", "oldSections": ["136"] },
+    { "section": "156", "title": "Procedure where existence of public right is denied.", "old": "137", "oldSections": ["137"] },
+    {
+      "section": "157",
+      "title": "Procedure where person against whom order is made under section 152 appears to show cause.",
+      "old": "138",
+      "oldSections": ["138"]
+    },
+    {
+      "section": "158",
+      "title": "Power of Magistrate to direct local investigation and examination of an expert.",
+      "old": "139",
+      "oldSections": ["139"]
+    },
+    { "section": "159", "title": "Power of Magistrate to furnish written instructions, etc.", "old": "140", "oldSections": ["140"] },
+    {
+      "section": "160",
+      "title": "Procedure on order being made absolute and consequences of disobedience.",
+      "old": "141",
+      "oldSections": ["141"]
+    },
+    { "section": "161", "title": "Injunction pending inquiry.", "old": "142", "oldSections": ["142"] },
+    {
+      "section": "162",
+      "title": "Magistrate may prohibit repetition or continuance of public nuisance.",
+      "old": "143",
+      "oldSections": ["143"]
+    },
+    {
+      "section": "163",
+      "title": "Power to issue order in urgent cases of nuisance or apprehended danger.",
+      "old": "144",
+      "oldSections": ["144"]
+    },
+    {
+      "section": "164",
+      "title": "Procedure where dispute concerning land or water is likely to cause breach of peace.",
+      "old": "145",
+      "oldSections": ["145"]
+    },
+    { "section": "165", "title": "Power to attach subject of dispute and to appoint receiver.", "old": "146", "oldSections": ["146"] },
+    { "section": "166", "title": "Dispute concerning right of use of land or water.", "old": "147", "oldSections": ["147"] },
+    { "section": "167", "title": "Local inquiry.", "old": "148", "oldSections": ["148"] },
+    { "section": "168", "title": "Police to prevent cognizable offences.", "old": "149", "oldSections": ["149"] },
+    { "section": "169", "title": "Information of design to commit cognizable offences.", "old": "150", "oldSections": ["150"] },
+    { "section": "170", "title": "Arrest to prevent the commission of cognizable offences.", "old": "151", "oldSections": ["151"] },
+    { "section": "171", "title": "Prevention of injury to public property.", "old": "152", "oldSections": ["152"] },
+    { "section": "172", "title": "Persons bound to conform to lawful directions of police.", "old": null, "oldSections": [] },
+    { "section": "173", "title": "Information in cognizable cases.", "old": "154", "oldSections": ["154"] },
+    {
+      "section": "174",
+      "title": "Information as to non- cognizable cases and investigation of such cases.",
+      "old": "155",
+      "oldSections": ["155"]
+    },
+    { "section": "175", "title": "Police officer's power to investigate cognizable case.", "old": "156", "oldSections": ["156"] },
+    { "section": "176", "title": "Procedure for investigation.", "old": "157", "oldSections": ["157"] },
+    { "section": "177", "title": "Report how submitted.", "old": "158", "oldSections": ["158"] },
+    { "section": "178", "title": "Power to hold investigation or preliminary inquiry.", "old": "159", "oldSections": ["159"] },
+    { "section": "179", "title": "Police officer's power to require attendance of witnesses.", "old": "160", "oldSections": ["160"] },
+    { "section": "180", "title": "Examination of witnesses by police.", "old": "161", "oldSections": ["161"] },
+    { "section": "181", "title": "Statements to police and use thereof.", "old": "162", "oldSections": ["162"] },
+    { "section": "182", "title": "No inducement to be offered.", "old": "163", "oldSections": ["163"] },
+    { "section": "183", "title": "Recording of confessions and statements.", "old": "164", "oldSections": ["164"] },
+    { "section": "184", "title": "Medical examination of the victim of rape.", "old": "164A", "oldSections": ["164A"] },
+    { "section": "185", "title": "Search by police officer.", "old": "165", "oldSections": ["165"] },
+    {
+      "section": "186",
+      "title": "When officer in charge of police station may require another to issue search- warrant.",
+      "old": "166",
+      "oldSections": ["166"]
+    },
+    {
+      "section": "187",
+      "title": "Procedure when investigation cannot be completed in twenty-four hours.",
+      "old": "167",
+      "oldSections": ["167"]
+    },
+    { "section": "188", "title": "Report of investigation by subordinate police officer.", "old": "168", "oldSections": ["168"] },
+    { "section": "189", "title": "Release of accused when evidence deficient.", "old": "169", "oldSections": ["169"] },
+    { "section": "190", "title": "Cases to be sent to Magistrate, when evidence is sufficient.", "old": "170", "oldSections": ["170"] },
+    {
+      "section": "191",
+      "title": "Complainant and witnesses not to be required to accompany police officer and not to be subjected to restraint.",
+      "old": "171",
+      "oldSections": ["171"]
+    },
+    { "section": "192", "title": "Diary of proceedings in investigation.", "old": "172", "oldSections": ["172"] },
+    { "section": "193", "title": "Report of police officer on completion of investigation.", "old": "173", "oldSections": ["173"] },
+    { "section": "194", "title": "Police to enquire and report on suicide, etc.", "old": "174", "oldSections": ["174"] },
+    { "section": "195", "title": "Power to summon persons.", "old": "175", "oldSections": ["175"] },
+    { "section": "196", "title": "Inquiry by Magistrate into cause of death", "old": "176", "oldSections": ["176"] },
+    { "section": "197", "title": "Ordinary place of inquiry and trial.", "old": "177", "oldSections": ["177"] },
+    { "section": "198", "title": "Place of inquiry or trial.", "old": "178", "oldSections": ["178"] },
+    { "section": "199", "title": "Offence triable where act is done or consequence ensues.", "old": "179", "oldSections": ["179"] },
+    {
+      "section": "200",
+      "title": "Place of trial where act is an offence by reason of relation to other offence",
+      "old": "180",
+      "oldSections": ["180"]
+    },
+    { "section": "201", "title": "Place of trial in case of certain offences.", "old": "181", "oldSections": ["181"] },
+    {
+      "section": "202",
+      "title": "Offences committed by means of electronic communications, letters, etc.",
+      "old": "182",
+      "oldSections": ["182"]
+    },
+    { "section": "203", "title": "Offence committed on journey or voyage.", "old": "183", "oldSections": ["183"] },
+    { "section": "204", "title": "Place of trial for offences triable together.", "old": "184", "oldSections": ["184"] },
+    {
+      "section": "205",
+      "title": "Power to order cases to be tried in different sessions divisions.",
+      "old": "185",
+      "oldSections": ["185"]
+    },
+    {
+      "section": "206",
+      "title": "High Court to decide, in case of doubt, district where inquiry or trial shall take place.",
+      "old": "186",
+      "oldSections": ["186"]
+    },
+    {
+      "section": "207",
+      "title": "Power to issue summons or warrant for offence committed beyond local jurisdiction.",
+      "old": "187",
+      "oldSections": ["187"]
+    },
+    { "section": "208", "title": "Offence committed outside India.", "old": "188", "oldSections": ["188"] },
+    {
+      "section": "209",
+      "title": "Receipt of evidence relating to offences committed outside India.",
+      "old": "189",
+      "oldSections": ["189"]
+    },
+    { "section": "210", "title": "Cognizance of offences by Magistrates.", "old": "190", "oldSections": ["190"] },
+    { "section": "211", "title": "Transfer on application of the accused.", "old": "191", "oldSections": ["191"] },
+    { "section": "212", "title": "Making over of cases to Magistrates.", "old": "192", "oldSections": ["192"] },
+    { "section": "213", "title": "Cognizance of offences by Courts of Session.", "old": "193", "oldSections": ["193"] },
+    { "section": "214", "title": "Additional Sessions Judges to try cases made over to them.", "old": "194", "oldSections": ["194"] },
+    {
+      "section": "215",
+      "title": "Prosecution for contempt of lawful authority of public servants, for offences against public justice and for offences relating to documents given in evidence.",
+      "old": "195",
+      "oldSections": ["195"]
+    },
+    { "section": "216", "title": "Procedure for witnesses in case of threatening, etc.", "old": "195A", "oldSections": ["195A"] },
+    {
+      "section": "217",
+      "title": "Prosecution for offences against the State and for criminal conspiracy to commit such offence.",
+      "old": "196",
+      "oldSections": ["196"]
+    },
+    { "section": "218", "title": "Prosecution of Judges and public servants.", "old": "197", "oldSections": ["197"] },
+    { "section": "219", "title": "Prosecution for offences against marriage.", "old": "198", "oldSections": ["198"] },
+    {
+      "section": "220",
+      "title": "Prosecution of offences under section 498A of the Bharatiya Nyaya Sanhita, 2023.",
+      "old": "198A",
+      "oldSections": ["198A"]
+    },
+    { "section": "221", "title": "Cognizance of offence", "old": "198B", "oldSections": ["198B"] },
+    { "section": "222", "title": "Prosecution for defamation.", "old": "199", "oldSections": ["199"] },
+    { "section": "223", "title": "Examination of complainant.", "old": "200", "oldSections": ["200"] },
+    {
+      "section": "224",
+      "title": "Procedure by Magistrate not competent to take cognizance of the case.",
+      "old": "201",
+      "oldSections": ["201"]
+    },
+    { "section": "225", "title": "Postponement of issue of process.", "old": "202", "oldSections": ["202"] },
+    { "section": "226", "title": "Dismissal of complaint.", "old": "203", "oldSections": ["203"] },
+    { "section": "227", "title": "Issue of process.", "old": "204", "oldSections": ["204"] },
+    { "section": "228", "title": "Magistrate may dispense with personal attendance of accused.", "old": "205", "oldSections": ["205"] },
+    { "section": "229", "title": "Special summons in cases of petty offence.", "old": "206", "oldSections": ["206"] },
+    {
+      "section": "230",
+      "title": "Supply to the accused of copy of police report and other documents.",
+      "old": "207",
+      "oldSections": ["207"]
+    },
+    {
+      "section": "231",
+      "title": "Supply of copies of statements and documents to accused in other cases triable by Court of Session.",
+      "old": "208",
+      "oldSections": ["208"]
+    },
+    {
+      "section": "232",
+      "title": "Commitment of case to Court of Session when offence is triable exclusively by it.",
+      "old": "209",
+      "oldSections": ["209"]
+    },
+    {
+      "section": "233",
+      "title": "Procedure to be followed when there is a complaint case and police investigation in respect of the same offence.",
+      "old": "210",
+      "oldSections": ["210"]
+    },
+    { "section": "234", "title": "Contents of charge.", "old": "211", "oldSections": ["211"] },
+    { "section": "235", "title": "Particulars as to time, place and person.", "old": "212", "oldSections": ["212"] },
+    { "section": "236", "title": "When manner of committing offence must be stated.", "old": "213", "oldSections": ["213"] },
+    {
+      "section": "237",
+      "title": "Words in charge taken in sense of law under which offence is punishable.",
+      "old": "214",
+      "oldSections": ["214"]
+    },
+    { "section": "238", "title": "Effect of errors.", "old": "215", "oldSections": ["215"] },
+    { "section": "239", "title": "Court may alter charge.", "old": "216", "oldSections": ["216"] },
+    { "section": "240", "title": "Recall of witnesses when charge altered.", "old": "217", "oldSections": ["217"] },
+    { "section": "241", "title": "Separate charges for distinct offences.", "old": "218", "oldSections": ["218"] },
+    { "section": "242", "title": "Offences of same kind within year may be charged together.", "old": "219", "oldSections": ["219"] },
+    { "section": "243", "title": "Trial for more than one offence.", "old": "220", "oldSections": ["220"] },
+    { "section": "244", "title": "Where it is doubtful what offence has been committed.", "old": "221", "oldSections": ["221"] },
+    { "section": "245", "title": "When offence proved included in offence charged.", "old": "222", "oldSections": ["222"] },
+    { "section": "246", "title": "What persons may be charged jointly.", "old": "223", "oldSections": ["223"] },
+    {
+      "section": "247",
+      "title": "Withdrawal of remaining charges on conviction on one of several charges.",
+      "old": "224",
+      "oldSections": ["224"]
+    },
+    { "section": "248", "title": "Trial to be conducted by Public Prosecutor.", "old": "225", "oldSections": ["225"] },
+    { "section": "249", "title": "Opening case for prosecution.", "old": "226", "oldSections": ["226"] },
+    { "section": "250", "title": "Discharge.", "old": "227", "oldSections": ["227"] },
+    { "section": "251", "title": "Framing of charge.", "old": "228", "oldSections": ["228"] },
+    { "section": "252", "title": "Conviction on plea of guilty.", "old": "229", "oldSections": ["229"] },
+    { "section": "253", "title": "Date for prosecution evidence.", "old": "230", "oldSections": ["230"] },
+    { "section": "254", "title": "Evidence for prosecution.", "old": "231", "oldSections": ["231"] },
+    { "section": "255", "title": "Acquittal.", "old": "232", "oldSections": ["232"] },
+    { "section": "256", "title": "Entering upon defence.", "old": "233", "oldSections": ["233"] },
+    { "section": "257", "title": "Arguments.", "old": "234", "oldSections": ["234"] },
+    { "section": "258", "title": "Judgment of acquittal or conviction.", "old": "235", "oldSections": ["235"] },
+    { "section": "259", "title": "Previous conviction.", "old": "236", "oldSections": ["236"] },
+    {
+      "section": "260",
+      "title": "Procedure in cases instituted under sib-section 2 of section 222.",
+      "old": "237",
+      "oldSections": ["237"]
+    },
+    { "section": "261", "title": "Compliance with section 230", "old": "238", "oldSections": ["238"] },
+    { "section": "262", "title": "When accused shall be discharged.", "old": "239", "oldSections": ["239"] },
+    { "section": "263", "title": "Framing of charge.", "old": "240", "oldSections": ["240"] },
+    { "section": "264", "title": "Conviction on plea of guilty.", "old": "241", "oldSections": ["241"] },
+    { "section": "265", "title": "Evidence for prosecution.", "old": "242", "oldSections": ["242"] },
+    { "section": "266", "title": "Evidence for defence.", "old": "243", "oldSections": ["243"] },
+    { "section": "267", "title": "Evidence for prosecution.", "old": "244", "oldSections": ["244"] },
+    { "section": "268", "title": "When accused shall be discharged.", "old": "245", "oldSections": ["245"] },
+    { "section": "269", "title": "Procedure where accused is not discharged.", "old": "246", "oldSections": ["246"] },
+    { "section": "270", "title": "Evidence for defence.", "old": "247", "oldSections": ["247"] },
+    { "section": "271", "title": "Acquittal or conviction.", "old": "248", "oldSections": ["248"] },
+    { "section": "272", "title": "Absence of complainant.", "old": "249", "oldSections": ["249"] },
+    { "section": "273", "title": "Compensation for accusation without reasonable cause.", "old": "250", "oldSections": ["250"] },
+    { "section": "274", "title": "Substance of accusation to be stated.", "old": "251", "oldSections": ["251"] },
+    { "section": "275", "title": "Conviction on plea of guilty.", "old": "252", "oldSections": ["252"] },
+    {
+      "section": "276",
+      "title": "Conviction on plea of guilty in absence of accused in petty cases.",
+      "old": "253",
+      "oldSections": ["253"]
+    },
+    { "section": "277", "title": "Procedure when not convicted.", "old": "254", "oldSections": ["254"] },
+    { "section": "278", "title": "Acquittal or conviction.", "old": "255", "oldSections": ["255"] },
+    { "section": "279", "title": "Non-appearance or death of complainant.", "old": "256", "oldSections": ["256"] },
+    { "section": "280", "title": "Withdrawal of complaint.", "old": "257", "oldSections": ["257"] },
+    { "section": "281", "title": "Power to stop proceedings in certain cases.", "old": "258", "oldSections": ["258"] },
+    { "section": "282", "title": "Power of Court to convert summons-cases into warrant- cases.", "old": "259", "oldSections": ["259"] },
+    { "section": "283", "title": "Power to try summarily.", "old": "260", "oldSections": ["260"] },
+    { "section": "284", "title": "Summary trial by Magistrate of the second class.", "old": "261", "oldSections": ["261"] },
+    { "section": "285", "title": "Procedure for summary trials.", "old": "262", "oldSections": ["262"] },
+    { "section": "286", "title": "Record in summary trials.", "old": "263", "oldSections": ["263"] },
+    { "section": "287", "title": "Judgment in cases tried summarily.", "old": "264", "oldSections": ["264"] },
+    { "section": "288", "title": "Language of record and judgment.", "old": "265", "oldSections": ["265"] },
+    { "section": "289", "title": "Application of the Chapter.", "old": "265A", "oldSections": ["265A"] },
+    { "section": "290", "title": "Application for plea bargaining.", "old": "265B", "oldSections": ["265B"] },
+    { "section": "291", "title": "Guidelines for mutually satisfactory disposition.", "old": "265C", "oldSections": ["265C"] },
+    {
+      "section": "292",
+      "title": "Report of the mutually satisfactory disposition to be submitted before the Court.",
+      "old": "265D",
+      "oldSections": ["265D"]
+    },
+    { "section": "293", "title": "Disposal of the case.", "old": "265E", "oldSections": ["265E"] },
+    { "section": "294", "title": "Judgment of the Court.", "old": "265F", "oldSections": ["265F"] },
+    { "section": "295", "title": "Finality of the judgment.", "old": "265G", "oldSections": ["265G"] },
+    { "section": "296", "title": "Power of the Court in plea bargaining.", "old": "265H", "oldSections": ["265H"] },
+    {
+      "section": "297",
+      "title": "Period of detention undergone by the accused to be set off against the sentence of imprisonment.",
+      "old": "265-I",
+      "oldSections": ["265"]
+    },
+    { "section": "298", "title": "Savings.", "old": "265J", "oldSections": ["265J"] },
+    { "section": "299", "title": "Statements of accused not to be used.", "old": "265K", "oldSections": ["265K"] },
+    { "section": "300", "title": "Non-application of the Chapter.", "old": "265L", "oldSections": ["265L"] },
+    { "section": "301", "title": "Definitions.", "old": "266", "oldSections": ["266"] },
+    { "section": "302", "title": "Power to require attendance of prisoners.", "old": "267", "oldSections": ["267"] },
+    {
+      "section": "303",
+      "title": "Power of State Government or Central Government to exclude certain persons from operation of section 302.",
+      "old": "268",
+      "oldSections": ["268"]
+    },
+    {
+      "section": "304",
+      "title": "Officer in charge of prison to abstain from carrying out order in certain contingencies.",
+      "old": "269",
+      "oldSections": ["269"]
+    },
+    { "section": "305", "title": "Prisoner to be brought to Court in custody.", "old": "270", "oldSections": ["270"] },
+    { "section": "306", "title": "Power to issue commission for examination of witness in prison.", "old": "271", "oldSections": ["271"] },
+    { "section": "307", "title": "Language of Courts.", "old": "272", "oldSections": ["272"] },
+    { "section": "308", "title": "Evidence to be taken in presence of accused.", "old": "273", "oldSections": ["273"] },
+    { "section": "309", "title": "Record in summons-cases and inquiries.", "old": "274", "oldSections": ["274"] },
+    { "section": "310", "title": "Record in warrant-cases.", "old": "275", "oldSections": ["275"] },
+    { "section": "311", "title": "Record in trial before Court of Session.", "old": "276", "oldSections": ["276"] },
+    { "section": "312", "title": "Language of record of evidence.", "old": "277", "oldSections": ["277"] },
+    { "section": "313", "title": "Procedure in regard to such evidence when completed.", "old": "278", "oldSections": ["278"] },
+    { "section": "314", "title": "Interpretation of evidence to accused or his pleader.", "old": "279", "oldSections": ["279"] },
+    { "section": "315", "title": "Remarks respecting demeanour of witness.", "old": "280", "oldSections": ["280"] },
+    { "section": "316", "title": "Record of examination of accused.", "old": "281", "oldSections": ["281"] },
+    { "section": "317", "title": "Interpreter to be bound to interpret truthfully.", "old": "282", "oldSections": ["282"] },
+    { "section": "318", "title": "Record in High Court.", "old": "283", "oldSections": ["283"] },
+    {
+      "section": "319",
+      "title": "When attendance of witness may be dispensed with and commission issued.",
+      "old": "284",
+      "oldSections": ["284"]
+    },
+    { "section": "320", "title": "Commission to whom to be issued.", "old": "285", "oldSections": ["285"] },
+    { "section": "321", "title": "Execution of commissions.", "old": "286", "oldSections": ["286"] },
+    { "section": "322", "title": "Parties may examine witnesses.", "old": "287", "oldSections": ["287"] },
+    { "section": "323", "title": "Return of commission.", "old": "288", "oldSections": ["288"] },
+    { "section": "324", "title": "Adjournment of proceeding.", "old": "289", "oldSections": ["289"] },
+    { "section": "325", "title": "Execution of foreign commissions.", "old": "290", "oldSections": ["290"] },
+    { "section": "326", "title": "Deposition of medical witness.", "old": "291", "oldSections": ["291"] },
+    { "section": "327", "title": "Identification report of Magistrate.", "old": "291A", "oldSections": ["291A"] },
+    { "section": "328", "title": "Evidence of officers of the Mint.", "old": "292", "oldSections": ["292"] },
+    { "section": "329", "title": "Reports of certain Government scientific experts.", "old": "293", "oldSections": ["293"] },
+    { "section": "330", "title": "No formal proof of certain documents.", "old": "294", "oldSections": ["294"] },
+    { "section": "331", "title": "Affidavit in proof of conduct of public servants.", "old": "295", "oldSections": ["295"] },
+    { "section": "332", "title": "Evidence of formal character on affidavit.", "old": "296", "oldSections": ["296"] },
+    { "section": "333", "title": "Authorities before whom affidavits may be sworn.", "old": "297", "oldSections": ["297"] },
+    { "section": "334", "title": "Previous conviction or acquittal how proved.", "old": "298", "oldSections": ["298"] },
+    { "section": "335", "title": "Record of evidence in absence of accused.", "old": "299", "oldSections": ["299"] },
+    {
+      "section": "336",
+      "title": "Evidence of public servants, experts, police officers in certain cases.",
+      "old": null,
+      "oldSections": []
+    },
+    {
+      "section": "337",
+      "title": "Person once convicted or acquitted not to be tried for same offence.",
+      "old": "300",
+      "oldSections": ["300"]
+    },
+    { "section": "338", "title": "Appearance by Public Prosecutors.", "old": "301", "oldSections": ["301"] },
+    { "section": "339", "title": "Permission to conduct prosecution.", "old": "302", "oldSections": ["302"] },
+    {
+      "section": "340",
+      "title": "Right of person against whom proceedings are instituted to be defended.",
+      "old": "303",
+      "oldSections": ["303"]
+    },
+    { "section": "341", "title": "Legal aid to accused at State expense in certain cases.", "old": "304", "oldSections": ["304"] },
+    { "section": "342", "title": "Procedure when corporation or registered society is an accused.", "old": "305", "oldSections": ["305"] },
+    { "section": "343", "title": "Tender of pardon to accomplice.", "old": "306", "oldSections": ["306"] },
+    { "section": "344", "title": "Power to direct tender of pardon.", "old": "307", "oldSections": ["307"] },
+    { "section": "345", "title": "Trial of person not complying with conditions of pardon.", "old": "308", "oldSections": ["308"] },
+    { "section": "346", "title": "Power to postpone or adjourn proceedings.", "old": "309", "oldSections": ["309"] },
+    { "section": "347", "title": "Local inspection.", "old": "310", "oldSections": ["310"] },
+    { "section": "348", "title": "Power to summon material witness, or examine person present.", "old": "311", "oldSections": ["311"] },
+    {
+      "section": "349",
+      "title": "Power of Magistrate to order person to give specimen signatures or handwriting.",
+      "old": "311A",
+      "oldSections": ["311A"]
+    },
+    { "section": "350", "title": "Expenses of complainants and witnesses.", "old": "312", "oldSections": ["312"] },
+    { "section": "351", "title": "Power to examine the accused.", "old": "313", "oldSections": ["313"] },
+    { "section": "352", "title": "Oral arguments and memorandum of arguments.", "old": "314", "oldSections": ["314"] },
+    { "section": "353", "title": "Accused person to be competent witness.", "old": "315", "oldSections": ["315"] },
+    { "section": "354", "title": "No influence to be used to induce disclosure.", "old": "316", "oldSections": ["316"] },
+    {
+      "section": "355",
+      "title": "Provision for inquiries and trial being held in the absence of accused in certain cases.",
+      "old": "317",
+      "oldSections": ["317"]
+    },
+    { "section": "356", "title": "Inquiry, trial or judgment in absentia of proclaimed offender.", "old": null, "oldSections": [] },
+    { "section": "357", "title": "Procedure where accused does not understand proceedings.", "old": "318", "oldSections": ["318"] },
+    {
+      "section": "358",
+      "title": "Power to proceed against other persons appearing to be guilty of offence.",
+      "old": "319",
+      "oldSections": ["319"]
+    },
+    { "section": "359", "title": "Compounding of offences.", "old": "320", "oldSections": ["320"] },
+    { "section": "360", "title": "Withdrawal from prosecution.", "old": "321", "oldSections": ["321"] },
+    { "section": "361", "title": "Procedure in cases which Magistrate cannot dispose of.", "old": "322", "oldSections": ["322"] },
+    {
+      "section": "362",
+      "title": "Procedure when, after commencement of inquiry or trial, Magistrate finds case should be committed.",
+      "old": "323",
+      "oldSections": ["323"]
+    },
+    {
+      "section": "363",
+      "title": "Trial of persons previously convicted of offences against coinage, stamp-law or property.",
+      "old": "324",
+      "oldSections": ["324"]
+    },
+    {
+      "section": "364",
+      "title": "Procedure when Magistrate cannot pass sentence sufficiently severe.",
+      "old": "325",
+      "oldSections": ["325"]
+    },
+    {
+      "section": "365",
+      "title": "Conviction or commitment on evidence partly recorded by one Magistrate and partly by another.",
+      "old": "326",
+      "oldSections": ["326"]
+    },
+    { "section": "366", "title": "Court to be open.", "old": "327", "oldSections": ["327"] },
+    { "section": "367", "title": "Procedure in case of accused being person of unsound mind.", "old": "328", "oldSections": ["328"] },
+    { "section": "368", "title": "Procedure in case of person of unsound mind tried before Court.", "old": "329", "oldSections": ["329"] },
+    {
+      "section": "369",
+      "title": "Release of person with mental illness pending investigation or trial.",
+      "old": "330",
+      "oldSections": ["330"]
+    },
+    { "section": "370", "title": "Resumption of inquiry or trial.", "old": "331", "oldSections": ["331"] },
+    { "section": "371", "title": "Procedure on accused appearing before Magistrate or Court.", "old": "332", "oldSections": ["332"] },
+    { "section": "372", "title": "When accused appears to have been of sound mind.", "old": "333", "oldSections": ["333"] },
+    { "section": "373", "title": "Judgment of acquittal on ground of unsoundness of mind.", "old": "334", "oldSections": ["334"] },
+    {
+      "section": "374",
+      "title": "Person acquitted on ground of unsoundness of mind to be detained in safe custody.",
+      "old": "335",
+      "oldSections": ["335"]
+    },
+    {
+      "section": "375",
+      "title": "Power of State Government to empower officer-in-charge to discharge.",
+      "old": "336",
+      "oldSections": ["336"]
+    },
+    {
+      "section": "376",
+      "title": "Procedure where prisoner of unsound mind is reported capable of making his defence.",
+      "old": "337",
+      "oldSections": ["337"]
+    },
+    {
+      "section": "377",
+      "title": "Procedure where person of unsound mind detained is declared fit to be released.",
+      "old": "338",
+      "oldSections": ["338"]
+    },
+    {
+      "section": "378",
+      "title": "Delivery of person of unsound mind to care of relative or friend.",
+      "old": "339",
+      "oldSections": ["339"]
+    },
+    { "section": "379", "title": "Procedure in cases mentioned in section 215.", "old": "340", "oldSections": ["340"] },
+    { "section": "380", "title": "Appeal.", "old": "341", "oldSections": ["341"] },
+    { "section": "381", "title": "Power to order costs.", "old": "342", "oldSections": ["342"] },
+    { "section": "382", "title": "Procedure of Magistrate taking cognizance.", "old": "343", "oldSections": ["343"] },
+    { "section": "383", "title": "Summary procedure for trial for giving false evidence.", "old": "344", "oldSections": ["344"] },
+    { "section": "384", "title": "Procedure in certain cases of contempt.", "old": "345", "oldSections": ["345"] },
+    {
+      "section": "385",
+      "title": "Procedure where Court considers that case should not be dealt with under section 384.",
+      "old": "346",
+      "oldSections": ["346"]
+    },
+    { "section": "386", "title": "When Registrar or Sub- Registrar to be deemed a Civil Court.", "old": "347", "oldSections": ["347"] },
+    { "section": "387", "title": "Discharge of offender on submission of apology.", "old": "348", "oldSections": ["348"] },
+    {
+      "section": "388",
+      "title": "Imprisonment or committal of person refusing to answer or produce document.",
+      "old": "349",
+      "oldSections": ["349"]
+    },
+    {
+      "section": "389",
+      "title": "Summary procedure for punishment for non- attendance by a witness in obedience to summons.",
+      "old": "350",
+      "oldSections": ["350"]
+    },
+    { "section": "390", "title": "Appeals from convictions under sections 383, 384, 388 and 389.", "old": "351", "oldSections": ["351"] },
+    {
+      "section": "391",
+      "title": "Certain Judges and Magistrates not to try certain offences when committed before themselves.",
+      "old": "352",
+      "oldSections": ["352"]
+    },
+    { "section": "392", "title": "Judgment.", "old": "353", "oldSections": ["353"] },
+    { "section": "393", "title": "Language and contents of judgment.", "old": "354", "oldSections": ["354"] },
+    { "section": "394", "title": "Order for notifying address of previously convicted offender.", "old": "356", "oldSections": ["356"] },
+    { "section": "395", "title": "Order to pay compensation.", "old": "357", "oldSections": ["357"] },
+    {
+      "section": "396",
+      "title": "Victim compensation scheme. Compensation to be in addition to fine under section 65, section 70 and sub-section (1) of section 124 of the Bharatiya Nyaya Sanhita, 2023 [under section 326A or section 376D of Indian Penal Code].",
+      "old": "357A & 357B",
+      "oldSections": ["357A", "357B"]
+    },
+    { "section": "397", "title": "Treatment of victims.", "old": "357C", "oldSections": ["357C"] },
+    { "section": "398", "title": "Witness protection scheme.", "old": null, "oldSections": [] },
+    { "section": "399", "title": "Compensation to persons groundlessly arrested.", "old": "358", "oldSections": ["358"] },
+    { "section": "400", "title": "Order to pay costs in non- cognizable cases.", "old": "359", "oldSections": ["359"] },
+    {
+      "section": "401",
+      "title": "Order to release on probation of good conduct or after admonition.",
+      "old": "360",
+      "oldSections": ["360"]
+    },
+    { "section": "402", "title": "Special reasons to be recorded in certain cases.", "old": "361", "oldSections": ["361"] },
+    { "section": "403", "title": "Court not to alter judgment.", "old": "362", "oldSections": ["362"] },
+    { "section": "404", "title": "Copy of judgment to be given to the accused and other persons.", "old": "363", "oldSections": ["363"] },
+    { "section": "405", "title": "Judgment when to be translated", "old": "364", "oldSections": ["364"] },
+    {
+      "section": "406",
+      "title": "Court of Session to send copy of finding and sentence to District Magistrate.",
+      "old": "365",
+      "oldSections": ["365"]
+    },
+    {
+      "section": "407",
+      "title": "Sentence of death to be submitted by Court of Session for confirmation.",
+      "old": "366",
+      "oldSections": ["366"]
+    },
+    {
+      "section": "408",
+      "title": "Power to direct further inquiry to be made or additional evidence to be taken.",
+      "old": "367",
+      "oldSections": ["367"]
+    },
+    { "section": "409", "title": "Power of High Court to confirm sentence or annul conviction.", "old": "368", "oldSections": ["368"] },
+    { "section": "410", "title": "Confirmation or new sentence to be signed by two Judges.", "old": "369", "oldSections": ["369"] },
+    { "section": "411", "title": "Procedure in case of difference of opinion.", "old": "370", "oldSections": ["370"] },
+    { "section": "412", "title": "Procedure in cases submitted to High Court for confirmation.", "old": "371", "oldSections": ["371"] },
+    { "section": "413", "title": "No appeal to lie unless otherwise provided.", "old": "372", "oldSections": ["372"] },
+    {
+      "section": "414",
+      "title": "Appeal from orders requiring security or refusal to accept or rejecting surety for keeping peace or good behaviour.",
+      "old": "373",
+      "oldSections": ["373"]
+    },
+    { "section": "415", "title": "Appeals from convictions.", "old": "374", "oldSections": ["374"] },
+    { "section": "416", "title": "No appeal in certain cases when accused pleads guilty.", "old": "375", "oldSections": ["375"] },
+    { "section": "417", "title": "No appeal in petty cases.", "old": "376", "oldSections": ["376"] },
+    { "section": "418", "title": "Appeal by the State Government against sentence.", "old": "377", "oldSections": ["377"] },
+    { "section": "419", "title": "Appeal in case of acquittal.", "old": "378", "oldSections": ["378"] },
+    { "section": "420", "title": "Appeal against conviction by High Court in certain cases.", "old": "379", "oldSections": ["379"] },
+    { "section": "421", "title": "Special right of appeal in certain cases.", "old": "380", "oldSections": ["380"] },
+    { "section": "422", "title": "Appeal to Court of Session how heard.", "old": "381", "oldSections": ["381"] },
+    { "section": "423", "title": "Petition of appeal.", "old": "382", "oldSections": ["382"] },
+    { "section": "424", "title": "Procedure when appellant in jail.", "old": "383", "oldSections": ["383"] },
+    { "section": "425", "title": "Summary dismissal of appeal.", "old": "384", "oldSections": ["384"] },
+    { "section": "426", "title": "Procedure for hearing appeals not dismissed summarily.", "old": "385", "oldSections": ["385"] },
+    { "section": "427", "title": "Powers of the Appellate Court.", "old": "386", "oldSections": ["386"] },
+    { "section": "428", "title": "Judgments of Subordinate Appellate Court.", "old": "387", "oldSections": ["387"] },
+    { "section": "429", "title": "Order of High Court on appeal to be certified to lower Court.", "old": "388", "oldSections": ["388"] },
+    {
+      "section": "430",
+      "title": "Suspension of sentence pending the appeal; release of appellant on bail.",
+      "old": "389",
+      "oldSections": ["389"]
+    },
+    { "section": "431", "title": "Arrest of accused in appeal from acquittal", "old": "390", "oldSections": ["390"] },
+    {
+      "section": "432",
+      "title": "Appellate Court may take further evidence or direct it to be taken.",
+      "old": "391",
+      "oldSections": ["391"]
+    },
+    { "section": "433", "title": "Procedure where Judges of Court of Appeal are equally divided.", "old": "392", "oldSections": ["392"] },
+    { "section": "434", "title": "Finality of judgments and orders on appeal.", "old": "393", "oldSections": ["393"] },
+    { "section": "435", "title": "Abatement of appeals.", "old": "394", "oldSections": ["394"] },
+    { "section": "436", "title": "Reference to High Court.", "old": "395", "oldSections": ["395"] },
+    { "section": "437", "title": "Disposal of case according to decision of High Court.", "old": "396", "oldSections": ["396"] },
+    { "section": "438", "title": "Calling for records to exercise powers of revision.", "old": "397", "oldSections": ["397"] },
+    { "section": "439", "title": "Power to order inquiry.", "old": "398", "oldSections": ["398"] },
+    { "section": "440", "title": "Sessions Judge's powers of revision.", "old": "399", "oldSections": ["399"] },
+    { "section": "441", "title": "Power of Additional Sessions Judge.", "old": "400", "oldSections": ["400"] },
+    { "section": "442", "title": "High Court's powers of revision.", "old": "401", "oldSections": ["401"] },
+    { "section": "443", "title": "Power of High Court to withdraw or transfer revision cases.", "old": "402", "oldSections": ["402"] },
+    { "section": "444", "title": "Option of Court to hear parties.", "old": "403", "oldSections": ["403"] },
+    { "section": "445", "title": "High Court's order to be certified to lower Court.", "old": "405", "oldSections": ["405"] },
+    { "section": "446", "title": "Power of Supreme Court to transfer cases and appeals.", "old": "406", "oldSections": ["406"] },
+    { "section": "447", "title": "Power of High Court to transfer cases and appeals.", "old": "407", "oldSections": ["407"] },
+    { "section": "448", "title": "Power of Sessions Judge to transfer cases and appeals.", "old": "408", "oldSections": ["408"] },
+    { "section": "449", "title": "Withdrawal of cases and appeals by Session Judge.", "old": "409", "oldSections": ["409"] },
+    { "section": "450", "title": "Withdrawal of cases by Judicial Magistrate.", "old": "410", "oldSections": ["410"] },
+    { "section": "451", "title": "Making over or withdrawal of cases by Executive Magistrates.", "old": "411", "oldSections": ["411"] },
+    { "section": "452", "title": "Reasons to be recorded.", "old": "412", "oldSections": ["412"] },
+    { "section": "453", "title": "Execution of order passed under section 409.", "old": "413", "oldSections": ["413"] },
+    { "section": "454", "title": "Execution of sentence of death passed by High Court.", "old": "414", "oldSections": ["414"] },
+    {
+      "section": "455",
+      "title": "Commutation of sentence of death in case of appeal to Supreme Court.",
+      "old": "415",
+      "oldSections": ["415"]
+    },
+    { "section": "456", "title": "Postponement of capital sentence on pregnant woman.", "old": "416", "oldSections": ["416"] },
+    { "section": "457", "title": "Power to appoint place of imprisonment.", "old": "417", "oldSections": ["417"] },
+    { "section": "458", "title": "Execution of sentence of imprisonment.", "old": "418", "oldSections": ["418"] },
+    { "section": "459", "title": "Direction of warrant for execution.", "old": "419", "oldSections": ["419"] },
+    { "section": "460", "title": "Warrant with whom to be lodged.", "old": "420", "oldSections": ["420"] },
+    { "section": "461", "title": "Warrant for levy of fine.", "old": "421", "oldSections": ["421"] },
+    { "section": "462", "title": "Effect of such warrant.", "old": "422", "oldSections": ["422"] },
+    {
+      "section": "463",
+      "title": "Warrant for levy of fine issued by a Court in any territory to which this Sanhita does not extend.",
+      "old": "423",
+      "oldSections": ["423"]
+    },
+    { "section": "464", "title": "Suspension of execution of sentence of imprisonment.", "old": "424", "oldSections": ["424"] },
+    { "section": "465", "title": "Who may issue warrant.", "old": "425", "oldSections": ["425"] },
+    { "section": "466", "title": "Sentence on escaped convict when to take effect.", "old": "426", "oldSections": ["426"] },
+    { "section": "467", "title": "Sentence on offender already sentenced for another offence.", "old": "427", "oldSections": ["427"] },
+    {
+      "section": "468",
+      "title": "Period of detention undergone by the accused to be set off against the sentence of imprisonment.",
+      "old": "428",
+      "oldSections": ["428"]
+    },
+    { "section": "469", "title": "Saving.", "old": "429", "oldSections": ["429"] },
+    { "section": "470", "title": "Return of warrant on execution of sentence.", "old": "430", "oldSections": ["430"] },
+    { "section": "471", "title": "Money ordered to be paid recoverable as a fine.", "old": "431", "oldSections": ["431"] },
+    { "section": "472", "title": "Mercy Petition in death sentence cases.", "old": null, "oldSections": [] },
+    { "section": "473", "title": "Power to suspend or remit sentences.", "old": "432", "oldSections": ["432"] },
+    { "section": "474", "title": "Power to commute sentence.", "old": "433", "oldSections": ["433"] },
+    {
+      "section": "475",
+      "title": "Restriction on powers of remission or commutation in certain cases.",
+      "old": "433A",
+      "oldSections": ["433A"]
+    },
+    {
+      "section": "476",
+      "title": "Concurrent power of Central Government in case of death sentences.",
+      "old": "434",
+      "oldSections": ["434"]
+    },
+    {
+      "section": "477",
+      "title": "State Government to act after concurrence with Central Government in certain cases.",
+      "old": "435",
+      "oldSections": ["435"]
+    },
+    { "section": "478", "title": "In what cases bail to be taken.", "old": "436", "oldSections": ["436"] },
+    {
+      "section": "479",
+      "title": "Maximum period for which an undertrial prisoner can be detained.",
+      "old": "436A",
+      "oldSections": ["436A"]
+    },
+    { "section": "480", "title": "When bail may be taken in case of non-bailable offence.", "old": "437", "oldSections": ["437"] },
+    { "section": "481", "title": "Bail to require accused to appear before next appellate Court.", "old": "437A", "oldSections": ["437A"] },
+    { "section": "482", "title": "Direction for grant of bail to person apprehending arrest.", "old": "438", "oldSections": ["438"] },
+    { "section": "483", "title": "Special powers of High Court or Court of Session regarding bail.", "old": "439", "oldSections": ["439"] },
+    { "section": "484", "title": "Amount of bond and reduction thereof.", "old": "440", "oldSections": ["440"] },
+    { "section": "485", "title": "Bond of accused and sureties.", "old": "441", "oldSections": ["441"] },
+    { "section": "486", "title": "Declaration by sureties.", "old": "441A", "oldSections": ["441A"] },
+    { "section": "487", "title": "Discharge from custody.", "old": "442", "oldSections": ["442"] },
+    {
+      "section": "488",
+      "title": "Power to order sufficient bail when that first taken is insufficient.",
+      "old": "443",
+      "oldSections": ["443"]
+    },
+    { "section": "489", "title": "Discharge of sureties.", "old": "444", "oldSections": ["444"] },
+    { "section": "490", "title": "Deposit instead of recognizance.", "old": "445", "oldSections": ["445"] },
+    { "section": "491", "title": "Procedure when bond has been forfeited.", "old": "446", "oldSections": ["446"] },
+    { "section": "492", "title": "Cancellation of bond and bail bond.", "old": "446A", "oldSections": ["446A"] },
+    {
+      "section": "493",
+      "title": "Procedure in case of insolvency of death of surety or when a bond is forfeited.",
+      "old": "447",
+      "oldSections": ["447"]
+    },
+    { "section": "494", "title": "Bond required from child.", "old": "448", "oldSections": ["448"] },
+    { "section": "495", "title": "Appeal from orders under section 491.", "old": "449", "oldSections": ["449"] },
+    { "section": "496", "title": "Power to direct levy of amount due on certain recognizances.", "old": "450", "oldSections": ["450"] },
+    {
+      "section": "497",
+      "title": "Order for custody and disposal of property pending trial in certain cases.",
+      "old": "451",
+      "oldSections": ["451"]
+    },
+    { "section": "498", "title": "Order for disposal of property at conclusion of trial.", "old": "452", "oldSections": ["452"] },
+    { "section": "499", "title": "Payment to innocent purchaser of money found on accused.", "old": "453", "oldSections": ["453"] },
+    { "section": "500", "title": "Appeal against orders under section 498 or section 499.", "old": "454", "oldSections": ["454"] },
+    { "section": "501", "title": "Destruction of libellous and other matter.", "old": "455", "oldSections": ["455"] },
+    { "section": "502", "title": "Power to restore possession of immovable property.", "old": "456", "oldSections": ["456"] },
+    { "section": "503", "title": "Procedure by police upon seizure of property.", "old": "457", "oldSections": ["457"] },
+    { "section": "504", "title": "Procedure where no claimant appears within six months.", "old": "458", "oldSections": ["458"] },
+    { "section": "505", "title": "Power to sell perishable property.", "old": "459", "oldSections": ["459"] },
+    { "section": "506", "title": "Irregularities which do not vitiate proceedings.", "old": "460", "oldSections": ["460"] },
+    { "section": "507", "title": "Irregularities which vitiate proceedings.", "old": "461", "oldSections": ["461"] },
+    { "section": "508", "title": "Proceedings in wrong place.", "old": "462", "oldSections": ["462"] },
+    { "section": "509", "title": "Non-compliance with provisions of section 183 or section 316.", "old": "463", "oldSections": ["463"] },
+    { "section": "510", "title": "Effect of omission to frame, or absence of, or error in, charge.", "old": "464", "oldSections": ["464"] },
+    {
+      "section": "511",
+      "title": "Finding or sentence when reversible by reason of error, omission or irregularity.",
+      "old": "465",
+      "oldSections": ["465"]
+    },
+    { "section": "512", "title": "Defect or error not to make attachment unlawful.", "old": "466", "oldSections": ["466"] },
+    { "section": "513", "title": "Definitions.", "old": "467", "oldSections": ["467"] },
+    {
+      "section": "514",
+      "title": "Bar to taking cognizance after lapse of the period of limitation.",
+      "old": "468",
+      "oldSections": ["468"]
+    },
+    { "section": "515", "title": "Commencement of the period of limitation.", "old": "469", "oldSections": ["469"] },
+    { "section": "516", "title": "Exclusion of time in certain cases.", "old": "470", "oldSections": ["470"] },
+    { "section": "517", "title": "Exclusion of date on which Court is closed.", "old": "471", "oldSections": ["471"] },
+    { "section": "518", "title": "Continuing offence.", "old": "472", "oldSections": ["472"] },
+    { "section": "519", "title": "Extension of period of limitation in certain cases.", "old": "473", "oldSections": ["473"] },
+    { "section": "520", "title": "Trials before High Courts.", "old": "474", "oldSections": ["474"] },
+    {
+      "section": "521",
+      "title": "Delivery to commanding officers of persons liable to be tried by Court-martial.",
+      "old": "475",
+      "oldSections": ["475"]
+    },
+    { "section": "522", "title": "Forms.", "old": "476", "oldSections": ["476"] },
+    { "section": "523", "title": "Power of High Court to make rules.", "old": "477", "oldSections": ["477"] },
+    {
+      "section": "524",
+      "title": "Power to alter functions allocated to Executive Magistrate in certain cases.",
+      "old": "478",
+      "oldSections": ["478"]
+    },
+    { "section": "525", "title": "Case in which Judge or Magistrate is personally interested.", "old": "479", "oldSections": ["479"] },
+    { "section": "526", "title": "Practicing advocate not to sit as Magistrate in certain Courts.", "old": "480", "oldSections": ["480"] },
+    {
+      "section": "527",
+      "title": "Public servant concerned in sale not to purchase or bid for property.",
+      "old": "481",
+      "oldSections": ["481"]
+    },
+    { "section": "528", "title": "Saving of inherent powers of High Court.", "old": "482", "oldSections": ["482"] },
+    {
+      "section": "529",
+      "title": "Duty of High Court to exercise continuous superintendence over Courts.",
+      "old": "483",
+      "oldSections": ["483"]
+    },
+    { "section": "530", "title": "Trial and proceedings to be held in electronic mode.", "old": null, "oldSections": [] },
+    { "section": "531", "title": "Repeal and savings.", "old": "484", "oldSections": ["484"] }
+  ],
+  "bsa": [
+    { "section": "1", "title": "Short title, application and commencement.", "old": "1", "oldSections": ["1"] },
+    { "section": "2", "title": "Definitions.", "old": "3 Interpretation clause", "oldSections": ["3"] },
+    { "section": "2(1)(a)", "title": "\"Court\".", "old": "3, para 1", "oldSections": ["3"] },
+    { "section": "2(1)(b)", "title": "\"conclusive proof\".", "old": "4, para 3", "oldSections": ["4"] },
+    { "section": "2(1)(c)", "title": "\"disproved\".", "old": "3, para 8", "oldSections": ["3"] },
+    { "section": "2(1)(d)", "title": "\"document\".", "old": "3, para 5", "oldSections": ["3"] },
+    { "section": "2(1)(e)", "title": "\"evidence\".", "old": "3, para 6", "oldSections": ["3"] },
+    { "section": "2(1)(f)", "title": "\"fact\".", "old": "3, para 2", "oldSections": ["3"] },
+    { "section": "2(1)(g)", "title": "\"facts in issue\".", "old": "3, para 4", "oldSections": ["3"] },
+    { "section": "2(1)(h)", "title": "\"may presume\".", "old": "4, para 1", "oldSections": ["4"] },
+    { "section": "2(1)(i)", "title": "\"not proved\".", "old": "3, para 9", "oldSections": ["3"] },
+    { "section": "2(1)(j)", "title": "\"proved\".", "old": "3, para 7", "oldSections": ["3"] },
+    { "section": "2(1)(k)", "title": "\"relevant\".", "old": "3, para 3", "oldSections": ["3"] },
+    { "section": "2(1)(l)", "title": "\"shall presume\".", "old": "4, para 2", "oldSections": ["4"] },
+    { "section": "2(2)", "title": "Words and expressions.", "old": null, "oldSections": [] },
+    { "section": "3", "title": "Evidence maybe given of facts in issue and relevant facts.", "old": "5", "oldSections": ["5"] },
+    { "section": "4", "title": "Relevancy of facts forming part of same transaction.", "old": "6", "oldSections": ["6"] },
+    {
+      "section": "5",
+      "title": "Facts which are occasion, cause or effect of facts in issue or relevant facts.",
+      "old": "7",
+      "oldSections": ["7"]
+    },
+    { "section": "6", "title": "Motive, preparation and previous or subsequent conduct.", "old": "8", "oldSections": ["8"] },
+    {
+      "section": "7",
+      "title": "Facts necessary to explain or introduce fact in issue or relevant facts.",
+      "old": "9",
+      "oldSections": ["9"]
+    },
+    { "section": "8", "title": "Things said or done by conspirator in reference to common design.", "old": "10", "oldSections": ["10"] },
+    { "section": "9", "title": "When facts not otherwise relevant become relevant.", "old": "11", "oldSections": ["11"] },
+    {
+      "section": "10",
+      "title": "Facts tending to enable Court to determine amount are relevant in suits for damages.",
+      "old": "12",
+      "oldSections": ["12"]
+    },
+    { "section": "11", "title": "Facts relevant when right or custom is in question.", "old": "13", "oldSections": ["13"] },
+    {
+      "section": "12",
+      "title": "Facts showing existence of state of mind, or of body or bodily feeling.",
+      "old": "14",
+      "oldSections": ["14"]
+    },
+    {
+      "section": "13",
+      "title": "Facts bearing on question whether act was accidental or intentional.",
+      "old": "15",
+      "oldSections": ["15"]
+    },
+    { "section": "14", "title": "Existence of course of business when relevant.", "old": "16", "oldSections": ["16"] },
+    { "section": "15", "title": "Admission defined.", "old": "17", "oldSections": ["17"] },
+    { "section": "16", "title": "Admission by party to proceeding or his agent.", "old": "18", "oldSections": ["18"] },
+    {
+      "section": "17",
+      "title": "Admissions by persons whose position must be proved as against party to suit.",
+      "old": "19",
+      "oldSections": ["19"]
+    },
+    { "section": "18", "title": "Admissions by persons expressly referred to by party to suit.", "old": "20", "oldSections": ["20"] },
+    {
+      "section": "19",
+      "title": "Proof of admissions against persons making them, and by or on their behalf.",
+      "old": "21",
+      "oldSections": ["21"]
+    },
+    { "section": "20", "title": "When oral admissions as to contents of documents are relevant.", "old": "22", "oldSections": ["22"] },
+    { "section": "21", "title": "Admissions in civil cases when relevant.", "old": "23", "oldSections": ["23"] },
+    {
+      "section": "22(1)",
+      "title": "Confession caused by inducement, threat, coercion or promise, when irrelevant in criminal proceeding.",
+      "old": "24",
+      "oldSections": ["24"]
+    },
+    {
+      "section": "First proviso to section 22",
+      "title": "Confession made after removal of impression caused by inducement, threat or promise, relevant.",
+      "old": "28",
+      "oldSections": ["28"]
+    },
+    {
+      "section": "Second proviso to section 22",
+      "title": "Confession otherwise relevant not to become irrelevant because of promise of secrecy, etc.",
+      "old": "29",
+      "oldSections": ["29"]
+    },
+    { "section": "23(1)", "title": "Confession to police officer.", "old": "25", "oldSections": ["25"] },
+    {
+      "section": "23(2)",
+      "title": "Confession by accused while in custody of police not to be proved against him.",
+      "old": "26",
+      "oldSections": ["26"]
+    },
+    {
+      "section": "Proviso to section 23",
+      "title": "How much of information received from accused may be proved.",
+      "old": "27",
+      "oldSections": ["27"]
+    },
+    {
+      "section": "24",
+      "title": "Consideration of proved confession affecting person making it and others jointly under trial for same offence.",
+      "old": "30",
+      "oldSections": ["30"]
+    },
+    { "section": "25", "title": "Admissions not conclusive proof, but may estop.", "old": "31", "oldSections": ["31"] },
+    {
+      "section": "26",
+      "title": "Cases in which statement of relevant fact by person who is dead or cannot be found, etc., is relevant.",
+      "old": "32",
+      "oldSections": ["32"]
+    },
+    {
+      "section": "27",
+      "title": "Relevancy of certain evidence for proving, in subsequent proceeding, truth of facts therein stated.",
+      "old": "33",
+      "oldSections": ["33"]
+    },
+    { "section": "28", "title": "Entries in books of account when relevant.", "old": "34", "oldSections": ["34"] },
+    {
+      "section": "29",
+      "title": "Relevancy of entry in public record or an electronic record made in performance of duty.",
+      "old": "35",
+      "oldSections": ["35"]
+    },
+    { "section": "30", "title": "Relevancy of statements in maps, charts and plans.", "old": "36", "oldSections": ["36"] },
+    {
+      "section": "31",
+      "title": "Relevancy of statement as to fact of public nature contained in certain Acts or notifications.",
+      "old": "37",
+      "oldSections": ["37"]
+    },
+    {
+      "section": "32",
+      "title": "Relevancy of statements as to any law contained in law books including electronic or digital form.",
+      "old": "38",
+      "oldSections": ["38"]
+    },
+    {
+      "section": "33",
+      "title": "What evidence to be given when statement forms part of a conversation, document, electronic record, book or series of letters or papers.",
+      "old": "39",
+      "oldSections": ["39"]
+    },
+    { "section": "34", "title": "Previous judgments relevant to bar a second suit or trial.", "old": "40", "oldSections": ["40"] },
+    { "section": "35", "title": "Relevancy of certain judgments in probate, etc., jurisdiction.", "old": "41", "oldSections": ["41"] },
+    {
+      "section": "36",
+      "title": "Relevancy and effect of judgments, orders or decrees, other than those mentioned in section35[41 IEA].",
+      "old": "42",
+      "oldSections": ["42"]
+    },
+    {
+      "section": "37",
+      "title": "Judgments, etc., other than those mentioned in sections 34, 35 and 36 [40to 42 IEA] when relevant.",
+      "old": "43",
+      "oldSections": ["43"]
+    },
+    {
+      "section": "38",
+      "title": "Fraud or collusion in obtaining judgment, or incompetency of Court, may be proved.",
+      "old": "44",
+      "oldSections": ["44"]
+    },
+    { "section": "39(1)", "title": "Opinions of experts.", "old": "45", "oldSections": ["45"] },
+    { "section": "39(2)", "title": "Opinion of Examiner of Electronic Evidence.", "old": "45A", "oldSections": ["45A"] },
+    { "section": "40", "title": "Facts bearing upon opinions of experts.", "old": "46", "oldSections": ["46"] },
+    { "section": "41(1)", "title": "Opinion as to handwriting and signature, when relevant.", "old": "47", "oldSections": ["47"] },
+    { "section": "41(2)", "title": "Opinion as to electronic signature, when relevant.", "old": "47A", "oldSections": ["47A"] },
+    { "section": "42", "title": "Opinion as to existence of general custom or right, when relevant.", "old": "48", "oldSections": ["48"] },
+    { "section": "43", "title": "Opinion as to usages, tenets, etc., when relevant.", "old": "49", "oldSections": ["49"] },
+    { "section": "44", "title": "Opinion on relationship, when relevant.", "old": "50", "oldSections": ["50"] },
+    { "section": "45", "title": "Grounds of opinion, when relevant.", "old": "51", "oldSections": ["51"] },
+    { "section": "46", "title": "In civil cases character to prove conduct imputed, irrelevant.", "old": "52", "oldSections": ["52"] },
+    { "section": "47", "title": "In criminal cases previous good character relevant.", "old": "53", "oldSections": ["53"] },
+    {
+      "section": "48",
+      "title": "Evidence of character or previous sexual experience not relevant in certain cases.",
+      "old": "53A",
+      "oldSections": ["53A"]
+    },
+    { "section": "49", "title": "Previous bad character not relevant, except in reply.", "old": "54", "oldSections": ["54"] },
+    { "section": "50", "title": "Character as affecting damages.", "old": "55", "oldSections": ["55"] },
+    { "section": "51", "title": "Fact judicially noticeable need not be proved.", "old": "56", "oldSections": ["56"] },
+    { "section": "52", "title": "Facts of which Court shall take judicial notice.", "old": "57", "oldSections": ["57"] },
+    { "section": "53", "title": "Facts admitted need not be proved.", "old": "58", "oldSections": ["58"] },
+    { "section": "54", "title": "Proof of facts by oral evidence.", "old": "59", "oldSections": ["59"] },
+    { "section": "55", "title": "Oral evidence to be direct.", "old": "60", "oldSections": ["60"] },
+    { "section": "56", "title": "Proof of contents of documents.", "old": "61", "oldSections": ["61"] },
+    { "section": "57", "title": "Primary evidence.", "old": "62", "oldSections": ["62"] },
+    { "section": "58", "title": "Secondary evidence.", "old": "63", "oldSections": ["63"] },
+    { "section": "59", "title": "Proof of documents by primary evidence.", "old": "64", "oldSections": ["64"] },
+    {
+      "section": "60",
+      "title": "Cases in which secondary evidence relating to documents may be given.",
+      "old": "65",
+      "oldSections": ["65"]
+    },
+    { "section": "61", "title": "Electronic or digital record.", "old": null, "oldSections": [] },
+    { "section": "62", "title": "Special provisions as to evidence relating to electronic record.", "old": "65A", "oldSections": ["65A"] },
+    { "section": "63", "title": "Admissibility of electronic records.", "old": "65B", "oldSections": ["65B"] },
+    { "section": "64", "title": "Rules as to notice to produce.", "old": "66", "oldSections": ["66"] },
+    {
+      "section": "65",
+      "title": "Proof of signature and handwriting of person alleged to have signed or written document produced.",
+      "old": "67",
+      "oldSections": ["67"]
+    },
+    { "section": "66", "title": "Proof as to electronic signature.", "old": "67A", "oldSections": ["67A"] },
+    { "section": "67", "title": "Proof of execution of document required by law to be attested.", "old": "68", "oldSections": ["68"] },
+    { "section": "68", "title": "Proof where no attesting witness found.", "old": "69", "oldSections": ["69"] },
+    { "section": "69", "title": "Admission of execution by party to attested document.", "old": "70", "oldSections": ["70"] },
+    { "section": "70", "title": "Proof when attesting witness denies execution.", "old": "71", "oldSections": ["71"] },
+    { "section": "71", "title": "Proof of document not required by law to be attested.", "old": "72", "oldSections": ["72"] },
+    {
+      "section": "72",
+      "title": "Comparison of signature, writing or seal with others admitted or proved.",
+      "old": "73",
+      "oldSections": ["73"]
+    },
+    { "section": "73", "title": "Proof as to verification of digital signature.", "old": "73A", "oldSections": ["73A"] },
+    { "section": "74(1)", "title": "Public and private documents.", "old": "74", "oldSections": ["74"] },
+    { "section": "74(2)", "title": "Public and private documents.", "old": "75", "oldSections": ["75"] },
+    { "section": "75", "title": "Certified copies of public documents.", "old": "76", "oldSections": ["76"] },
+    { "section": "76", "title": "Proof of documents by production of certified copies.", "old": "77", "oldSections": ["77"] },
+    { "section": "77", "title": "Proof of other official documents.", "old": "78", "oldSections": ["78"] },
+    { "section": "78", "title": "Presumption as to genuineness of certified copies.", "old": "79", "oldSections": ["79"] },
+    { "section": "79", "title": "Presumption as to documents produced as record of evidence, etc.", "old": "80", "oldSections": ["80"] },
+    {
+      "section": "80",
+      "title": "Presumption as to Gazettes, newspapers, [private Acts of parliament] and other documents.",
+      "old": "81",
+      "oldSections": ["81"]
+    },
+    { "section": "81", "title": "Presumption as to Gazettes in electronic or digital record.", "old": "81A", "oldSections": ["81A"] },
+    { "section": "82", "title": "Presumption as to maps or plans made by authority of Government.", "old": "83", "oldSections": ["83"] },
+    { "section": "83", "title": "Presumption as to collections of laws and reports of decisions.", "old": "84", "oldSections": ["84"] },
+    { "section": "84", "title": "Presumption as to powers-of- attorney.", "old": "85", "oldSections": ["85"] },
+    { "section": "85", "title": "Presumption as to electronic agreements.", "old": "85A", "oldSections": ["85A"] },
+    { "section": "86", "title": "Presumption as to electronic records and electronic signatures.", "old": "85B", "oldSections": ["85B"] },
+    { "section": "87", "title": "Presumption as to Electronic Signature Certificates.", "old": "85C", "oldSections": ["85C"] },
+    { "section": "88", "title": "Presumption as to certified copies of foreign judicial records.", "old": "86", "oldSections": ["86"] },
+    { "section": "89", "title": "Presumption as to books, maps and charts.", "old": "87", "oldSections": ["87"] },
+    { "section": "90", "title": "Presumption as to electronic messages.", "old": "88A", "oldSections": ["88A"] },
+    { "section": "91", "title": "Presumption as to due execution, etc., of documents not produced.", "old": "89", "oldSections": ["89"] },
+    { "section": "92", "title": "Presumption as to documents thirty years old.", "old": "90", "oldSections": ["90"] },
+    { "section": "93", "title": "Presumption as to electronic records five years old.", "old": "90A", "oldSections": ["90A"] },
+    {
+      "section": "94",
+      "title": "Evidence of terms of contracts, grants and other dispositions of property reduced to form of document.",
+      "old": "91",
+      "oldSections": ["91"]
+    },
+    { "section": "95", "title": "Exclusion of evidence of oral agreement.", "old": "92", "oldSections": ["92"] },
+    { "section": "96", "title": "Exclusion of evidence to explain or amend ambiguous document.", "old": "93", "oldSections": ["93"] },
+    {
+      "section": "97",
+      "title": "Exclusion of evidence against application of document to existing facts.",
+      "old": "94",
+      "oldSections": ["94"]
+    },
+    { "section": "98", "title": "Evidence as to document unmeaning in reference to existing facts.", "old": "95", "oldSections": ["95"] },
+    {
+      "section": "99",
+      "title": "Evidence as to application of language which can apply to one only of several persons.",
+      "old": "96",
+      "oldSections": ["96"]
+    },
+    {
+      "section": "100",
+      "title": "Evidence as to application of language to one of two sets of facts, to neither of which the whole correctly applies.",
+      "old": "97",
+      "oldSections": ["97"]
+    },
+    { "section": "101", "title": "Evidence as to meaning of illegible characters, etc.", "old": "98", "oldSections": ["98"] },
+    { "section": "102", "title": "Who may give evidence of agreement varying terms of document.", "old": "99", "oldSections": ["99"] },
+    { "section": "103", "title": "Saving of provisions of Indian Succession Act relating to wills.", "old": "100", "oldSections": ["100"] },
+    { "section": "104", "title": "Burden of proof.", "old": "101", "oldSections": ["101"] },
+    { "section": "105", "title": "On whom burden of proof lies.", "old": "102", "oldSections": ["102"] },
+    { "section": "106", "title": "Burden of proof as to particular fact.", "old": "103", "oldSections": ["103"] },
+    { "section": "107", "title": "Burden of proving fact to be proved to make evidence admissible.", "old": "104", "oldSections": ["104"] },
+    { "section": "108", "title": "Burden of proving that case of accused comes within exceptions.", "old": "105", "oldSections": ["105"] },
+    { "section": "109", "title": "Burden of proving fact especially within knowledge.", "old": "106", "oldSections": ["106"] },
+    {
+      "section": "110",
+      "title": "Burden of proving death of person known to have been alive within thirty years.",
+      "old": "107",
+      "oldSections": ["107"]
+    },
+    {
+      "section": "111",
+      "title": "Burden of proving that person is alive who has not been heard of for seven years.",
+      "old": "108",
+      "oldSections": ["108"]
+    },
+    {
+      "section": "112",
+      "title": "Burden of proof as to relationship in the cases of partners, landlord and tenant, principal and agent.",
+      "old": "109",
+      "oldSections": ["109"]
+    },
+    { "section": "113", "title": "Burden of proof as to ownership.", "old": "110", "oldSections": ["110"] },
+    {
+      "section": "114",
+      "title": "Proof of good faith in transactions where one party is in relation of active confidence.",
+      "old": "111",
+      "oldSections": ["111"]
+    },
+    { "section": "115", "title": "Presumption as to certain offences.", "old": "111A", "oldSections": ["111A"] },
+    { "section": "116", "title": "Birth during marriage, conclusive proof of legitimacy.", "old": "112", "oldSections": ["112"] },
+    { "section": "117", "title": "Presumption as to abetment of suicide by a married woman.", "old": "113A", "oldSections": ["113A"] },
+    { "section": "118", "title": "Presumption as to dowry death.", "old": "113B", "oldSections": ["113B"] },
+    { "section": "119", "title": "Court may presume existence of certain facts.", "old": "114", "oldSections": ["114"] },
+    {
+      "section": "120",
+      "title": "Presumption as to absence of consent in certain prosecution for rape.",
+      "old": "114A",
+      "oldSections": ["114A"]
+    },
+    { "section": "121", "title": "Estoppel.", "old": "115", "oldSections": ["115"] },
+    { "section": "122", "title": "Estoppel of tenant and of licensee of person in possession.", "old": "116", "oldSections": ["116"] },
+    { "section": "123", "title": "Estoppel of acceptor of bill of exchange, bailee or licensee.", "old": "117", "oldSections": ["117"] },
+    { "section": "124", "title": "Who may testify.", "old": "118", "oldSections": ["118"] },
+    { "section": "125", "title": "Witness unable to communicate verbally.", "old": "119", "oldSections": ["119"] },
+    { "section": "126", "title": "Competency of husband and wife as witnesses in certain cases.", "old": "120", "oldSections": ["120"] },
+    { "section": "127", "title": "Judges and Magistrates.", "old": "121", "oldSections": ["121"] },
+    { "section": "128", "title": "Communications during marriage.", "old": "122", "oldSections": ["122"] },
+    { "section": "129", "title": "Evidence as to affairs of State.", "old": "123", "oldSections": ["123"] },
+    { "section": "130", "title": "Official communications.", "old": "124", "oldSections": ["124"] },
+    { "section": "131", "title": "Information as to commission of offences.", "old": "125", "oldSections": ["125"] },
+    { "section": "132(1)&(2)", "title": "Professional communications.", "old": "126", "oldSections": ["126"] },
+    { "section": "132(3)", "title": "Professional communications to apply interpreters, etc\".", "old": "127", "oldSections": ["127"] },
+    { "section": "133", "title": "Privilege not waived by volunteering evidence.", "old": "128", "oldSections": ["128"] },
+    { "section": "134", "title": "Confidential communication with legal advisers.", "old": "129", "oldSections": ["129"] },
+    { "section": "135", "title": "Production of title-deeds of witness not a party.", "old": "130", "oldSections": ["130"] },
+    {
+      "section": "136",
+      "title": "Production of documents or electronic records which another person, having possession, could refuse to produce.",
+      "old": "131",
+      "oldSections": ["131"]
+    },
+    {
+      "section": "137",
+      "title": "Witness not excused from answering on ground that answer will criminate.",
+      "old": "132",
+      "oldSections": ["132"]
+    },
+    { "section": "138", "title": "Accomplice.", "old": "133", "oldSections": ["133"] },
+    { "section": "139", "title": "Number of witnesses.", "old": "134", "oldSections": ["134"] },
+    { "section": "140", "title": "Order of production and examination of witnesses.", "old": "135", "oldSections": ["135"] },
+    { "section": "141", "title": "Judge to decide as to admissibility of evidence.", "old": "136", "oldSections": ["136"] },
+    { "section": "142", "title": "Examination of witnesses.", "old": "137", "oldSections": ["137"] },
+    { "section": "143", "title": "Order of examinations.", "old": "138", "oldSections": ["138"] },
+    { "section": "144", "title": "Cross-examination of person called to produce a document.", "old": "139", "oldSections": ["139"] },
+    { "section": "145", "title": "Witnesses to character.", "old": "140", "oldSections": ["140"] },
+    { "section": "146(1)", "title": "Leading questions.", "old": "141", "oldSections": ["141"] },
+    { "section": "146(2)&(3)", "title": "When they (leading) must not be asked.", "old": "142", "oldSections": ["142"] },
+    { "section": "146(4)", "title": "When they (leading) may be asked.", "old": "143", "oldSections": ["143"] },
+    { "section": "147", "title": "Evidence as to matters in writing.", "old": "144", "oldSections": ["144"] },
+    { "section": "148", "title": "Cross-examination as to previous statements in writing.", "old": "145", "oldSections": ["145"] },
+    { "section": "149", "title": "Questions lawful in cross- examination.", "old": "146", "oldSections": ["146"] },
+    { "section": "150", "title": "When witness to be compelled to answer.", "old": "147", "oldSections": ["147"] },
+    {
+      "section": "151",
+      "title": "Court to decide when question shall be asked and when witness compelled to answer.",
+      "old": "148",
+      "oldSections": ["148"]
+    },
+    { "section": "152", "title": "Question not to be asked without reasonable grounds.", "old": "149", "oldSections": ["149"] },
+    {
+      "section": "153",
+      "title": "Procedure of Court in case of question being asked without reasonable grounds.",
+      "old": "150",
+      "oldSections": ["150"]
+    },
+    { "section": "154", "title": "Indecent and scandalous questions.", "old": "151", "oldSections": ["151"] },
+    { "section": "155", "title": "Questions intended to insult or annoy.", "old": "152", "oldSections": ["152"] },
+    {
+      "section": "156",
+      "title": "Exclusion of evidence to contradict answers to questions testing veracity.",
+      "old": "153",
+      "oldSections": ["153"]
+    },
+    { "section": "157", "title": "Question by party to his own witness.", "old": "154", "oldSections": ["154"] },
+    { "section": "158", "title": "Impeaching credit of witness.", "old": "155", "oldSections": ["155"] },
+    {
+      "section": "159",
+      "title": "Questions tending to corroborate evidence of relevant fact, admissible.",
+      "old": "156",
+      "oldSections": ["156"]
+    },
+    {
+      "section": "160",
+      "title": "Former statements of witness may be proved to corroborate later testimony as to same fact.",
+      "old": "157",
+      "oldSections": ["157"]
+    },
+    {
+      "section": "161",
+      "title": "What matters may be proved in connection with proved statement relevant under section 26 or 27. [ section 32 or 33].",
+      "old": "158",
+      "oldSections": ["158"]
+    },
+    { "section": "162", "title": "Refreshing memory.", "old": "159", "oldSections": ["159"] },
+    {
+      "section": "163",
+      "title": "Testimony to facts stated in document mentioned in section 162[159].",
+      "old": "160",
+      "oldSections": ["160"]
+    },
+    { "section": "164", "title": "Right of adverse party as to writing used to refresh memory.", "old": "161", "oldSections": ["161"] },
+    { "section": "165", "title": "Production of documents.", "old": "162", "oldSections": ["162"] },
+    {
+      "section": "166",
+      "title": "Giving, as evidence, of document called for and produced on notice.",
+      "old": "163",
+      "oldSections": ["163"]
+    },
+    {
+      "section": "167",
+      "title": "Using, as evidence, of document production of which was refused on notice.",
+      "old": "164",
+      "oldSections": ["164"]
+    },
+    { "section": "168", "title": "Judge's power to put questions or order production.", "old": "165", "oldSections": ["165"] },
+    { "section": "169", "title": "No new trial for improper admission or rejection of evidence.", "old": "167", "oldSections": ["167"] },
+    { "section": "170", "title": "Repeal and savings.", "old": null, "oldSections": [] }
+  ]
+}

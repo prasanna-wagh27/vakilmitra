@@ -444,6 +444,7 @@ function SiteFooter() {
         { label: t("home.nav.how"), href: "#how" },
         { label: t("home.nav.pricing"), href: "#pricing" },
         { label: t("home.nav.faq"), href: "#faq" },
+        { label: t("laws.title"), to: "/new-laws" },
       ],
     },
     { title: "home.footer.legal", links: POLICY_LINKS.map((l) => ({ label: t(l.key), to: l.to })) },
