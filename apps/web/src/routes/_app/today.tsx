@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { addDays, istDate } from "@vakilmitra/shared";
 import { useState } from "react";
+import { changeText } from "@/components/CourtTracking";
 import { Empty, ErrorBox, Loading } from "@/components/common";
 import { HearingRow } from "@/components/HearingRow";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/co
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fmtDate, fmtDay, fmtNumber, rupees } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import { boardQuery, feeSummaryQuery } from "@/lib/queries";
+import { boardQuery, courtUpdatesQuery, feeSummaryQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/today")({ component: TodayPage });
@@ -26,6 +27,8 @@ function TodayPage() {
   const board = useQuery(boardQuery(day));
   const todays = useQuery(boardQuery(today));
   const fees = useQuery(feeSummaryQuery);
+  const court = useQuery(courtUpdatesQuery);
+  const courtUpdates = court.data?.updates ?? [];
   const num = (n: number) => fmtNumber(n, locale);
 
   // Group the board by court, the way advocates walk the corridor.
@@ -112,6 +115,33 @@ function TodayPage() {
           )}
         </CardContent>
       </Card>
+
+      {courtUpdates.length > 0 && (
+        <Card className="mt-6 gap-0 pb-0">
+          <CardHeader className="border-b pb-4">
+            <CardTitle>{t("today.courtUpdates")}</CardTitle>
+            <CardDescription>{t("today.courtUpdatesHint")}</CardDescription>
+          </CardHeader>
+          <CardContent className="divide-y px-0">
+            {courtUpdates.slice(0, 10).map((u) => (
+              <Item key={u.id} asChild size="sm" className="rounded-none px-4">
+                <Link to="/cases/$caseId" params={{ caseId: u.case.id }}>
+                  <ItemContent className="min-w-0">
+                    <ItemTitle className="line-clamp-2 text-[15px]">{u.case.title}</ItemTitle>
+                    <ItemDescription className="line-clamp-2">{changeText(u.change, t, tf, locale)}</ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <span className="text-xs text-muted-foreground">
+                      {fmtDate(u.createdAt, locale, { day: "numeric", month: "short" })}
+                    </span>
+                    <HugeiconsIcon icon={ArrowRight01Icon} className="size-4 text-muted-foreground" />
+                  </ItemActions>
+                </Link>
+              </Item>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {missing.length > 0 && (
         <Card className="mt-6 gap-0 pb-0">

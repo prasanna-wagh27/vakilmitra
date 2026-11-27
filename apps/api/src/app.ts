@@ -32,6 +32,7 @@ import { factRoutes } from "./routes/facts.js";
 import { feeRoutes } from "./routes/fees.js";
 import { landRoutes } from "./routes/land.js";
 import { reportRoutes } from "./routes/report.js";
+import { trackingRoutes } from "./routes/tracking.js";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -210,6 +211,7 @@ export async function buildApp() {
     await authed.register(clientRoutes, { prefix: "/api/clients" });
     await authed.register(caseRoutes, { prefix: "/api/cases" });
     await authed.register(diaryRoutes, { prefix: "/api" });
+    await authed.register(trackingRoutes, { prefix: "/api" });
     await authed.register(feeRoutes, { prefix: "/api/fees" });
     await authed.register(landRoutes, { prefix: "/api" });
     await authed.register(reportRoutes, { prefix: "/api" });

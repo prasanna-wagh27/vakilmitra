@@ -9,12 +9,13 @@ Built to the **Tech Stack Standard**. Hosting tier: **Prototype / MVP** (pilot, 
 ```
 apps/web          Vite + React SPA: TanStack Router/Query, Tailwind + shadcn/ui, React Hook Form + Zod, Zustand, lucide
 apps/api          Fastify API: Zod type provider + OpenAPI docs, Better Auth, pino logging
-apps/worker       BullMQ worker: OCR of uploaded pages
+apps/worker       BullMQ worker: OCR of uploaded pages, eCourts case checks, the evening email, backups
 packages/db       Drizzle schema + migrations (PostgreSQL, pg_trgm)
 packages/shared   Zod schemas, enums, response types, IST date helpers, Marathi/English strings
 packages/storage  Encrypted file storage (envelope AES-256-GCM) over local disk or any S3-compatible bucket
 packages/ocr      OCR adapter: Tesseract Marathi + English, on our own servers
 packages/ai       AI models per task (drafting, translation) behind one interface; the provider is a setting
+packages/courts   eCourts case tracking by CNR: one court-data service behind one interface, change detection, check schedule
 packages/jobs     Queue definitions shared by API and worker (BullMQ on Valkey)
 scripts/          license gate
 ```
@@ -109,6 +110,17 @@ Everything runs on one server in Mumbai with Docker Compose (`deploy/compose.yml
   - Use Sentry's EU region (`de.sentry.io`), and keep `SENTRY_TRACES_SAMPLE_RATE=0` (errors only) unless performance traces are needed.
 - The worker is CPU-bound (about 1 s per page per core); set `OCR_CONCURRENCY` to the number of cores.
 - Cloud reads run on their own queue (`ocr-cloud`, limit `OCR_CLOUD_CONCURRENCY`, default 4), so a slow cloud call (Sarvam polls for up to 2 minutes) never holds a Tesseract slot. The local job saves Tesseract's reading first (route `local:cloud-queued`), so the advocate sees text at once; the cloud job then replaces it. Just before sending, the cloud job re-checks that the page is still the version it was queued for (version and image size, read again after fetching the image) and that the owner still consents, and it writes the audit row before sending. After its last retry, the local reading stays (route `local:cloud-failed`).
+
+## Case tracking (eCourts)
+
+An advocate turns on tracking for a case with its CNR (the 16-character eCourts number, e.g. `MHPU010012342024`). VakilMitra then reads the case from a court-data service, puts the next date in the diary, and reports new dates, new orders and disposal on Today and in the evening email.
+
+- **No official API:** eCourts has no public API, so readings come from a paid service that reads the portal. The service is a setting: `COURTS_PROVIDER=ecourtsindia` with `COURTS_API_KEY` (and `COURTS_API_URL` to point elsewhere). Set the same `COURTS_PROVIDER` on the API (to offer tracking) and the worker (to read cases). Unset, tracking is off and the case page does not offer it. `COURTS_PROVIDER=demo` gives made-up records for development and staging, and is refused in production.
+- **Check one case before turning it on:** the eCourtsIndia reader (`packages/courts/src/ecourtsindia.ts`) was written from their public docs, whose examples differ in shape, without a live key. It accepts each shape shown and refuses anything it cannot place. With the real key, run `pnpm --filter @vakilmitra/worker courts:check <CNR>` and compare its output with the case on services.ecourts.gov.in. Another service is one class implementing `CourtProvider`.
+- **What it costs:** each reading is one paid lookup. A case is read only when something is likely to have changed (`packages/courts/src/schedule.ts`): every evening after its date has passed until the new date appears, the evening before its listing, otherwise weekly; never once disposed; never for read-only accounts. Each plan has a number of tracked cases (`trackedCases` in `packages/shared/src/billing.ts`: 10 trial, 50 Solo, 300 Pro, 1,000 Chamber). "Check now" is allowed once per 15 minutes per case.
+- **The diary:** a court date the advocate already entered is kept and only filled in; a future date the court moved is moved, with its notes; otherwise a hearing marked "eCourts" is added. Blank case number and court are filled from the record; nothing the advocate wrote is overwritten. A disposed case is marked disposed.
+- **The evening email:** at 7:30 pm IST the worker reads due cases, then emails each advocate (owner and juniors with access) tomorrow's hearings and the day's court changes, in their language. It goes out even with tracking off (tomorrow's hearings), only to advocates with something to hear, and can be turned off in Settings. The worker needs `SMTP_URL`, `MAIL_FROM` and `WEB_ORIGIN` for it.
+- **Privacy:** only the CNR is sent to the service; court records are public. Each lookup is in the case's activity record (`case.court_check`).
 
 ## AI models
 

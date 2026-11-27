@@ -95,6 +95,11 @@ function En() {
           use only business AI services whose terms do not let them train their models on your text. Each request is recorded in your access
           log, and you can turn it off at any time.
         </li>
+        <li>
+          a court-records service, <strong>only for cases you choose to track on eCourts</strong>. Only the case's CNR number is sent, to
+          read its public court record (next date, orders, status). Each lookup is recorded in the case's activity record, and you can stop
+          tracking a case at any time.
+        </li>
       </ul>
       <p>We may also disclose data where Indian law requires it, for example on a lawful order of a court or authority.</p>
 
@@ -232,6 +237,11 @@ function Mr() {
           एआय वापरा" <strong>चालू केल्यास</strong>. हे मूलतः बंद असते. चालू केल्यावर, तुम्ही भाषांतर किंवा मसुदा मागितला तरच, त्या पानाचा मजकूर किंवा तुमच्या
           मसुद्याच्या टिपा पाठवल्या जातात. सेवा भारतात की परदेशात प्रक्रिया करते हे सेटिंग्जमध्ये दिसते. ज्या व्यावसायिक एआय सेवांच्या अटी तुमच्या मजकुरावर त्यांचे
           मॉडेल प्रशिक्षित करू देत नाहीत, त्याच आम्ही वापरतो. प्रत्येक विनंती तुमच्या प्रवेश नोंदीत नोंदवली जाते, आणि तुम्ही ते कधीही बंद करू शकता.
+        </li>
+        <li>
+          न्यायालयीन नोंदी देणारी सेवा, <strong>फक्त तुम्ही eCourts वर पाहण्यासाठी निवडलेल्या प्रकरणांसाठी</strong>. त्या प्रकरणाचा फक्त CNR क्रमांक पाठवला
+          जातो, त्याची सार्वजनिक न्यायालयीन नोंद (पुढील तारीख, आदेश, स्थिती) वाचण्यासाठी. प्रत्येक तपासणी प्रकरणाच्या नोंदीत नोंदवली जाते, आणि तुम्ही कोणत्याही
+          प्रकरणाचे पाहणे कधीही थांबवू शकता.
         </li>
       </ul>
       <p>भारतीय कायद्याने आवश्यक असल्यास, उदा. न्यायालय किंवा प्राधिकरणाच्या कायदेशीर आदेशावर, आम्ही माहिती उघड करू शकतो.</p>

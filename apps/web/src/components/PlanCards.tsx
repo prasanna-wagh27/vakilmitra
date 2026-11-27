@@ -26,6 +26,7 @@ export function PlanCards({ interval, action }: { interval: BillingInterval; act
           tf("billing.featPages", { n: fmtNumber(limits.pagesPerMonth, locale) }),
           tf("billing.featStorage", { n: fmtNumber(limits.storageBytes / GB, locale) }),
           tf("billing.featAi", { n: fmtNumber(limits.aiPerMonth, locale) }),
+          tf("billing.featTracked", { n: fmtNumber(limits.trackedCases, locale) }),
         ];
         return (
           <Card key={p} className={cn(p === "PRO" && "ring-2 ring-brand")}>

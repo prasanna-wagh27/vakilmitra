@@ -90,6 +90,7 @@ function SettingsPage() {
         </form>
       </Section>
 
+      <ConsentToggle field="dailyDigest" title={t("settings.digest")} text={t("settings.digestText")} />
       <CloudOcrConsent />
       <AiConsent />
 
@@ -187,7 +188,7 @@ export function ConsentToggle({
   text,
   note,
 }: {
-  field: "cloudOcrConsent" | "aiConsent";
+  field: "cloudOcrConsent" | "aiConsent" | "dailyDigest";
   title: string;
   text: string;
   note?: string;
@@ -201,8 +202,9 @@ export function ConsentToggle({
   const toggle = useApiMutation((on: boolean) => api<{ advocate: Advocate }>("/me", { method: "PATCH", body: { [field]: on } }), {
     onSuccess: (r) => qc.setQueryData(meQuery.queryKey, r.advocate),
   });
-  const on = pending ?? me.data?.[field] ?? false;
-  const since = field === "aiConsent" ? me.data?.aiConsentAt : me.data?.cloudOcrConsentAt;
+  const on = pending ?? me.data?.[field] ?? field === "dailyDigest";
+  // Consents show since when they were given; the evening email is a plain preference.
+  const since = field === "aiConsent" ? me.data?.aiConsentAt : field === "cloudOcrConsent" ? me.data?.cloudOcrConsentAt : null;
   const change = (next: boolean) => {
     setPending(next);
     toggle.mutate(next, { onSettled: () => setPending(null) });

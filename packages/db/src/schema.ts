@@ -83,6 +83,8 @@ export const advocates = pgTable("advocate", {
   // Consent to send client text (page text, drafting notes) to the configured AI models (off by default). See packages/ai.
   aiConsent: boolean("ai_consent").notNull().default(false),
   aiConsentAt: ts("ai_consent_at"),
+  // The evening email: tomorrow's hearings and what the courts changed today (on by default).
+  dailyDigest: boolean("daily_digest").notNull().default(true),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -439,11 +441,67 @@ export const hearings = pgTable(
     nextStep: text("next_step"),
     outcome: text("outcome"),
     reminderSentAt: ts("reminder_sent_at"),
+    // manual (entered by the advocate) | ecourts (added from the court's records by case tracking)
+    source: text("source").notNull().default("manual"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [index("hearing_case_date_idx").on(t.caseId, t.date), index("hearing_date_idx").on(t.date)],
 );
+
+// ---------- Court case tracking (eCourts, by CNR) ----------
+
+/**
+ * A case followed on eCourts: one row per tracked case, holding the last reading. The worker
+ * reads it again when it is due (packages/courts schedule.ts) and records what changed.
+ * Court records are public; nothing from the advocate's own file is sent, only the CNR.
+ */
+export const caseTracking = pgTable(
+  "case_tracking",
+  {
+    caseId: text("case_id")
+      .primaryKey()
+      .references(() => cases.id, { onDelete: "cascade" }),
+    cnr: text("cnr").notNull(),
+    // Who turned it on (owner or a junior with edit access).
+    enabledById: text("enabled_by_id").references(() => advocates.id, { onDelete: "set null" }),
+    // PENDING (not read yet) | OK | NOT_FOUND (no such CNR on eCourts yet) | ERROR (the service failed)
+    status: text("status").notNull().default("PENDING"),
+    error: text("error"),
+    failures: integer("failures").notNull().default(0),
+    provider: text("provider"), // the service that gave the last reading
+    snapshot: jsonb("snapshot").$type<CourtCaseSnapshot>(),
+    lastCheckedAt: ts("last_checked_at"),
+    // Last reading that brought a change (or when tracking started), for slowing down quiet cases.
+    lastChangedAt: ts("last_changed_at"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("case_tracking_cnr_idx").on(t.cnr)],
+);
+
+/** What a reading found new: a next date, an order, disposal. Shown on Today and in the evening email. */
+export const courtUpdates = pgTable(
+  "court_update",
+  {
+    id: id(),
+    caseId: text("case_id")
+      .notNull()
+      .references(() => cases.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(), // NEXT_DATE | NEW_ORDER | DISPOSED
+    detail: jsonb("detail").$type<Record<string, unknown>>().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("court_update_case_at_idx").on(t.caseId, t.createdAt), index("court_update_at_idx").on(t.createdAt)],
+);
+
+/** The stored reading (see CourtCase in packages/courts). Typed loosely here so the database package needs no courts dependency. */
+export interface CourtCaseSnapshot {
+  cnr: string;
+  disposed: boolean;
+  nextHearingDate: string | null;
+  [key: string]: unknown;
+}
 
 // ---------- Fees (amounts in paise) ----------
 
@@ -738,6 +796,14 @@ export const casesRelations = relations(cases, ({ one, many }) => ({
   hearings: many(hearings),
   feeAgreements: many(feeAgreements),
   grants: many(caseAccess),
+  tracking: one(caseTracking, { fields: [cases.id], references: [caseTracking.caseId] }),
+  courtUpdates: many(courtUpdates),
+}));
+export const caseTrackingRelations = relations(caseTracking, ({ one }) => ({
+  case: one(cases, { fields: [caseTracking.caseId], references: [cases.id] }),
+}));
+export const courtUpdatesRelations = relations(courtUpdates, ({ one }) => ({
+  case: one(cases, { fields: [courtUpdates.caseId], references: [cases.id] }),
 }));
 export const partiesRelations = relations(parties, ({ one }) => ({
   case: one(cases, { fields: [parties.caseId], references: [cases.id] }),

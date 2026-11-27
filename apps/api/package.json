@@ -20,6 +20,7 @@
     "@fastify/swagger": "^9.9.5",
     "@sentry/node": "10.78.0",
     "@vakilmitra/ai": "workspace:*",
+    "@vakilmitra/courts": "workspace:*",
     "@vakilmitra/db": "workspace:*",
     "@vakilmitra/jobs": "workspace:*",
     "@vakilmitra/shared": "workspace:*",
