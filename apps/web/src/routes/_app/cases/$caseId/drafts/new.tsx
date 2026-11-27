@@ -2,15 +2,17 @@ import { AiMagicIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { DRAFT_KINDS, type DraftKind, type Locale } from "@vakilmitra/shared";
+import { DRAFT_KINDS, type Draft, type DraftKind, FORM_KINDS, type FormKind, type Locale } from "@vakilmitra/shared";
 import { useEffect, useRef, useState } from "react";
 import { ConsentPrompt, isConsentError, ownerOff, useAi } from "@/components/AiConsent";
 import { ErrorBox, Field, PageHeader } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Checkbox, NativeSelect, Textarea } from "@/components/ui/input";
-import { apiStream } from "@/lib/api";
+import { api, apiStream } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
-import { caseQuery } from "@/lib/queries";
+import { caseQuery, useApiMutation } from "@/lib/queries";
+
+const isForm = (k: DraftKind): k is FormKind => (FORM_KINDS as readonly DraftKind[]).includes(k);
 
 export const Route = createFileRoute("/_app/cases/$caseId/drafts/new")({ component: NewDraftPage });
 
@@ -77,6 +79,11 @@ function NewDraftPage() {
     }
   };
   const start = () => (ai.needsConsent ? setAsking(true) : run());
+  // A pleading from the blank form: no AI, so no instructions or consent needed.
+  const fromForm = useApiMutation(
+    (k: FormKind) => api<{ draft: Draft }>(`/cases/${caseId}/drafts/form`, { method: "POST", body: { kind: k, language } }),
+    { onSuccess: ({ draft }) => navigate({ to: "/cases/$caseId/drafts/$draftId", params: { caseId, draftId: draft.id }, replace: true }) },
+  );
 
   return (
     <>
@@ -143,6 +150,16 @@ function NewDraftPage() {
           />
         )}
         {ownerOff(error) ? <p className="text-sm text-muted-foreground">{t("draft.ownerOff")}</p> : <ErrorBox error={error} />}
+        {isForm(kind) && (
+          <div className="border-t pt-4">
+            <p className="mb-2 text-sm text-muted-foreground">{t("draft.or")}</p>
+            <Button type="button" variant="outline" disabled={busy || fromForm.isPending} onClick={() => fromForm.mutate(kind)}>
+              {t("draft.form")}
+            </Button>
+            <p className="mt-2 text-sm text-muted-foreground">{t("draft.formHint")}</p>
+            <ErrorBox error={fromForm.error} />
+          </div>
+        )}
       </form>
 
       {(busy || text) && (

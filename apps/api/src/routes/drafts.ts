@@ -6,11 +6,12 @@
 import { Readable } from "node:stream";
 import { streamText } from "@vakilmitra/ai";
 import { advocates, and, cases, drafts, eq, ne, sql } from "@vakilmitra/db";
-import { type Draft, type DraftKind, draftGenerateInput, draftUpdateInput, type Locale } from "@vakilmitra/shared";
+import { type Draft, type DraftKind, draftFormInput, draftGenerateInput, draftUpdateInput, type Locale } from "@vakilmitra/shared";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { type CaseContext, draftMessage, draftPrompt, plainText } from "../ai/draft.js";
 import { draftDocx } from "../ai/draft-docx.js";
+import { draftForm } from "../ai/forms.js";
 import { db } from "../db.js";
 import { logAccess, requireCaseAccess } from "../lib/access.js";
 import { aiHttpError, assertAiAllowed, countAiUse, noteAiModel } from "../lib/ai.js";
@@ -25,6 +26,8 @@ interface DraftValues {
   instructions?: string;
   useCaseDetails?: boolean;
   model?: string;
+  /** Started from a blank form rather than written by AI. */
+  form?: boolean;
 }
 
 function toDraft(d: DraftRow): Draft {
@@ -38,6 +41,7 @@ function toDraft(d: DraftRow): Draft {
     body: d.body,
     instructions: v.instructions ?? null,
     model: v.model ?? null,
+    source: v.form ? "form" : "ai",
     version: d.version,
     createdAt: d.createdAt.toISOString(),
     updatedAt: d.updatedAt.toISOString(),
@@ -57,6 +61,8 @@ const KIND_TITLE: Record<Locale, Record<DraftKind, string>> = {
     PUBLIC_NOTICE: "Public notice",
     LEGAL_NOTICE: "Legal notice",
     NOTICE_REPLY: "Reply to notice",
+    PLAINT: "Plaint",
+    WRITTEN_STATEMENT: "Written statement",
     AFFIDAVIT: "Affidavit",
     APPLICATION: "Application",
     OTHER: "Draft",
@@ -65,6 +71,8 @@ const KIND_TITLE: Record<Locale, Record<DraftKind, string>> = {
     PUBLIC_NOTICE: "जाहीर नोटीस",
     LEGAL_NOTICE: "कायदेशीर नोटीस",
     NOTICE_REPLY: "नोटिशीला उत्तर",
+    PLAINT: "वादपत्र",
+    WRITTEN_STATEMENT: "लेखी कैफियत",
     AFFIDAVIT: "प्रतिज्ञापत्र",
     APPLICATION: "अर्ज",
     OTHER: "मसुदा",
@@ -75,6 +83,24 @@ const KIND_TITLE: Record<Locale, Record<DraftKind, string>> = {
 const SAVE_EVERY_MS = 3_000;
 
 const idParams = z.object({ id: z.string() });
+
+/** The case with what a draft can use: client, parties, properties. */
+const caseForDraft = (caseId: string) =>
+  db.query.cases.findFirst({
+    where: eq(cases.id, caseId),
+    with: {
+      client: { columns: { name: true, address: true } },
+      parties: { columns: { name: true, role: true, isOurClient: true, address: true, opposingCounsel: true } },
+      properties: { columns: { surveyNo: true, gatNo: true, hissaNo: true, village: true, taluka: true, district: true } },
+    },
+  });
+
+/** The advocate who asks signs: a junior drafting on a senior's case signs their own. */
+const signer = (advocateId: string) =>
+  db.query.advocates.findFirst({
+    where: eq(advocates.id, advocateId),
+    columns: { name: true, barCouncilNo: true, phone: true },
+  });
 
 export const draftRoutes: FastifyPluginAsyncZod = async (app) => {
   /**
@@ -90,24 +116,13 @@ export const draftRoutes: FastifyPluginAsyncZod = async (app) => {
       logAccess(req, "draft.generate", "case", caseId);
       await requireCaseAccess(req.advocateId, caseId, "write");
       const { kind, language, instructions, useCaseDetails } = req.body;
-      const c = await db.query.cases.findFirst({
-        where: eq(cases.id, caseId),
-        with: {
-          client: { columns: { name: true, address: true } },
-          parties: { columns: { name: true, role: true, isOurClient: true, address: true, opposingCounsel: true } },
-          properties: { columns: { surveyNo: true, gatNo: true, hissaNo: true, village: true, taluka: true, district: true } },
-        },
-      });
+      const c = await caseForDraft(caseId);
       if (!c) throw notFound("Case");
       const ownerId = c.advocateId;
       req.audit.details = { kind, language, useCaseDetails };
       await assertAiAllowed(req, "drafting", ownerId);
 
-      // The signature block is the advocate who asks (a junior drafting on a senior's case signs their own).
-      const me = await db.query.advocates.findFirst({
-        where: eq(advocates.id, req.advocateId),
-        columns: { name: true, barCouncilNo: true, phone: true },
-      });
+      const me = await signer(req.advocateId);
       const ctx: CaseContext | null = useCaseDetails ? c : null;
       const abort = new AbortController();
       // The response closing before it finished means the advocate left: stop the model.
@@ -173,6 +188,39 @@ export const draftRoutes: FastifyPluginAsyncZod = async (app) => {
         .header("X-Accel-Buffering", "no")
         .header("X-Draft-Id", draftId)
         .send(Readable.from(write()));
+    },
+  );
+
+  /**
+   * Start a plaint or written statement from the blank form: every part the Code asks for, the
+   * case's court, number, parties and properties filled in, and [blanks] for the facts. No AI.
+   */
+  app.post(
+    "/cases/:caseId/drafts/form",
+    { schema: { params: z.object({ caseId: z.string() }), body: draftFormInput } },
+    async (req, reply) => {
+      const { caseId } = req.params;
+      logAccess(req, "draft.create", "case", caseId);
+      await requireCaseAccess(req.advocateId, caseId, "write");
+      const { kind, language } = req.body;
+      req.audit.details = { kind, language, form: true };
+      const c = await caseForDraft(caseId);
+      if (!c) throw notFound("Case");
+      const me = await signer(req.advocateId);
+      const values: DraftValues = { form: true };
+      const [row] = await db
+        .insert(drafts)
+        .values({
+          caseId,
+          template: kind,
+          language,
+          title: `${KIND_TITLE[language][kind]} · ${c.title}`.slice(0, 200),
+          body: draftForm(kind, language, c, me!),
+          values,
+        })
+        .returning();
+      Object.assign(req.audit, { entityType: "draft", entityId: row!.id });
+      return reply.code(201).send({ draft: toDraft(row!) });
     },
   );
 

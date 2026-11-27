@@ -1,6 +1,6 @@
 /**
  * Drafting legal documents for an advocate in Maharashtra: public notices, legal notices and
- * replies, affidavits and applications. The model writes a first draft from the advocate's
+ * replies, plaints and written statements, affidavits and applications. The model writes a first draft from the advocate's
  * instructions and (if asked) the case's own details; the advocate edits and signs it.
  */
 import type { DraftKind, Locale } from "@vakilmitra/shared";
@@ -26,6 +26,24 @@ const KIND: Record<DraftKind, string> = {
     "A reply, sent by the advocate on behalf of the client, to a notice the client received.",
     "Refer to the notice by date. State that every allegation not specifically admitted is denied. Reply paragraph-wise in numbered paragraphs, set out the client's true version, and call on the sender to withdraw the notice.",
     "Reserve the client's rights to take any action, and say a copy is kept for record.",
+  ].join(" "),
+  PLAINT: [
+    "A plaint to institute a civil suit in a court in Maharashtra, with every part Order VII of the Code of Civil Procedure asks for, in this order.",
+    "The cause title: the court (such as the Civil Judge, Junior Division, at [place]), 'Regular Civil Suit No. [ ] of [year]', and each plaintiff and defendant with name, age, occupation and residence.",
+    "The nature of the suit in one line. Then numbered paragraphs: the facts constituting the cause of action, in the order they happened; when and where the cause of action arose; why the court has territorial and pecuniary jurisdiction; that the suit is within limitation and why; the valuation of the suit for jurisdiction and court fee and the court fee paid; that no other suit on the same cause between the parties is pending or decided (as a placeholder to confirm if the instructions do not say); the address for service of the plaintiff.",
+    "The prayer: each relief claimed set out separately, then costs of the suit and any other relief the court thinks fit.",
+    "Place and date, the plaintiff's signature and the advocate's signature for the plaintiff. Then the verification by the plaintiff: which paragraphs are true to own knowledge and which on information and belief, with place and date.",
+    "End with a line that an affidavit in support of the plaint is filed, and a numbered list of documents relied on (placeholders for what the instructions do not name).",
+    "In Marathi use the terms of Maharashtra courts: वादपत्र, नियमित दिवाणी दावा क्र., वादी, प्रतिवादी, दाव्यास कारण, अधिकारक्षेत्र, मुदत, मूल्यांकन व कोर्ट फी, विनंती, सत्यापन, कागदपत्रांची यादी.",
+  ].join(" "),
+  WRITTEN_STATEMENT: [
+    "A written statement of a defendant in a pending civil suit in Maharashtra, as Order VIII of the Code of Civil Procedure asks for it.",
+    "The cause title as in the plaint, with the suit number, then 'Written statement on behalf of defendant no. [ ]'.",
+    "Preliminary objections first (such as maintainability, jurisdiction, limitation, non-joinder of parties, valuation and court fee), only those the instructions support.",
+    "Then a reply to each paragraph of the plaint by its number, admitting or denying each allegation specifically; never an evasive or general denial. Add that whatever is not specifically admitted is denied.",
+    "Then the defendant's own version of the facts in numbered paragraphs, and that the plaintiff has no cause of action. A set-off or counter-claim only if the instructions ask for one, with its own valuation and court fee.",
+    "The prayer that the suit be dismissed with costs, and any other relief the instructions ask for. Place and date, the defendant's and the advocate's signatures, the verification by the defendant (own knowledge and information and belief, by paragraph), a line that an affidavit in support is filed, and a numbered list of documents relied on.",
+    "In Marathi use the terms of Maharashtra courts: लेखी कैफियत, नियमित दिवाणी दावा क्र., वादी, प्रतिवादी, प्राथमिक आक्षेप, परिच्छेदनिहाय उत्तर, नाकबूल, खरी वस्तुस्थिती, विनंती, सत्यापन, कागदपत्रांची यादी.",
   ].join(" "),
   AFFIDAVIT: [
     "An affidavit (प्रतिज्ञापत्र) to be sworn by the deponent and filed.",

@@ -5,6 +5,7 @@ import { createFileRoute, useBlocker, useNavigate } from "@tanstack/react-router
 import type { Draft } from "@vakilmitra/shared";
 import { useEffect, useRef, useState } from "react";
 import { ErrorBox, Field, Loading, PageHeader } from "@/components/common";
+import { DraftParts } from "@/components/DraftParts";
 import { CopyButton } from "@/components/PageTranslation";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
@@ -60,7 +61,9 @@ function DraftEditor({ caseId, draft }: { caseId: string; draft: Draft }) {
         back={`/cases/${caseId}`}
         description={tf("draft.meta", { kind: t(`draft.kind.${draft.kind}`), date: fmtDate(draft.updatedAt, locale) })}
       />
-      <p className="mb-4 rounded-lg bg-warning-soft p-3 text-sm text-warning">{t("draft.check")}</p>
+      <p className="mb-4 rounded-lg bg-warning-soft p-3 text-sm text-warning">
+        {t(draft.source === "form" ? "draft.formCheck" : "draft.check")}
+      </p>
 
       <form
         className="space-y-4"
@@ -104,6 +107,10 @@ function DraftEditor({ caseId, draft }: { caseId: string; draft: Draft }) {
         </div>
         {dirty && <p className="text-sm text-muted-foreground">{t("draft.saveFirst")}</p>}
       </form>
+
+      <div className="mt-8">
+        <DraftParts kind={draft.kind} body={body} />
+      </div>
 
       {draft.instructions && (
         <details className="mt-8 text-sm">

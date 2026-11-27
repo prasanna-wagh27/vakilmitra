@@ -6,6 +6,7 @@ import { z } from "zod";
 
 export * from "./billing.js";
 export * from "./courts.js";
+export * from "./draft-structure.js";
 export * from "./sentry.js";
 export * from "./time.js";
 
@@ -641,8 +642,22 @@ export const reportDraftInput = z.object({ opinion: z.string().max(20_000), lang
 // ---------- AI drafting ----------
 
 /** What the advocate can ask AI to draft. Each has its own guidance in apps/api/src/ai/draft.ts. */
-export const DRAFT_KINDS = ["PUBLIC_NOTICE", "LEGAL_NOTICE", "NOTICE_REPLY", "AFFIDAVIT", "APPLICATION", "OTHER"] as const;
+export const DRAFT_KINDS = [
+  "PUBLIC_NOTICE",
+  "LEGAL_NOTICE",
+  "NOTICE_REPLY",
+  "PLAINT",
+  "WRITTEN_STATEMENT",
+  "AFFIDAVIT",
+  "APPLICATION",
+  "OTHER",
+] as const;
 export type DraftKind = (typeof DRAFT_KINDS)[number];
+
+/** Pleadings that can also start from a blank form (no AI), with the case's details filled in. */
+export const FORM_KINDS = ["PLAINT", "WRITTEN_STATEMENT"] as const satisfies readonly DraftKind[];
+export type FormKind = (typeof FORM_KINDS)[number];
+export const draftFormInput = z.object({ kind: z.enum(FORM_KINDS), language: z.enum(LOCALES) });
 
 export const draftGenerateInput = z.object({
   kind: z.enum(DRAFT_KINDS),
@@ -669,6 +684,8 @@ export interface Draft {
   instructions: string | null;
   /** "<provider>:<model id>" that wrote the first version. */
   model: string | null;
+  /** Written by AI, or started from a blank form. */
+  source: "ai" | "form";
   version: number;
   createdAt: string;
   updatedAt: string;
