@@ -29,6 +29,16 @@ import { cn } from "@/lib/utils";
 /** Paths of the home page in each language. Search engines get both (see src/seo.ts). */
 export const HOME_PATH = { mr: "/", en: "/en" } as const;
 
+/**
+ * Where the home page sends the reader so the address matches the language on screen, or null.
+ * Only between the two home addresses: while a link leads away (to /privacy, /login), the address
+ * changes before the home page goes, and must not be sent back home.
+ */
+export function homePathFor(pathname: string, locale: keyof typeof HOME_PATH): string | null {
+  const onHome = pathname === HOME_PATH.mr || pathname === HOME_PATH.en;
+  return onHome && pathname !== HOME_PATH[locale] ? HOME_PATH[locale] : null;
+}
+
 /** Before the home page loads: a signed-in advocate goes straight to their day. */
 export async function sendSignedInToToday({ context }: { context: { queryClient: QueryClient } }) {
   let signedIn = false;
@@ -53,7 +63,8 @@ export function HomePage() {
   }, [t]);
   // The address follows the language too, so each language has its own page to link and index.
   useEffect(() => {
-    if (pathname !== HOME_PATH[locale]) void navigate({ to: HOME_PATH[locale], hash: hash || undefined, replace: true });
+    const to = homePathFor(pathname, locale);
+    if (to) void navigate({ to, hash: hash || undefined, replace: true });
   }, [locale, pathname, hash, navigate]);
 
   return (

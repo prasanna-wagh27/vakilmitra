@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { LEGAL, legalComplete } from "@/lib/legal";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,12 @@ export function Fill({ v }: { v: string | null }) {
 
 /** Public pages (no sign-in): pricing and policies. */
 export function PublicPage({ title, children }: { title: string; children: ReactNode }) {
+  const { t } = useI18n();
+  // The pre-rendered page has its title; this keeps it right after moving here inside the app,
+  // and in the reader's language (as seo.ts writes it).
+  useEffect(() => {
+    document.title = `${title} | ${t("app.name")}`;
+  }, [title, t]);
   return (
     <div className="min-h-dvh">
       <header className="border-b">

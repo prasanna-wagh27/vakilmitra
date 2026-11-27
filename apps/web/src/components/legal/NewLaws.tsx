@@ -109,7 +109,8 @@ export function NewLawsPage({
             className="pl-9"
           />
         </div>
-        <div className="mt-3 flex flex-wrap gap-2" role="group">
+        <fieldset className="mt-3 flex flex-wrap gap-2">
+          <legend className="sr-only">{t("laws.filter")}</legend>
           {([undefined, ...LAW_CODES] as const).map((c) => (
             <button
               key={c ?? "all"}
@@ -124,7 +125,7 @@ export function NewLawsPage({
               {c ? t(`laws.tab.${c}`) : t("laws.all")}
             </button>
           ))}
-        </div>
+        </fieldset>
       </div>
 
       {searching ? (
