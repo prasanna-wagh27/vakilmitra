@@ -1,9 +1,13 @@
 import * as Sentry from "@sentry/node";
+import { courtsConfigFromEnv, createCourtProvider } from "@vakilmitra/courts";
 import { createDb } from "@vakilmitra/db";
 import {
   BACKUP_SCHEDULE,
+  COURTS_EVENING_SCHEDULE,
+  type CourtsJob,
   connectionFromUrl,
   createBackupQueue,
+  createCourtsQueue,
   createHousekeepingQueue,
   createOcrCloudQueue,
   enqueueCloudOcr,
@@ -17,7 +21,9 @@ import { backupStorageConfigFromEnv, createBlobStore, createStorage, parseMaster
 import { type Job, Worker } from "bullmq";
 import pino from "pino";
 import { checkRestore, runBackup } from "./backup.js";
+import { checkCase, checkDueCases, sendDigests } from "./court-check.js";
 import { loadEnv } from "./env.js";
+import { createMailer } from "./mail.js";
 import { markCloudFailed, markFailed, processCloudPage, processPage } from "./process-page.js";
 import { pruneActivity } from "./retention.js";
 
@@ -139,6 +145,33 @@ housekeepingWorker.on("failed", (job, err) => {
 });
 await housekeepingQueue.upsertJobScheduler("daily-housekeeping", HOUSEKEEPING_SCHEDULE, { name: "housekeeping" });
 
+// Case tracking and the evening email. Reading cases needs COURTS_PROVIDER; the evening email
+// (tomorrow's hearings) goes out either way.
+const courtProvider = createCourtProvider(courtsConfigFromEnv(process.env));
+const mailer = createMailer(env, log);
+const courtsQueue = createCourtsQueue(env.VALKEY_URL);
+const courtsWorker = new Worker<CourtsJob>(
+  QUEUES.courts,
+  async (job) => {
+    if (job.name === "check-case" && "caseId" in job.data) {
+      if (!courtProvider) return;
+      const result = await checkCase({ db, provider: courtProvider, log }, job.data.caseId);
+      log.info({ caseId: job.data.caseId, result }, "court check");
+      return;
+    }
+    if (courtProvider) log.info(await checkDueCases({ db, provider: courtProvider, log }), "evening court checks");
+    log.info(await sendDigests({ db, mailer, log, webOrigin: env.WEB_ORIGIN }), "evening emails");
+  },
+  // One reading at a time: the services limit how fast we may ask. The evening run can take a while.
+  { connection: connectionFromUrl(env.VALKEY_URL), concurrency: 1, lockDuration: 30 * 60_000 },
+);
+courtsWorker.on("failed", (job, err) => {
+  log.error({ err, job: job?.name }, "court job failed");
+  reportFailure(QUEUES.courts)(job, err);
+});
+await courtsQueue.upsertJobScheduler("evening-courts", COURTS_EVENING_SCHEDULE, { name: "evening" });
+if (!courtProvider) log.warn("Case tracking is off: set COURTS_PROVIDER (see README, Case tracking)");
+
 // Logged once connected; listening for the "ready" event here would miss it, since it fires during the awaits above.
 await worker.waitUntilReady();
 log.info(
@@ -158,8 +191,8 @@ worker.on("failed", reportFailure(QUEUES.ocr));
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, async () => {
     log.info("shutting down");
-    await Promise.all([worker.close(), cloudWorker?.close(), backupWorker?.close(), housekeepingWorker.close()]);
-    await Promise.all([cloudQueue?.close(), backupQueue?.close(), housekeepingQueue.close()]);
+    await Promise.all([worker.close(), cloudWorker?.close(), backupWorker?.close(), housekeepingWorker.close(), courtsWorker.close()]);
+    await Promise.all([cloudQueue?.close(), backupQueue?.close(), housekeepingQueue.close(), courtsQueue.close()]);
     await policy.local.close();
     await policy.cloud?.close();
     await pool.end();

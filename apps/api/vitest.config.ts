@@ -21,6 +21,8 @@ export default defineConfig({
       // Used only by billing-gst.test.ts, which turns GST_REGISTERED on; receipts never carry it.
       BILLING_SUPPLIER_GSTIN: "27AAAAA0000A1Z5",
       BILLING_SAC: "998314",
+      // Case tracking on, with made-up records (the worker is not running in tests).
+      COURTS_PROVIDER: "demo",
     },
   },
 });

@@ -5,6 +5,7 @@
 import { z } from "zod";
 
 export * from "./billing.js";
+export * from "./courts.js";
 export * from "./sentry.js";
 export * from "./time.js";
 
@@ -85,6 +86,8 @@ export const updateProfileInput = z.object({
   cloudOcrConsent: z.boolean().optional(),
   /** Allow client text (page text, drafting notes) to be sent to the configured AI models. */
   aiConsent: z.boolean().optional(),
+  /** The evening email: tomorrow's hearings and the day's court changes. */
+  dailyDigest: z.boolean().optional(),
 });
 
 export const clientInput = z.object({
@@ -374,6 +377,8 @@ export interface Advocate {
   cloudOcrConsentAt?: string | null;
   aiConsent: boolean;
   aiConsentAt?: string | null;
+  /** The evening email: tomorrow's hearings and the day's court changes. */
+  dailyDigest?: boolean;
 }
 export interface Client {
   id: string;
@@ -400,6 +405,8 @@ export interface Hearing {
   prepNotes: string | null;
   nextStep: string | null;
   outcome: string | null;
+  /** manual (entered by hand) | ecourts (added by case tracking). */
+  source: "manual" | "ecourts";
 }
 export interface CaseRef {
   id: string;
