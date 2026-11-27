@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { DRAFT_KINDS, type DraftKind, type DraftSummary, type Hearing, istDate } from "@vakilmitra/shared";
 import { useState } from "react";
+import { CourtTrackingSection } from "@/components/CourtTracking";
 import { Empty, ErrorBox, Loading, PageHeader, Section } from "@/components/common";
 import { FlagCard } from "@/components/FlagCard";
 import { CaseForm, FeeAgreementForm, HearingForm, OutcomeForm, PartyForm, PaymentForm, PropertyForm, ShareForm } from "@/components/forms";
@@ -239,6 +240,8 @@ function CasePage() {
 
       <DraftsSection caseId={caseId} drafts={c.drafts} canEdit={canEdit} />
 
+      <CourtTrackingSection caseId={caseId} cnrNumber={c.cnrNumber} canEdit={canEdit} />
+
       <Section title={t("case.hearings")} action={canEdit && <AddButton onClick={() => setSheet({ kind: "hearing" })} />}>
         {c.hearings.length === 0 ? (
           <Empty />
@@ -258,6 +261,11 @@ function CasePage() {
                       <p className="font-semibold">
                         {fmtDate(h.date, locale, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
                         {h.time ? ` · ${h.time}` : ""}
+                        {h.source === "ecourts" && (
+                          <Badge variant="outline" className="ml-2 align-middle">
+                            {t("track.badge")}
+                          </Badge>
+                        )}
                       </p>
                       {(h.purpose || h.courtHall) && (
                         <p className="text-sm">

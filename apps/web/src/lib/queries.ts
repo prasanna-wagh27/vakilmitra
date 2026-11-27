@@ -8,9 +8,11 @@ import type {
   CaseDetail,
   CaseListItem,
   CaseStatus,
+  CaseTrackingResponse,
   Client,
   ClientListItem,
   ClientTotals,
+  CourtUpdateWithCase,
   DocumentDetail,
   DocumentSummary,
   Draft,
@@ -78,6 +80,16 @@ export interface Board {
 }
 export const boardQuery = (date: string) =>
   queryOptions({ queryKey: ["board", date], queryFn: () => api<Board>("/diary/board", { query: { date } }) });
+
+/** A case's eCourts tracking (the case page polls while a reading is on its way). */
+export const trackingQuery = (caseId: string) =>
+  queryOptions({ queryKey: ["tracking", caseId], queryFn: () => api<CaseTrackingResponse>(`/cases/${caseId}/tracking`) });
+
+/** Court changes on the advocate's cases in the last week, for Today. */
+export const courtUpdatesQuery = queryOptions({
+  queryKey: ["court-updates"],
+  queryFn: () => api<{ available: boolean; updates: CourtUpdateWithCase[] }>("/court-updates"),
+});
 
 export const diaryQuery = (from: string, to: string) =>
   queryOptions({

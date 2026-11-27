@@ -300,7 +300,7 @@ function Pricing() {
             tf("billing.featPages", { n: fmtNumber(limits.pagesPerMonth, locale) }),
             tf("billing.featStorage", { n: fmtNumber(limits.storageBytes / GB, locale) }),
             tf("billing.featAi", { n: fmtNumber(limits.aiPerMonth, locale) }),
-            tf("billing.featAi", { n: fmtNumber(limits.aiPerMonth, locale) }),
+            tf("billing.featTracked", { n: fmtNumber(limits.trackedCases, locale) }),
           ];
           return (
             <div key={p} className={cn("flex flex-col rounded-[2rem] p-7 md:p-8", dark ? "bg-night text-white" : "bg-sand")}>

@@ -42,6 +42,13 @@ const MR_BY_MESSAGE: Record<string, string> = {
   "This page has too much text to translate at once": "या पानावर एकावेळी भाषांतरासाठी खूप जास्त मजकूर आहे.",
   "The AI service did not answer. Try again in a minute.": "एआय सेवेकडून उत्तर आले नाही. एका मिनिटाने पुन्हा प्रयत्न करा.",
   "AI is not set up yet": "एआय सेवा अजून सुरू केलेली नाही.",
+  "Case tracking is not switched on yet. Your diary dates still work as before.":
+    "eCourts वर प्रकरणे पाहण्याची सोय अजून सुरू झालेली नाही. डायरीतील तारखा पूर्वीसारख्याच चालतात.",
+  "Enter the case's CNR number (16 characters, like MHPU010012342024).": "प्रकरणाचा CNR क्रमांक द्या (१६ अक्षरी, उदा. MHPU010012342024).",
+  "All case tracking places on the plan are in use. Stop tracking a closed case, or upgrade.":
+    "योजनेतील eCourts वर पाहण्याच्या सर्व जागा भरल्या आहेत. संपलेल्या प्रकरणाचे पाहणे थांबवा किंवा योजना वाढवा.",
+  "Checked a few minutes ago. Try again a little later.": "काही मिनिटांपूर्वीच तपासले. थोड्या वेळाने पुन्हा प्रयत्न करा.",
+  "This case is not tracked": "हे प्रकरण eCourts वर पाहिले जात नाही.",
 };
 
 const MR_BY_CODE: Record<string, string> = {
@@ -52,6 +59,9 @@ const MR_BY_CODE: Record<string, string> = {
   invalid_input: "काही माहिती योग्य नाही. फॉर्म तपासा.",
   conflict: "हे आधीच अस्तित्वात आहे.",
   ai_off: "एआय सेवा अजून सुरू केलेली नाही.",
+  tracking_unavailable: "eCourts वर प्रकरणे पाहण्याची सोय अजून सुरू झालेली नाही.",
+  cnr_required: "प्रकरणाचा CNR क्रमांक द्या (१६ अक्षरी, उदा. MHPU010012342024).",
+  too_soon: "काही मिनिटांपूर्वीच तपासले. थोड्या वेळाने पुन्हा प्रयत्न करा.",
   ai_failed: "एआय सेवेकडून उत्तर आले नाही. एका मिनिटाने पुन्हा प्रयत्न करा.",
   ai_consent_required: "आधी सेटिंग्जमध्ये एआय वापरास परवानगी द्या.",
   // Sign-in (Better Auth codes)

@@ -9,6 +9,7 @@ import {
   and,
   caseAccess,
   cases,
+  caseTracking,
   checkouts,
   count,
   countDistinct,
@@ -129,7 +130,18 @@ export async function usageOf(ownerId: string, now = new Date()): Promise<Billin
     .select({ n: count() })
     .from(aiUsage)
     .where(and(eq(aiUsage.ownerId, ownerId), gte(aiUsage.createdAt, istMonthStart(now))));
-  return { pagesThisMonth: p?.month ?? 0, storageBytes: Number(p?.storage ?? 0), juniors: j?.n ?? 0, aiThisMonth: a?.n ?? 0 };
+  const [t] = await db
+    .select({ n: count() })
+    .from(caseTracking)
+    .innerJoin(cases, eq(cases.id, caseTracking.caseId))
+    .where(eq(cases.advocateId, ownerId));
+  return {
+    pagesThisMonth: p?.month ?? 0,
+    storageBytes: Number(p?.storage ?? 0),
+    juniors: j?.n ?? 0,
+    aiThisMonth: a?.n ?? 0,
+    trackedCases: t?.n ?? 0,
+  };
 }
 
 const limitError = (message: string, details: Record<string, unknown>) => new HttpError(402, "plan_limit", message, details);

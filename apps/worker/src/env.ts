@@ -6,6 +6,10 @@ const schema = z.object({
   VALKEY_URL: z.url().default("redis://localhost:6379"),
   // A scratch database the nightly restore check may drop and recreate (name must end in _restore_check).
   BACKUP_RESTORE_CHECK_URL: z.url().optional(),
+  // The evening email (same settings as the API). WEB_ORIGIN is the advocates' site, for the link in it.
+  SMTP_URL: z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional()),
+  MAIL_FROM: z.string().default("VakilMitra <no-reply@vakilmitra.in>"),
+  WEB_ORIGIN: z.url().default("http://localhost:5173"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 

@@ -20,6 +20,7 @@ const profile = {
   cloudOcrConsentAt: true,
   aiConsent: true,
   aiConsentAt: true,
+  dailyDigest: true,
   createdAt: true,
 } as const;
 

@@ -5,7 +5,7 @@
 import { and, count, type Db, documents, eq, pages } from "@vakilmitra/db";
 import { type ConnectionOptions, Queue, type QueueOptions } from "bullmq";
 
-export const QUEUES = { ocr: "ocr", ocrCloud: "ocr-cloud", backup: "backup", housekeeping: "housekeeping" } as const;
+export const QUEUES = { ocr: "ocr", ocrCloud: "ocr-cloud", backup: "backup", housekeeping: "housekeeping", courts: "courts" } as const;
 
 export interface OcrJob {
   pageId: string;
@@ -75,6 +75,33 @@ export function createHousekeepingQueue(url: string) {
   });
 }
 export const HOUSEKEEPING_SCHEDULE = { pattern: "30 2 * * *", tz: "Asia/Kolkata" } as const;
+
+/**
+ * Court case tracking. Two kinds of job on one queue:
+ *   "check-case" { caseId }: read one case now (tracking just turned on, or "refresh" pressed)
+ *   "evening"    {}:         read every tracked case that is due, then send the evening emails
+ */
+export type CourtsJob = { caseId: string } | Record<string, never>;
+export function createCourtsQueue(url: string) {
+  return new Queue<CourtsJob, void, string>(QUEUES.courts, {
+    connection: connectionFromUrl(url),
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: { type: "exponential", delay: 60_000 },
+      removeOnComplete: { age: 24 * 3600, count: 1000 },
+      removeOnFail: { age: 7 * 24 * 3600 },
+    },
+  });
+}
+/** 7:30 pm IST: district courts have usually entered the day's next dates by then. */
+export const COURTS_EVENING_SCHEDULE = { pattern: "30 19 * * *", tz: "Asia/Kolkata" } as const;
+
+export type CourtsQueueLike = Pick<ReturnType<typeof createCourtsQueue>, "add">;
+
+/** Queue a reading of one case. The API limits how often a case may be refreshed, so every request gets its own job. */
+export async function enqueueCaseCheck(queue: CourtsQueueLike, caseId: string, now = Date.now()) {
+  await queue.add("check-case", { caseId }, { jobId: `check-case-${caseId}-${now}`, attempts: 2 });
+}
 
 export type OcrCloudQueue = ReturnType<typeof createOcrCloudQueue>;
 export type OcrCloudQueueLike = Pick<OcrCloudQueue, "add">;

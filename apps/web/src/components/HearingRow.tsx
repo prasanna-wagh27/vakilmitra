@@ -16,6 +16,11 @@ export function HearingRow({ h }: { h: HearingWithCase; serial?: number }) {
           {meta && <ItemDescription className="line-clamp-1">{meta}</ItemDescription>}
         </ItemContent>
         <ItemActions>
+          {h.source === "ecourts" && (
+            <Badge variant="outline" className="hidden sm:inline-flex">
+              eCourts
+            </Badge>
+          )}
           {h.purpose && (
             <Badge variant="outline" className="max-w-32 truncate">
               {h.purpose}

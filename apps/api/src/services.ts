@@ -1,5 +1,5 @@
 import { Ai, aiConfigFromEnv } from "@vakilmitra/ai";
-import { createOcrQueue, type OcrQueueLike } from "@vakilmitra/jobs";
+import { type CourtsQueueLike, createCourtsQueue, createOcrQueue, type OcrQueueLike } from "@vakilmitra/jobs";
 import { createStorage, type SecureStorage, storageConfigFromEnv } from "@vakilmitra/storage";
 import { RazorpayClient, type RazorpayLike } from "./billing/razorpay.js";
 import { env } from "./env.js";
@@ -15,6 +15,8 @@ export interface Services {
   mailer?: Mailer;
   /** AI models per task (drafting, translation); a task with no model set is off. Created on first use. */
   ai?: Ai;
+  /** Case tracking readings, done by the worker. Created on first use. */
+  courtsQueue?: CourtsQueueLike;
 }
 
 let current: Services | null = null;
@@ -32,6 +34,8 @@ export const mailer = (): Mailer => (getServices().mailer ??= createMailer());
 
 /** The AI door for features. The settings were already checked at start-up (env.ts). */
 export const ai = (): Ai => (getServices().ai ??= new Ai(aiConfigFromEnv(process.env)));
+
+export const courtsQueue = (): CourtsQueueLike => (getServices().courtsQueue ??= createCourtsQueue(env.VALKEY_URL));
 
 export function setServices(s: Services) {
   current = s;

@@ -1,4 +1,5 @@
 import { AI_TASKS, Ai, AiConfigError, aiConfigFromEnv } from "@vakilmitra/ai";
+import { CourtsConfigError, courtsConfigFromEnv } from "@vakilmitra/courts";
 import { GST_REGISTERED } from "@vakilmitra/shared";
 import { z } from "zod";
 
@@ -69,3 +70,16 @@ try {
   console.error(err.message);
   process.exit(1);
 }
+
+/**
+ * Case tracking on eCourts (COURTS_PROVIDER, read by the worker). The API only needs to know
+ * whether it is on, to offer it; a wrong setting stops the start here too.
+ */
+try {
+  courtsConfigFromEnv(process.env);
+} catch (err) {
+  if (!(err instanceof CourtsConfigError)) throw err;
+  console.error(err.message);
+  process.exit(1);
+}
+export const courtsAvailable = () => !!process.env.COURTS_PROVIDER;
