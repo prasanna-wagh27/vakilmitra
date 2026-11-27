@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { LEGAL, legalComplete } from "@/lib/legal";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,12 @@ export function Fill({ v }: { v: string | null }) {
 
 /** Public pages (no sign-in): pricing and policies. */
 export function PublicPage({ title, children }: { title: string; children: ReactNode }) {
+  const { t } = useI18n();
+  // The pre-rendered page has its title; this keeps it right after moving here inside the app,
+  // and in the reader's language (as seo.ts writes it).
+  useEffect(() => {
+    document.title = `${title} | ${t("app.name")}`;
+  }, [title, t]);
   return (
     <div className="min-h-dvh">
       <header className="border-b">
@@ -72,7 +78,7 @@ export function PolicyFooter({ className }: { className?: string }) {
   return (
     <footer className={cn("border-t", className)}>
       <nav className="mx-auto flex max-w-4xl flex-wrap justify-center gap-x-4 gap-y-2 px-4 py-5 text-xs text-muted-foreground">
-        {POLICY_LINKS.map((l) => (
+        {[...POLICY_LINKS, { to: "/new-laws", key: "laws.title" } as const].map((l) => (
           <Link key={l.to} to={l.to} className="hover:text-foreground hover:underline" activeProps={{ className: "text-foreground" }}>
             {t(l.key)}
           </Link>

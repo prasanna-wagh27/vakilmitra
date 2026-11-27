@@ -77,6 +77,15 @@ describe("rendering a public page ahead of time", () => {
     }
   }, 30_000);
 
+  it("writes the whole old-to-new sections table into the lookup page, for search engines", async () => {
+    const body = await renderPage("/new-laws", "mr");
+    expect(body).toContain(t("mr", "laws.title"));
+    expect(body).toContain("318(4)");
+    expect(body).toContain("Punishment for murder.");
+    expect(body).toContain("Admissibility of electronic records.");
+    expect(body).toContain('href="/register"');
+  });
+
   it("never calls the API, and puts fetch back afterwards", async () => {
     const before = globalThis.fetch;
     await renderPage("/", "mr");

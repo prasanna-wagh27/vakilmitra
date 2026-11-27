@@ -32,6 +32,7 @@ export const PUBLIC_PAGES: PublicPage[] = [
   { path: "/refunds", locale: "mr", title: "legal.refunds", description: "home.metaDescription" },
   { path: "/delivery", locale: "mr", title: "legal.delivery", description: "home.metaDescription" },
   { path: "/contact", locale: "mr", title: "legal.contact", description: "home.metaDescription" },
+  { path: "/new-laws", locale: "mr", title: "laws.title", description: "laws.metaDescription" },
 ];
 
 /** The built file for a page: / is index.html, /en is en.html (Caddy tries {path}.html). */
